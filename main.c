@@ -22,10 +22,13 @@
 int main(void)
 {
   pll_enable(80);
-
+  greenled_init();
   while (1)
     {
+      greenled_on();
       delayms(500);
+      greenled_off();
+			delayms(500);
     }
 }
 

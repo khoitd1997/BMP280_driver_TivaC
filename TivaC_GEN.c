@@ -57,6 +57,7 @@ uint8_t delayms(uint32_t milliseconds)
 // Green LED on PF3
 void greenled_init(void)
 {
+  SYSCTL_RCGCGPIO_R |= 0x20;
   GPIO_PORTF_LOCK_R = 0x4C4F434B;
   GPIO_PORTF_CR_R |= 0x08;
   GPIO_PORTF_AFSEL_R &= ~(0x08);
@@ -78,6 +79,7 @@ void greenled_off(void)
 // Red LED on PF1
 void redled_init(void)
 {
+  SYSCTL_RCGCGPIO_R |= 0x20;
   GPIO_PORTF_LOCK_R = 0x4C4F434B;
   GPIO_PORTF_CR_R |= 0x02;
   GPIO_PORTF_AFSEL_R &= ~(0x02);
@@ -90,7 +92,7 @@ void redled_on(void)
 {
   GPIO_PORTF_DATA_R |= 0x02;
 }
-void rednled_off(void)
+void redled_off(void)
 {
   GPIO_PORTF_DATA_R &= ~(0x02);
 }
@@ -98,6 +100,7 @@ void rednled_off(void)
 // Blue LED on PF1
 void blueled_init(void)
 {
+  SYSCTL_RCGCGPIO_R |= 0x20;
   GPIO_PORTF_LOCK_R = 0x4C4F434B;
   GPIO_PORTF_CR_R |= 0x04;
   GPIO_PORTF_AFSEL_R &= ~(0x04);
@@ -110,7 +113,7 @@ void blueled_on(void)
 {
   GPIO_PORTF_DATA_R |= 0x04;
 }
-void bluenled_off(void)
+void blueled_off(void)
 {
   GPIO_PORTF_DATA_R &= ~(0x04);
 }

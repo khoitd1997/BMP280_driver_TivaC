@@ -23,6 +23,13 @@ uint8_t delayms(uint32_t milliseconds);
 
 // Make PA2 an output, enable digital I/O, ensure alt. functions off
 void greenled_init(void);
-void redled_init(void);
+void greenled_on(void);
+void greenled_off(void);
 void blueled_init(void);
+void blueled_on(void);
+void blueled_off(void);
+void redled_init(void);
+void redled_on(void);
+void redled_off(void);
+
 #endif
