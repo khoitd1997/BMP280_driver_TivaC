@@ -44,34 +44,33 @@ uint8_t i2c0_open(void)
 
 uint8_t i2c0_close(void)
 {
-// should really disable interrupt here
-#ifdef FORCED_I2C0_CLOSED  // force close even if there is error
-  if ((I2C0_MCS_R & 0x080) || (I2C0_MCS_R & 0x02))
+  // should really disable interrupt here
+  while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {
-      // Error occured
-      return 1;
-    }
-#endif
-  while ((I2C0_MCS_R & 0x01) || (I2C0_MCS_R & 0x40) || !(I2C0_MCS_R & 0x20))
-    {
-      // Wait till the bus is free
+      // wait for the bus to stop being busy
     }
 
   GPIO_PORTB_LOCK_R = 0x4C4F434B;
   GPIO_PORTB_CR_R |= 0x0C;
-  GPIO_PORTB_AFSEL_R &= 0xFFF3;
-  I2C0_MCS_R &= 0xFFF8;
-  I2C0_MCR_R &= 0xFF8F;
+  GPIO_PORTB_AFSEL_R &= ~(0x0C);
+  I2C0_MCS_R &= ~(I2C_MCS_RUN);
+  I2C0_MCR_R &= ~(I2C_MCR_MFE | I2C_MCR_SFE);
   GPIO_PORTB_LOCK_R = 0x00;  // lock the PORTB
+
   // reenable interrupt here
   // just don't disable the system clock
-  return 0;
+  if (I2C0_MCS_R & I2C_MCS_ERROR)
+    {
+      return 1;
+    }
+  else
+    {
+      return 0;
+    }
 }
 
-uint8_t i2c0_data_read(uint16_t slave_address)
+uint8_t i2c0_single_data_read(uint16_t slave_address)
 {
-  uint16_t data_counter;
-
   while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {
       // wait for the bus to stop being busy
@@ -98,7 +97,7 @@ uint8_t i2c0_data_read(uint16_t slave_address)
     }
 }
 
-uint8_t i2c0_data_write(uint32_t slave_address, uint8_t data_byte)
+uint8_t i2c0_single_data_write(uint16_t slave_address, uint8_t data_byte)
 {
   while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {
