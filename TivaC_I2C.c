@@ -26,14 +26,14 @@ uint8_t i2c0_open(void)
 
   // Open drain on I2CSDA PB3 and non on PB2
   GPIO_PORTB_ODR_R |= 0x08;
-  GPIO_PORTB_ODR_R &= 0xFFFB;
+  GPIO_PORTB_ODR_R &= ~(0x04);
   // No need for PMCn field in GPIOPCTL register
   // I2CMCR0 init master, glitch filter
-  I2C0_MCR_R = 0x50;
-  I2C0_MCS_R |= 0x01;
+  I2C0_MCR_R |= I2C_MCR_GFE | I2C_MCR_MFE;
   // calculate the clock cycle and input into I2CMTPR
   // rn assume 80MHz, later add support for variable frequency
-  I2C0_MTPR_R = 0x09;
+  I2C0_MTPR_R &= ~(I2C_MTPR_TPR_M);
+  I2C0_MTPR_R += 0x09 << I2C_MTPR_TPR_S;
   // input address into I2CMSA, 0x77 for the BMP280
 
   // enable interrupt in i2cmimr
@@ -52,10 +52,9 @@ uint8_t i2c0_close(void)
       return 1;
     }
 #endif
-  if ((I2C0_MCS_R & 0x01) || (I2C0_MCS_R & 0x40) || !(I2C0_MCS_R & 0x20))
+  while ((I2C0_MCS_R & 0x01) || (I2C0_MCS_R & 0x40) || !(I2C0_MCS_R & 0x20))
     {
-      // Something is still happening
-      return 2;
+      // Wait till the bus is free
     }
 
   GPIO_PORTB_LOCK_R = 0x4C4F434B;
@@ -69,6 +68,69 @@ uint8_t i2c0_close(void)
   return 0;
 }
 
+uint8_t i2c0_data_read(uint16_t slave_address)
+{
+  uint16_t data_counter;
+
+  while ((I2C0_MCS_R & I2C_MCS_BUSY))
+    {
+      // wait for the bus to stop being busy
+    }
+
+  I2C0_MSA_R &= ~I2C_MSA_SA_M;
+  I2C0_MSA_R += slave_address << I2C_MSA_SA_S;
+  I2C0_MSA_R |= I2C_MSA_RS;
+  I2C0_MCS_R |=
+      I2C_MCS_ACK | I2C_MCS_STOP | I2C_MCS_START | I2C_MCS_RUN & (~I2C_MCS_HS);
+
+  while ((I2C0_MCS_R & I2C_MCS_BUSY))
+    {
+      // wait for the bus to stop being busy
+    }
+
+  if (I2C0_MCS_R & I2C_MCS_ERROR)
+    {
+      return 1;
+    }
+  else
+    {
+      return I2C0_MDR_R;
+    }
+}
+
+uint8_t i2c0_data_write(uint32_t slave_address, uint8_t data_byte)
+{
+  while ((I2C0_MCS_R & I2C_MCS_BUSY))
+    {
+      // wait for the bus to stop being busy
+    }
+  I2C0_MDR_R = data_byte << I2C_MDR_DATA_S;
+
+  while ((I2C0_MCS_R & I2C_MCS_BUSY))
+    {
+      // wait for the bus to stop being busy
+    }
+
+  I2C0_MSA_R &= ~(I2C_MSA_RS);
+  I2C0_MCS_R |=
+      I2C_MCS_ACK | I2C_MCS_STOP | I2C_MCS_START | I2C_MCS_RUN & (~I2C_MCS_HS);
+
+  while ((I2C0_MCS_R & I2C_MCS_BUSY))
+    {
+      // wait for the bus to stop being busy
+    }
+
+  if (I2C0_MCS_R & I2C_MCS_ERROR)
+    {
+      return 1;
+    }
+  else
+    {
+      return 0;
+    }
+}
+
+/*
 uint8_t i2c0_data_byte_write(uint8_t data_byte, uint32_t slave_address)
 {
   // write data byte into I2CMDR
@@ -126,39 +188,4 @@ uint32_t i2c0_data_byte_read(uint32_t slave_address)
   // seem to need to check busy and error bit in i2cmcs
   // Read data from I2CMDR
 }
-
-uint8_t i2c0_data_read(uint32_t  slave_address,
-                       uint32_t *data_storage,
-                       uint16_t  length)
-{
-  uint16_t data_counter;
-  while ((I2C0_MCS_R & 0x01) || (I2C0_MCS_R & 0x40) || !(I2C0_MCS_R & 0x20))
-    {
-      // wait for the bus to stop being busy
-    }
-  I2C0_MSA_R = (slave_address << 1) | 0x01;
-  I2C0_MCS_R |= 0x0B;
-  while (data_counter < length)
-    {
-      while ((I2C0_MCS_R & 0x01))
-        {
-          // check if the I2C controller is still busy
-          // maybe add a delay
-        }
-      if ((I2C0_MCS_R & 0x080) || (I2C0_MCS_R & 0x02))
-        {
-          // Error occured
-          // may need to check for arbitation stuffs
-          return 1;  // maxium legal return value of I2C is 0xFF
-        }
-      data_storage[data_counter] = I2C0_MDR_R & 0x00FF;
-    }
-  return 0;
-}
-
-uint8_t i2c0_data_write(uint32_t slave_address,
-                        uint8_t *data_storage,
-                        uint8_t  length)
-{
-  return 0;
-}
+*/

@@ -5,14 +5,11 @@
 #include <stdlib.h>
 #include "TM4C123.h"
 #include "TM4C123GH6PM.h"
-uint8_t  i2c0_open(void);  /*initialize I2C registers*/
-uint8_t  i2c0_close(void); /*Cleanup the I2C controller*/
-uint32_t i2c0_data_byte_read(uint32_t slave_address);
-uint8_t  i2c0_data_byte_write(uint8_t data_byte, uint32_t slave_address);
-uint8_t  i2c0_data_read(uint32_t  slave_address,
-                        uint32_t *data_storage,
-                        uint16_t  length);
-uint8_t  i2c0_data_write(uint32_t slave_address,
-                         uint8_t *data_storage,
-                         uint8_t  length);
+uint8_t i2c0_open(void);  /*initialize I2C registers*/
+uint8_t i2c0_close(void); /*Cleanup the I2C controller*/
+// uint32_t i2c0_data_byte_read(uint32_t slave_address);
+// uint8_t  i2c0_data_byte_write(uint8_t data_byte, uint32_t slave_address);
+
+uint8_t i2c0_data_read(uint16_t slave_address);
+uint8_t i2c0_data_write(uint32_t slave_address, uint8_t data_byte);
 #endif
