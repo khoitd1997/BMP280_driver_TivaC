@@ -1,4 +1,5 @@
-#include <TivaC_I2C.h>
+#include "TivaC_I2C.h"
+#include "TM4C123.h"
 
 /**
  * @brief
@@ -38,12 +39,13 @@ uint8_t i2c0_open(void)
   // enable interrupt in i2cmimr
   I2C0_MIMR_R       = 0x01;
   GPIO_PORTB_LOCK_R = 0x00;  // lock the PORTB
+  return 0;
 }
 
 uint8_t i2c0_close(void)
 {
 // should really disable interrupt here
-#ifdef FORCED_I2C_CLOSED  // force close even if there is error
+#ifdef FORCED_I2C0_CLOSED  // force close even if there is error
   if ((I2C0_MCS_R & 0x080) || (I2C0_MCS_R & 0x02))
     {
       // Error occured
@@ -63,11 +65,11 @@ uint8_t i2c0_close(void)
   I2C0_MCR_R &= 0xFF8F;
   GPIO_PORTB_LOCK_R = 0x00;  // lock the PORTB
   // reenable interrupt here
-  // just don't disable the clock
+  // just don't disable the system clock
   return 0;
 }
 
-uint8_t i2c0_data_write(uint8_t data_byte, uint32_t slave_address)
+uint8_t i2c0_data_byte_write(uint8_t data_byte, uint32_t slave_address)
 {
   // write data byte into I2CMDR
 
@@ -79,25 +81,35 @@ uint8_t i2c0_data_write(uint8_t data_byte, uint32_t slave_address)
   I2C0_MDR_R = data_byte;
   // init transmit-> writing I2CMCS
   I2C0_MCS_R |= 0xF;  // 0-111  // generate start signal
-
+  while ((I2C0_MCS_R & 0x01))
+    {
+      // check if the I2C controller is still busy
+      // maybe add a delay
+    }
   // check error in I2CMCS and return the error
   if ((I2C0_MCS_R & 0x080) || (I2C0_MCS_R & 0x02))
     {
       // Error occured
       return 1;
     }
+  return 0;
 }
+
 // I2C0_MMIS_R leave in the main loop
-uint32_t i2c0_data_read(uint32_t slave_address)
+uint32_t i2c0_data_byte_read(uint32_t slave_address)
 {
   while ((I2C0_MCS_R & 0x01) || (I2C0_MCS_R & 0x40) || !(I2C0_MCS_R & 0x20))
     {
       // wait for the bus to stop being busy
     }
-  I2C0_MSA_R = (slave_address << 1) | 0x01;  // need to indicate 1
+  I2C0_MSA_R = (slave_address << 1) | 0x01;
   // init transmit-> writing I2CMCS
   I2C0_MCS_R |= 0x07;  // 0-111  // generate start signal
-
+  while ((I2C0_MCS_R & 0x01))
+    {
+      // check if the I2C controller is still busy
+      // maybe add a delay
+    }
   // check error in I2CMCS and return the error
   if ((I2C0_MCS_R & 0x080) || (I2C0_MCS_R & 0x02))
     {
@@ -113,4 +125,40 @@ uint32_t i2c0_data_read(uint32_t slave_address)
   // write to i2cmcs
   // seem to need to check busy and error bit in i2cmcs
   // Read data from I2CMDR
+}
+
+uint8_t i2c0_data_read(uint32_t  slave_address,
+                       uint32_t *data_storage,
+                       uint16_t  length)
+{
+  uint16_t data_counter;
+  while ((I2C0_MCS_R & 0x01) || (I2C0_MCS_R & 0x40) || !(I2C0_MCS_R & 0x20))
+    {
+      // wait for the bus to stop being busy
+    }
+  I2C0_MSA_R = (slave_address << 1) | 0x01;
+  I2C0_MCS_R |= 0x0B;
+  while (data_counter < length)
+    {
+      while ((I2C0_MCS_R & 0x01))
+        {
+          // check if the I2C controller is still busy
+          // maybe add a delay
+        }
+      if ((I2C0_MCS_R & 0x080) || (I2C0_MCS_R & 0x02))
+        {
+          // Error occured
+          // may need to check for arbitation stuffs
+          return 1;  // maxium legal return value of I2C is 0xFF
+        }
+      data_storage[data_counter] = I2C0_MDR_R & 0x00FF;
+    }
+  return 0;
+}
+
+uint8_t i2c0_data_write(uint32_t slave_address,
+                        uint8_t *data_storage,
+                        uint8_t  length)
+{
+  return 0;
 }

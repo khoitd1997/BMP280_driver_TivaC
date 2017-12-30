@@ -1,21 +1,5 @@
-/*********************************************************************
-*               SEGGER MICROCONTROLLER GmbH & Co. KG                 *
-*       Solutions for real time microcontroller applications         *
-**********************************************************************
-*                                                                    *
-*       (c) 2014 - 2017  SEGGER Microcontroller GmbH & Co. KG        *
-*                                                                    *
-*       www.segger.com     Support: support@segger.com               *
-*                                                                    *
-**********************************************************************
 
--------------------------- END-OF-HEADER -----------------------------
-
-File    : main.c
-Purpose : Generic application start
-
-
-/**
+/*
  * Written by Khoi Dinh Trinh on 12/13/2017
  * BMP280 breakout board from Adafruit:
  * https://www.adafruit.com/product/2651
@@ -27,12 +11,22 @@ Purpose : Generic application start
  * API will be in a separate file
  */
 
-#include <TivaC_I2C.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "TM4C123.h"
+#include "TivaC_GEN.h"
+#include "TivaC_I2C.h"
+
 // interrupt void interruptHandler(void);
-void main(void)
+int main(void)
 {
+  pll_enable(80);
+
+  while (1)
+    {
+      delayms(500);
+    }
 }
 
 /*************************** End of file ****************************/
