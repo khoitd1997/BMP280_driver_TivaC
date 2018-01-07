@@ -68,8 +68,10 @@ uint8_t i2c0_close(void)
 }
 
 uint8_t i2c0_single_data_read(const uint8_t slave_address,
-                              const uint8_t remain_receive)
+                              const uint8_t remain_receive,
+                              const uint8_t repeat_start)
 {
+  uint32_t i2c0_mcs_temp = 0;
   while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {
       // wait for the bus to stop being busy
@@ -82,18 +84,33 @@ uint8_t i2c0_single_data_read(const uint8_t slave_address,
     {
       // wait for the bus to stop being busy
     }
+
   I2C0_MSA_R |= I2C_MSA_RS;
 
-  if (remain_receive)
+  // option parsing
+  if (repeat_start)
     {
-      I2C0_MCS_R = (I2C_MCS_ACK | I2C_MCS_START | I2C_MCS_RUN) &
-                   ((~I2C_MCS_STOP) & (~I2C_MCS_HS));
+      i2c0_mcs_temp |= I2C_MCS_START;
     }
   else
     {
-      I2C0_MCS_R = (I2C_MCS_ACK | I2C_MCS_STOP | I2C_MCS_START | I2C_MCS_RUN) &
-                   (~I2C_MCS_HS);
+      i2c0_mcs_temp &= ~I2C_MCS_START;
     }
+  if (remain_receive)
+    {
+      i2c0_mcs_temp &= ~I2C_MCS_STOP;
+      // I2C0_MCS_R = (I2C_MCS_ACK | I2C_MCS_START | I2C_MCS_RUN) &
+//      ((~I2C_MCS_STOP) & (~I2C_MCS_HS));
+    }
+  else
+    {
+      i2c0_mcs_temp |= I2C_MCS_STOP;
+      // I2C0_MCS_R = (I2C_MCS_ACK | I2C_MCS_STOP | I2C_MCS_START | I2C_MCS_RUN)
+      // &
+      //(~I2C_MCS_HS);
+    }
+  i2c0_mcs_temp |= I2C_MCS_ACK | I2C_MCS_RUN;
+  I2C0_MCS_R = i2c0_mcs_temp;
 
   while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {

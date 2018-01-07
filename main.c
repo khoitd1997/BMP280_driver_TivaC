@@ -21,7 +21,6 @@
 #define TRUE 1
 #define FALSE 0
 
-
 #define OUTPUT_BUFFER_LENGTH 4
 #define INPUT_BUFFER_LENGTH 4
 #define BMP280_CONFIG_ADDRESS 0xF4
@@ -45,14 +44,18 @@ int main(void)
   //     }
   //     output[output_index] = 246 + output_index;
   //   }
-  //i2c0_open();
-  //i2c0_multiple_data_byte_write(BMP280_ADDR, bmp280_obuffer, OUTPUT_BUFFER_LENGTH);
+  // i2c0_open();
+  // i2c0_multiple_data_byte_write(BMP280_ADDR, bmp280_obuffer,
+  // OUTPUT_BUFFER_LENGTH);
   while (1)
     {
       // i2c0_single_data_write(119, 246);
       i2c0_open();
       i2c0_single_data_write(BMP280_ADDR, 0xF6, REMAIN_TRANSMIT);
-      i2c0_single_data_read(BMP280_ADDR, FALSE);
+      i2c0_single_data_read(BMP280_ADDR, REMAIN_RECEIVE, REPEAT_START);
+      i2c0_single_data_read(BMP280_ADDR, REMAIN_RECEIVE, NO_REPEAT_START);
+      i2c0_single_data_read(BMP280_ADDR, REMAIN_RECEIVE, NO_REPEAT_START);
+      i2c0_single_data_read(BMP280_ADDR, NO_REMAIN_RECEIVE, NO_REPEAT_START);
       delayms(500);
       // i2c0_close();
     }
