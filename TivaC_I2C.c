@@ -100,7 +100,7 @@ uint8_t i2c0_single_data_read(const uint8_t slave_address,
     {
       i2c0_mcs_temp &= ~I2C_MCS_STOP;
       // I2C0_MCS_R = (I2C_MCS_ACK | I2C_MCS_START | I2C_MCS_RUN) &
-//      ((~I2C_MCS_STOP) & (~I2C_MCS_HS));
+      //      ((~I2C_MCS_STOP) & (~I2C_MCS_HS));
     }
   else
     {
@@ -123,7 +123,7 @@ uint8_t i2c0_single_data_read(const uint8_t slave_address,
     }
   else
     {
-      return (I2C0_MDR_R) & (I2C_MDR_DATA_M);
+      return ((I2C0_MDR_R) & (I2C_MDR_DATA_M)) >> I2C_MDR_DATA_S;
     }
 }
 
@@ -227,10 +227,72 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
                                      uint8_t*      input_buffer,
                                      const uint8_t input_buffer_length)
 {
+  if (input_buffer == NULL || input_buffer_length < 2)
+    {
+      return 2;
+    }
+
   while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {
       // wait for the bus to stop being busy
     }
+
+  // load slave address and the first data element
+  I2C0_MSA_R = (slave_address << I2C_MSA_SA_S) & (I2C_MSA_SA_M);
+
+  while ((I2C0_MCS_R & I2C_MCS_BUSY))
+    {
+      // wait for the bus to stop being busy
+    }
+
+  // initiate the first read
+  I2C0_MSA_R |= I2C_MSA_RS;
+  I2C0_MCS_R = (I2C_MCS_START | I2C_MCS_RUN | I2C_MCS_ACK) & (~I2C_MCS_STOP);
+
+  while ((I2C0_MCS_R & I2C_MCS_BUSY))
+    {
+      // wait for the bus to stop being busy
+    }
+
+  *input_buffer = (I2C0_MDR_R & I2C_MDR_DATA_M) << I2C_MDR_DATA_S;
+  ++input_buffer;
+
+  // read up till the data before the last one
+  for (int buffer_index = 1; buffer_index < input_buffer_length - 1;
+       ++buffer_index, ++input_buffer)
+    {
+      I2C0_MSA_R |= I2C_MSA_RS;
+      I2C0_MCS_R =
+          (I2C_MCS_RUN | I2C_MCS_ACK) & (~I2C_MCS_STOP) & (~I2C_MCS_START);
+
+      while ((I2C0_MCS_R & I2C_MCS_BUSY))
+        {
+          // wait for the bus to stop being busy
+        }
+      i2c0_error_handling();
+
+      *input_buffer = (I2C0_MDR_R & I2C_MDR_DATA_M) >> I2C_MDR_DATA_S;
+    }
+
+  // Read the last data byte and close the transaction
+  I2C0_MSA_R |= I2C_MSA_RS;
+  I2C0_MCS_R =
+      (I2C_MCS_RUN | I2C_MCS_STOP) & ((~I2C_MCS_START) & (~I2C_MCS_ACK));
+
+  while ((I2C0_MCS_R & I2C_MCS_BUSY))
+    {
+      // wait for the bus to stop being busy
+    }
+  i2c0_error_handling();
+
+  *input_buffer = (I2C0_MDR_R & I2C_MDR_DATA_M) << I2C_MDR_DATA_S;
+
+  while ((I2C0_MCS_R & I2C_MCS_BUSY))
+    {
+      // wait for the bus to stop being busy
+    }
+  i2c0_error_handling();
+
   return 0;
 }
 

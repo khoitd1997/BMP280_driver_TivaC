@@ -52,11 +52,8 @@ int main(void)
       // i2c0_single_data_write(119, 246);
       i2c0_open();
       i2c0_single_data_write(BMP280_ADDR, 0xF6, REMAIN_TRANSMIT);
-      i2c0_single_data_read(BMP280_ADDR, REMAIN_RECEIVE, REPEAT_START);
-      i2c0_single_data_read(BMP280_ADDR, REMAIN_RECEIVE, NO_REPEAT_START);
-      i2c0_single_data_read(BMP280_ADDR, REMAIN_RECEIVE, NO_REPEAT_START);
-      i2c0_single_data_read(BMP280_ADDR, NO_REMAIN_RECEIVE, NO_REPEAT_START);
-      delayms(500);
+      i2c0_multiple_data_byte_read(BMP280_ADDR, bmp280_ibuffer, INPUT_BUFFER_LENGTH);
+      delayms(10);
       // i2c0_close();
     }
 }
