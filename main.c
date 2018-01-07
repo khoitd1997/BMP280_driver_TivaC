@@ -18,17 +18,28 @@
 #include "TivaC_GEN.h"
 #include "TivaC_I2C.h"
 
+#define TRUE 1
+#define FALSE 0
+
+#define OUTPUT_BUFFER_LENGTH 10
+
 // interrupt void interruptHandler(void);
 int main(void)
 {
   pll_enable(80);
-  greenled_init();
+  uint8_t output[OUTPUT_BUFFER_LENGTH];
+  for (int output_index = 0,
+           output_index < OUTPUT_BUFFER_LENGTH,
+           ++output_index)
+    {
+      output[output_index] = 246 + output_index;
+    }
+  i2c0_open();
   while (1)
     {
-      greenled_on();
+      i2c0_multiple_data_byte_write(119, output, OUTPUT_BUFFER_LENGTH);
       delayms(500);
-      greenled_off();
-			delayms(500);
+      // i2c0_close();
     }
 }
 
