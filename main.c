@@ -21,23 +21,38 @@
 #define TRUE 1
 #define FALSE 0
 
-#define OUTPUT_BUFFER_LENGTH 10
 
+#define OUTPUT_BUFFER_LENGTH 4
+#define INPUT_BUFFER_LENGTH 4
+#define BMP280_CONFIG_ADDRESS 0xF4
+#define BMP280_ADDR 0x77
 // interrupt void interruptHandler(void);
 int main(void)
 {
   pll_enable(80);
-  uint8_t output[OUTPUT_BUFFER_LENGTH];
-  for (int output_index = 0,
-           output_index < OUTPUT_BUFFER_LENGTH,
-           ++output_index)
-    {
-      output[output_index] = 246 + output_index;
-    }
-  i2c0_open();
+  uint8_t bmp280_obuffer[OUTPUT_BUFFER_LENGTH];
+  uint8_t bmp280_ibuffer[INPUT_BUFFER_LENGTH];
+
+  bmp280_obuffer[0] = 0xF4;
+  bmp280_obuffer[1] = 0x01;
+  bmp280_obuffer[2] = 0xF5;
+  bmp280_obuffer[3] = 0x88;
+  // for (int output_index = 0; output_index < OUTPUT_BUFFER_LENGTH;
+  //      ++output_index)
+  //   {
+  //     if(output_index%2){
+  //       output[output_index]=
+  //     }
+  //     output[output_index] = 246 + output_index;
+  //   }
+  //i2c0_open();
+  //i2c0_multiple_data_byte_write(BMP280_ADDR, bmp280_obuffer, OUTPUT_BUFFER_LENGTH);
   while (1)
     {
-      i2c0_multiple_data_byte_write(119, output, OUTPUT_BUFFER_LENGTH);
+      // i2c0_single_data_write(119, 246);
+      i2c0_open();
+      i2c0_single_data_write(BMP280_ADDR, 0xF6, REMAIN_TRANSMIT);
+      i2c0_single_data_read(BMP280_ADDR, FALSE);
       delayms(500);
       // i2c0_close();
     }

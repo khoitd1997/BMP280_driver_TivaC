@@ -12,9 +12,11 @@ uint8_t i2c0_open(void)
 {
   // Enable RCGCI2C for i2c0
   SYSCTL_RCGCI2C_R |= SYSCTL_RCGCI2C_R0;
-  // Enable PortB RCGCGPIO
+  // Enable clock for PORTB
   SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R1;
-  // set GPIOAFSEL default i2c0 enabled
+
+  // Enable Digital and I2C function and disable
+  // the rest
   GPIO_PORTB_LOCK_R |= 0x4C4F434B;
   GPIO_PORTB_CR_R |= 0x0C;
   GPIO_PORTB_PUR_R &= 0xFFFFFFF3;
@@ -24,11 +26,10 @@ uint8_t i2c0_open(void)
   GPIO_PORTB_PCTL_R = (0x3 << 8) | (0x3 << 12);
   GPIO_PORTB_AMSEL_R &= ~0x0C;
 
-  // Open drain on I2CSDA PB3 and non on PB2
+  // Open drain on I2CSDA PB3 and none on PB2
   GPIO_PORTB_ODR_R |= 0x08;
   GPIO_PORTB_ODR_R &= ~(0x04);
 
-  // No need for PMCn field in GPIOPCTL register
   // I2CMCR0 init master
   I2C0_MCR_R = I2C_MCR_MFE;
 
@@ -66,7 +67,8 @@ uint8_t i2c0_close(void)
     }
 }
 
-uint8_t i2c0_single_data_read(const uint8_t slave_address)
+uint8_t i2c0_single_data_read(const uint8_t slave_address,
+                              const uint8_t remain_receive)
 {
   while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {
@@ -75,56 +77,72 @@ uint8_t i2c0_single_data_read(const uint8_t slave_address)
 
   I2C0_MSA_R &= ~I2C_MSA_SA_M;
   I2C0_MSA_R += slave_address << I2C_MSA_SA_S;
+
+  while ((I2C0_MCS_R & I2C_MCS_BUSY))
+    {
+      // wait for the bus to stop being busy
+    }
   I2C0_MSA_R |= I2C_MSA_RS;
-  I2C0_MCS_R = (I2C_MCS_ACK | I2C_MCS_STOP | I2C_MCS_START | I2C_MCS_RUN) &
-               (~I2C_MCS_HS);
+
+  if (remain_receive)
+    {
+      I2C0_MCS_R = (I2C_MCS_ACK | I2C_MCS_START | I2C_MCS_RUN) &
+                   ((~I2C_MCS_STOP) & (~I2C_MCS_HS));
+    }
+  else
+    {
+      I2C0_MCS_R = (I2C_MCS_ACK | I2C_MCS_STOP | I2C_MCS_START | I2C_MCS_RUN) &
+                   (~I2C_MCS_HS);
+    }
 
   while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {
       // wait for the bus to stop being busy
     }
 
-  if (I2C0_MCS_R & I2C_MCS_ERROR)
+  if (!i2c0_error_handling())
     {
       return 1;
     }
   else
     {
-      return I2C0_MDR_R;
+      return (I2C0_MDR_R) & (I2C_MDR_DATA_M);
     }
 }
 
 uint8_t i2c0_single_data_write(const uint8_t slave_address,
-                               const uint8_t data_byte)
+                               const uint8_t data_byte,
+                               const uint8_t no_end_stop)
 {
   while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {
       // wait for the bus to stop being busy
     }
-  // enable interrupt in i2cmimr
-  // I2C0_MIMR_R       = 0x01;
-  // GPIO_PORTB_LOCK_R = 0x00;  // lock the PORTB
-  // loaded slave address and set it to transmit
+
   I2C0_MSA_R = (slave_address << I2C_MSA_SA_S) & (I2C_MSA_SA_M);
-  I2C0_MSA_R &= ~(I2C_MSA_RS);
-  I2C0_MDR_R = data_byte;
+
+  I2C0_MDR_R &= I2C_MDR_DATA_M;
+  I2C0_MDR_R += data_byte << I2C_MDR_DATA_S;
 
   // write settings
-  I2C0_MCS_R = I2C_MCS_START | I2C_MCS_RUN | I2C_MCS_STOP;
+  if (no_end_stop)
+    {
+      I2C0_MSA_R &= ~(I2C_MSA_RS);
+      I2C0_MCS_R = (I2C_MCS_START | I2C_MCS_RUN) & (~I2C_MCS_STOP);
+    }
+  else
+    {
+      I2C0_MSA_R &= ~(I2C_MSA_RS);
+      I2C0_MCS_R = I2C_MCS_START | I2C_MCS_RUN | I2C_MCS_STOP;
+    }
 
   while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {
       // wait for the bus to stop being busy
     }
 
-  if (I2C0_MCS_R & I2C_MCS_ERROR)
-    {
-      return 1;
-    }
-  else
-    {
-      return 0;
-    }
+  i2c0_error_handling();
+  return 0;
 }
 
 uint8_t i2c0_multiple_data_byte_write(const uint8_t  slave_address,
@@ -147,17 +165,15 @@ uint8_t i2c0_multiple_data_byte_write(const uint8_t  slave_address,
   // after first transmit remain in transmit state
   I2C0_MSA_R = (slave_address << I2C_MSA_SA_S) & (I2C_MSA_SA_M);
   I2C0_MSA_R &= ~(I2C_MSA_RS);
-  I2C0_MDR_R |= I2C_MDR_DATA_M & ((*output_buffer) << I2C_MDR_DATA_S);
-  I2C0_MCS_R = (I2C_MCS_START | I2C_MCS_RUN) & (~I2C_MCS_STOP) & (~I2C_MCS_HS);
+  I2C0_MDR_R |= I2C_MDR_DATA_M & ((*output_buffer++) << I2C_MDR_DATA_S);
+  I2C0_MCS_R =
+      (I2C_MCS_START | I2C_MCS_RUN) & ((~I2C_MCS_STOP) & (~I2C_MCS_HS));
 
   while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {
       // wait for the bus to stop being busy
     }
-  if (I2C0_MCS_R & I2C_MCS_ERROR)
-    {
-      return 1;
-    }
+  i2c0_error_handling();
 
   for (int buffer_index = 1; buffer_index < output_buffer_length - 1;
        ++buffer_index)
@@ -166,30 +182,26 @@ uint8_t i2c0_multiple_data_byte_write(const uint8_t  slave_address,
       I2C0_MDR_R |= I2C_MDR_DATA_M & ((*output_buffer++) << I2C_MDR_DATA_S);
       I2C0_MSA_R &= ~(I2C_MSA_RS);
       I2C0_MCS_R =
-          (~I2C_MCS_START) | I2C_MCS_RUN & (~I2C_MCS_STOP) & (~I2C_MCS_HS);
+          ((~I2C_MCS_START) & (~I2C_MCS_STOP) & (~I2C_MCS_HS)) & I2C_MCS_RUN;
 
       while ((I2C0_MCS_R & I2C_MCS_BUSY))
         {
           // wait for the bus to stop being busy
         }
-      if (I2C0_MCS_R & I2C_MCS_ERROR)
-        {
-          return 1;
-        }
+      i2c0_error_handling();
     }
 
   // transmit the last element and return to idle state
   I2C0_MDR_R |= I2C_MDR_DATA_M & ((*output_buffer) << I2C_MDR_DATA_S);
   I2C0_MSA_R &= ~(I2C_MSA_RS);
-  I2C0_MCS_R = (~I2C_MCS_START) | I2C_MCS_RUN | (I2C_MCS_STOP) & (~I2C_MCS_HS);
+  I2C0_MCS_R =
+      ((~I2C_MCS_START) & (~I2C_MCS_HS)) & ((I2C_MCS_STOP) | (I2C_MCS_RUN));
+
   while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {
       // wait for the bus to stop being busy
     }
-  if (I2C0_MCS_R & I2C_MCS_ERROR)
-    {
-      return 1;
-    }
+  i2c0_error_handling();
   return 0;
 }
 
@@ -203,4 +215,16 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
       // wait for the bus to stop being busy
     }
   return 0;
+}
+
+uint8_t i2c0_error_handling(void)
+{
+  if (I2C0_MCS_R & I2C_MCS_ERROR)
+    {
+      return 1;
+    }
+  else
+    {
+      return 0;
+    }
 }
