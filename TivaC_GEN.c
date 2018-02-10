@@ -54,6 +54,7 @@ uint8_t delayms(uint32_t milliseconds)
   return 0;
 }
 
+// TODO: Fix Green LED
 // Green LED on PF3
 void greenled_init(void)
 {

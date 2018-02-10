@@ -78,6 +78,7 @@ uint8_t i2c0_single_data_read(const uint8_t slave_address,
       // wait for the bus to stop being busy
     }
 
+  //set slave address
   I2C0_MSA_R &= ~I2C_MSA_SA_M;
   I2C0_MSA_R += slave_address << I2C_MSA_SA_S;
 

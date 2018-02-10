@@ -36,6 +36,8 @@ int main(void)
   bmp280_obuffer[1] = 0x01;
   bmp280_obuffer[2] = 0xF5;
   bmp280_obuffer[3] = 0x88;
+  blueled_init();
+
   // for (int output_index = 0; output_index < OUTPUT_BUFFER_LENGTH;
   //      ++output_index)
   //   {
@@ -47,13 +49,13 @@ int main(void)
   // i2c0_open();
   // i2c0_multiple_data_byte_write(BMP280_ADDR, bmp280_obuffer,
   // OUTPUT_BUFFER_LENGTH);
-  while (1)
+  for(;;)
     {
       // i2c0_single_data_write(119, 246);
-      i2c0_open();
-      i2c0_single_data_write(BMP280_ADDR, 0xF6, REMAIN_TRANSMIT);
-      i2c0_multiple_data_byte_read(BMP280_ADDR, bmp280_ibuffer, INPUT_BUFFER_LENGTH);
-      delayms(10);
+     i2c0_open();
+     i2c0_single_data_write(BMP280_ADDR, 0xF6, REMAIN_TRANSMIT);
+     i2c0_multiple_data_byte_read(BMP280_ADDR, bmp280_ibuffer, INPUT_BUFFER_LENGTH);
+     delayms(10);
       // i2c0_close();
     }
 }
