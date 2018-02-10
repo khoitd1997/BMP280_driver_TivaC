@@ -14,7 +14,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "TM4C123.h"
+ 
 #include "TivaC_GEN.h"
 #include "TivaC_I2C.h"
 

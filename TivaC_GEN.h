@@ -2,7 +2,7 @@
 #define _TIVAC_GEN_H
 #include <stdint.h>
 #include <stdio.h>
-#include "TM4C123GH6PM.h"
+#include "tm4c123gh6pm.h"
 #define GPIO_PORTA_DATA_R (*((volatile unsigned long *)0x400043FC))
 #define GPIO_PORTA_DIR_R (*((volatile unsigned long *)0x40004400))
 #define GPIO_PORTA_AFSEL_R (*((volatile unsigned long *)0x40004420))

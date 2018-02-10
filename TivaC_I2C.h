@@ -3,9 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "TM4C123.h"
-#include "TM4C123GH6PM.h"
-
+ 
 #define REMAIN_TRANSMIT 2
 #define NO_REMAIN_TRANSMIT 0
 

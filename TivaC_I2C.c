@@ -1,5 +1,6 @@
 #include "TivaC_I2C.h"
-#include "TM4C123.h"
+#include "tm4c123gh6pm.h"
+
 /**
  * @brief
  * Use I2C0 controller and support single or multiple bytes transfer up to high
