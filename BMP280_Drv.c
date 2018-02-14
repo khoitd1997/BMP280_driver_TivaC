@@ -1,8 +1,19 @@
 #include "BMP280_Drv.h"
 #include "TivaC_I2C.h"
 
+typedef enum{status=0, ctrl_meas, config, press_msb, press_lsb, press_xlsb, temp_msb, temp_lsb, temp_xlsb} bmp280_regName;
+
+//added with the bmp280_regName to get the correct address
+static uint16_t bmp280_baseRegAddr=0xf3;
+
+//the two special addresses
+static uint16_t bmp280_resAddr=0xe0;
+static uint16_t bmp280_idAddr=0xd0;
+
+//initialize the bmp280 with predefined value in the datasheet
 void bmp280Init(bmp280* sensor, bmp280_measureSettings settings, bmp280_comProtocol protocol)
 {
+    bmp280->address=0x77;
     //values in settings obtained from BMP280 datasheet page 19
     sensor->protocol=protocol;
     switch(settings)
@@ -64,12 +75,29 @@ void bmp280Init(bmp280* sensor, bmp280_measureSettings settings, bmp280_comProto
     }
 }
 
-uint8_t bmp280_getID(bmp280)
+//get manufacturer ID of the bmp280
+uint8_t bmp280_getID(bmp280*)
 {
+    unint8_t ID;
     i2c0_open();
-    
+    //write data with no stop signal
+    i2c0_single_data_write(bmp280->address, bmp280_idAddr, 0);
+    //repeat start and then read the ID 
+    ID=i2c0_single_data_read(bmp280->address, 0,1);
+    i2c0_close();
+    return ID;
+}
+
+//reset the bmp280 with a power-on reset
+void bmp280_reset(bmp280*)
+{
+    uint8_t resSeq[2];
+    resSeq[0]=bmp280_resAddr;
+
+    //obtain from page 24 datasheet
+    resSeq[0]=0xb6;
+    i2c0_open();
+    i2c0_multiple_data_byte_write(bmp280->address, resSeq, 2);
     i2c0_close();
 }
 
-void bmp280_reset(bmp280);
-void bmp280_init(bmp280);
