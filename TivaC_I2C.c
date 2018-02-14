@@ -143,15 +143,14 @@ uint8_t i2c0_single_data_write(const uint8_t slave_address,
   I2C0_MDR_R &= I2C_MDR_DATA_M;
   I2C0_MDR_R += data_byte << I2C_MDR_DATA_S;
 
+  I2C0_MSA_R &= ~(I2C_MSA_RS);
   // write settings
   if (no_end_stop)
-    {
-      I2C0_MSA_R &= ~(I2C_MSA_RS);
+    { 
       I2C0_MCS_R = (I2C_MCS_START | I2C_MCS_RUN) & (~I2C_MCS_STOP);
     }
   else
     {
-      I2C0_MSA_R &= ~(I2C_MSA_RS);
       I2C0_MCS_R = I2C_MCS_START | I2C_MCS_RUN | I2C_MCS_STOP;
     }
 
