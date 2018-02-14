@@ -44,7 +44,7 @@ struct bmp280Sensor
 //initialize a bmp280 struct
 //will be use in a big switch statement for initializing based on
 //both predefined option and customizable value 
-bmp280* bmp280Init( bmp280_measureSettings,bmp280_comProtocol);
+void bmp280_init(bmp280* sensor, bmp280_measureSettings settings, bmp280_comProtocol protocol);
 uint8_t bmp280_getID(bmp280*);
 void bmp280_reset(bmp280*);
 
