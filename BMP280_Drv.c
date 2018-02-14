@@ -57,10 +57,19 @@ void bmp280Init(bmp280* sensor, bmp280_measureSettings settings, bmp280_comProto
             sensor->standbyTime=0.5;
             break;
         default:
-        //stop the mcu if none of these options for now
             for(;;)
+            {
+                //stop the mcu if none of these options for now
+            }
     }
 }
-uint8_t bmp280_getID(bmp280);
+
+uint8_t bmp280_getID(bmp280)
+{
+    i2c0_open();
+    
+    i2c0_close();
+}
+
 void bmp280_reset(bmp280);
 void bmp280_init(bmp280);
