@@ -74,11 +74,11 @@ void bmp280_close(bmp280* sensor, bmp280_errCode* errCode);
 
 // functions used for customizing the setting of the bmp280
 // calling these functions will cause a write to the actual hardware
-void bmp280_set_temp(bmp280* sensor, bmp280_errCode* errCode);
-void bmp280_set_pres(bmp280* sensor, bmp280_errCode* errCode);
-void bmp280_set_filter(bmp280* sensor, bmp280_errCode* errCode);
-void bmp280_set_sampling(bmp280* sensor, bmp280_errCode* errCode);
-void bmp280_set_mode(bmp280* sensor, bmp280_errCode* errCode);
+void bmp280_set_temp(bmp280* sensor, bmp280_Coeff tempSetting, bmp280_errCode* errCode);
+void bmp280_set_pres(bmp280* sensor, bmp280_Coeff presSetting, bmp280_errCode* errCode);
+void bmp280_set_filter(bmp280* sensor, bmp280_Coeff iirSetting, bmp280_errCode* errCode);
+void bmp280_set_sampling(bmp280* sensor, bmp280_samplSettings samplingSetting, bmp280_errCode* errCode);
+void bmp280_set_mode(bmp280* sensor, bmp280_operMode powerMode, bmp280_errCode* errCode);
 
 uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode);
 void    bmp280_reset(bmp280* sensor, bmp280_errCode* errCode);

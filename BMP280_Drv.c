@@ -5,27 +5,26 @@
 
 #include "BMP280_Drv.h"
 #include "TivaC_I2C.h"
-
-#define SETTING_TOTALS 6  // how many settings we need for the BMP280
+#include "BMP280_Utils.h"
 
 typedef enum {
-  status = 0,
-  ctrl_meas,
-  config,
-  press_msb,
-  press_lsb,
-  press_xlsb,
-  temp_msb,
-  temp_lsb,
-  temp_xlsb
+  Status = 0,
+  Ctrl_meas,
+  Config,
+  Cress_msb,
+  Press_lsb,
+  Press_xlsb,
+  Temp_msb,
+  Temp_lsb,
+  Temp_xlsb
 } bmp280_regName;
 
 // added with the bmp280_regName to get the correct address
-static uint16_t bmp280_baseRegAddr = 0xf3;
+#define BMP280_BASEADDR 0xF3
 
 // the two special addresses
-static uint16_t bmp280_resAddr = 0xe0;
-static uint16_t bmp280_idAddr  = 0xd0;
+#define BMP280_RESADDR 0xE0 
+#define BMP280_IDARR 0xD0 
 
 
 // initialize the bmp280 with predefined value in the datasheet
@@ -105,16 +104,30 @@ void bmp280_init(bmp280*                sensor,
 
 void bmp280_open(bmp280* sensor, bmp280_errCode* errCode)
 {
+   
   if (sensor->protocol == I2C)
     {
-      if (!(sensor->portOpened))
-        {
-          i2c0_open();
-          *errCode = ERR_NO_ERR;
-        }
+      // preparing data byte for writing to bmp280 register
+      uint8_t i2cWriteBytes[4]; // 2 for register addresses and 2 for the setting byte
+      
+      // handle control byte first
+      i2cWriteBytes[0]= BMP280_BASEADDR + Ctrl_meas;
+      i2cWriteBytes[1]= createCtrlByte(sensor->tempSamp, sensor->presSamp, sensor->mode, errCode);
 
-        i2c0_multiple_data_byte_write(sensor->address, ;
+      // handle config byte 
+      i2cWriteBytes[2]= BMP280_BASEADDR + Config;
+      i2cWriteBytes[3]= createConfigByte(sensor->standbyTime, sensor->iirFilter, sensor->protocol, errCode);
+
+      if(*errCode!=ERR_NO_ERR)
+      {
+        return; 
+      }
+      i2c0_open();
+      i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 4);
     }
+
+    *errCode=ERR_NO_ERR;
+    sensor->portOpened=1;
 }
 
 // get manufacturer ID of the bmp280
@@ -131,7 +144,7 @@ uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode)
         {
           i2c0_waitBusy();
           // write data with no stop signal
-          i2c0_single_data_write(sensor->address, bmp280_idAddr, 0);
+          i2c0_single_data_write(sensor->address, BMP280_RESADDR, 0);
           // repeat start and then read the ID
           ID = i2c0_single_data_read(sensor->address, 0, 1);
         }
@@ -148,10 +161,10 @@ void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode)
       *errCode = ERR_PORT_NOT_OPEN;
     }
   uint8_t resSeq[2];
-  resSeq[0] = bmp280_resAddr;
+  resSeq[0] = BMP280_RESADDR;
 
   // obtain from page 24 datasheet
-  resSeq[0] = 0xb6;
+  resSeq[1] = 0xB6;
 
   if (sensor->protocol == I2C)
     {
@@ -169,3 +182,4 @@ void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode)
 
   // TODO: do SPI
 }
+

@@ -17,6 +17,7 @@ int checkUnitialized(bmp280* sensor, bmp280_errCode* errCode)
     }
 }
 
+// TODO: use register to check for open port instead 
 int checkPortOpened(bmp280* sensor, bmp280_errCode* errCode)
 {
   if (!(sensor->portOpened))
@@ -121,6 +122,8 @@ uint8_t createCtrlByte(bmp280_Coeff    tempSampling,
         return 1;
         break;
     }
+
+  *errCode = ERR_NO_ERR;
   return tempByte;
 }
 
@@ -206,5 +209,6 @@ uint8_t createConfigByte(float              standbyTime,
       tempByte &= 0xFE;
     }
 
+  *errCode = ERR_NO_ERR;
   return tempByte;
 }
