@@ -112,11 +112,11 @@ void bmp280_open(bmp280* sensor, bmp280_errCode* errCode)
       
       // handle control byte first
       i2cWriteBytes[0]= BMP280_BASEADDR + Ctrl_meas;
-      i2cWriteBytes[1]= createCtrlByte(sensor->tempSamp, sensor->presSamp, sensor->mode, errCode);
+      i2cWriteBytes[1]= createCtrlByte(sensor, errCode);
 
       // handle config byte 
       i2cWriteBytes[2]= BMP280_BASEADDR + Config;
-      i2cWriteBytes[3]= createConfigByte(sensor->standbyTime, sensor->iirFilter, sensor->protocol, errCode);
+      i2cWriteBytes[3]= createConfigByte(sensor, errCode);
 
       if(*errCode!=ERR_NO_ERR)
       {
@@ -183,3 +183,16 @@ void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode)
   // TODO: do SPI
 }
 
+void bmp280_set_temp(bmp280* sensor, bmp280_Coeff tempSetting, bmp280_errCode* errCode)
+{
+  uint8_t i2cWriteBytes[2];
+  i2cWriteBytes[0]= BMP280_BASEADDR + Ctrl_meas;
+  sensor->tempSamp=tempSetting; 
+  i2cWriteBytes[1]= createCtrlByte(sensor, errCode);
+  if(*errCode!=ERR_NO_ERR)
+  {
+    return;
+  }
+  i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 2);
+  *errCode=ERR_NO_ERR;
+}

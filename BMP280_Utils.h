@@ -8,13 +8,9 @@
 #include "BMP280_Drv.h"
 
 // functions used for creating data byte to write to based on given setting
-uint8_t createCtrlByte(bmp280_Coeff    tempSampling,
-                       bmp280_Coeff    pressSampling,
-                       bmp280_operMode powerMode,
+uint8_t createCtrlByte(bmp280* sensor,
                        bmp280_errCode* errCode);
-uint8_t createConfigByte(float              standbyTime,
-                         bmp280_Coeff       filterCoeff,
-                         bmp280_comProtocol protocol,
+uint8_t createConfigByte(bmp280* sensor, 
                          bmp280_errCode*    errCode);
 
 // error checking

@@ -32,14 +32,12 @@ int checkPortOpened(bmp280* sensor, bmp280_errCode* errCode)
     }
 }
 
-uint8_t createCtrlByte(bmp280_Coeff    tempSampling,
-                       bmp280_Coeff    pressSampling,
-                       bmp280_operMode powerMode,
+uint8_t createCtrlByte(bmp280* sensor,
                        bmp280_errCode* errCode)
 {
   // start with all 1 and zero out the needed bits
   uint8_t tempByte = 0xFF;
-  switch (tempSampling)
+  switch (sensor->tempSamp)
     {
       case x0:
         tempByte &= 0x1F;
@@ -71,7 +69,7 @@ uint8_t createCtrlByte(bmp280_Coeff    tempSampling,
         break;
     }
 
-  switch (pressSampling)
+  switch (sensor->presSamp)
     {
       case x0:
         tempByte &= 0xE3;
@@ -103,7 +101,7 @@ uint8_t createCtrlByte(bmp280_Coeff    tempSampling,
         break;
     }
 
-  switch (powerMode)
+  switch (sensor->mode)
     {
       case Sleep:
         tempByte &= 0xFC;
@@ -127,44 +125,42 @@ uint8_t createCtrlByte(bmp280_Coeff    tempSampling,
   return tempByte;
 }
 
-uint8_t createConfigByte(float              standbyTime,
-                         bmp280_Coeff       filterCoeff,
-                         bmp280_comProtocol protocol,
+uint8_t createConfigByte(bmp280* sensor,
                          bmp280_errCode*    errCode)
 {
   // start with all 1 and zero out the needed bits
   uint8_t tempByte = 0xFF;
 
   // handle standby time
-  if (standbyTime == 0.5)
+  if (sensor->standbyTime == 0.5)
     {
       tempByte &= 0x1F;
     }
-  else if (standbyTime == 62.5)
+  else if (sensor->standbyTime == 62.5)
     {
       tempByte &= 0x3F;
     }
-  else if (standbyTime == 125)
+  else if (sensor->standbyTime == 125)
     {
       tempByte &= 0x5F;
     }
-  else if (standbyTime == 250)
+  else if (sensor->standbyTime == 250)
     {
       tempByte &= 0x7F;
     }
-  else if (standbyTime == 500)
+  else if (sensor->standbyTime == 500)
     {
       tempByte &= 0x9F;
     }
-  else if (standbyTime == 1000)
+  else if (sensor->standbyTime == 1000)
     {
       tempByte &= 0xBF;
     }
-  else if (standbyTime == 2000)
+  else if (sensor->standbyTime == 2000)
     {
       tempByte &= 0xDF;
     }
-  else if (standbyTime == 4000)
+  else if (sensor->standbyTime == 4000)
     {
       tempByte &= 0xFF;
     }
@@ -175,7 +171,7 @@ uint8_t createConfigByte(float              standbyTime,
     }
 
   // handle iir filter sampling
-  switch (filterCoeff)
+  switch (sensor->iirFilter)
     {
       case x0:
         tempByte &= 0xE3;
@@ -204,7 +200,7 @@ uint8_t createConfigByte(float              standbyTime,
     }
 
   // set protocol to be I2C or SPI
-  if (protocol == I2C)
+  if (sensor->protocol == I2C)
     {
       tempByte &= 0xFE;
     }
