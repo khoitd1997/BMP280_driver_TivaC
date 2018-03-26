@@ -6,6 +6,8 @@
 #include "BMP280_Drv.h"
 #include "TivaC_I2C.h"
 
+#define SETTING_TOTALS 6  // how many settings we need for the BMP280
+
 typedef enum {
   status = 0,
   ctrl_meas,
@@ -25,15 +27,15 @@ static uint16_t bmp280_baseRegAddr = 0xf3;
 static uint16_t bmp280_resAddr = 0xe0;
 static uint16_t bmp280_idAddr  = 0xd0;
 
+
 // initialize the bmp280 with predefined value in the datasheet
 void bmp280_init(bmp280*                sensor,
                  bmp280_measureSettings settings,
                  bmp280_comProtocol     protocol)
 {
-  sensor->portNum = 0;     // 0 for now
-  sensor->address = 0x77;  // value pretty much hardcoded due to hardware
-  sensor->protocol =
-      protocol;  // values in settings obtained from BMP280 datasheet page 19
+  sensor->portNum  = 0;         // 0 for now
+  sensor->address  = 0x77;      // value pretty much hardcoded due to hardware
+  sensor->protocol = protocol;  // settings obtained in datasheet pg 19
   switch (settings)
     {
       case handLow:
@@ -86,6 +88,12 @@ void bmp280_init(bmp280*                sensor,
         sensor->standbyTime = 0.5;
         break;
       case custom:
+        sensor->mode        = Uninitialized;
+        sensor->tempSamp    = Uninitialized;
+        sensor->presSamp    = Uninitialized;
+        sensor->samplSet    = Uninitialized;
+        sensor->iirFilter   = Uninitialized;
+        sensor->standbyTime = -1;
         // do nothing and let user does the config themselves
       default:
         for (;;)
@@ -95,33 +103,50 @@ void bmp280_init(bmp280*                sensor,
     }
 }
 
+void bmp280_open(bmp280* sensor, bmp280_errCode* errCode)
+{
+  if (sensor->protocol == I2C)
+    {
+      if (!(sensor->portOpened))
+        {
+          i2c0_open();
+          *errCode = ERR_NO_ERR;
+        }
+
+        i2c0_multiple_data_byte_write(sensor->address, ;
+    }
+}
+
 // get manufacturer ID of the bmp280
-uint8_t bmp280_getID(bmp280* sensor)
+uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode)
 {
   uint8_t ID;
   if (sensor->protocol == I2C)
     {
-      if (!sensor->portOpened)
+      if (checkPortOpened(sensor, errCode))
         {
-          i2c0_open();
+          return;
         }
       else
         {
           i2c0_waitBusy();
+          // write data with no stop signal
+          i2c0_single_data_write(sensor->address, bmp280_idAddr, 0);
+          // repeat start and then read the ID
+          ID = i2c0_single_data_read(sensor->address, 0, 1);
         }
-      // write data with no stop signal
-      i2c0_single_data_write(sensor->address, bmp280_idAddr, 0);
-      // repeat start and then read the ID
-      ID = i2c0_single_data_read(sensor->address, 0, 1);
-      i2c0_close();
     }
   sensor->ID = ID;
   return ID;
 }
 
 // reset the bmp280 with a power-on reset
-void bmp280_reset(bmp280* sensor)
+void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode)
 {
+  if (!(sensor->portOpened))
+    {
+      *errCode = ERR_PORT_NOT_OPEN;
+    }
   uint8_t resSeq[2];
   resSeq[0] = bmp280_resAddr;
 
@@ -130,16 +155,16 @@ void bmp280_reset(bmp280* sensor)
 
   if (sensor->protocol == I2C)
     {
-      if (!sensor->portOpened)
+      if (checkPortOpened(sensor, errCode))
         {
-          i2c0_open();
+          return;
         }
       else
         {
           i2c0_waitBusy();
+          i2c0_multiple_data_byte_write(sensor->address, resSeq, 2);
+          i2c0_close();
         }
-      i2c0_multiple_data_byte_write(sensor->address, resSeq, 2);
-      i2c0_close();
     }
 
   // TODO: do SPI

@@ -17,14 +17,25 @@ typedef enum {
   indoorNav,
   custom
 } bmp280_measureSettings;
-typedef enum { Sleep = 0, Forced, Normal } bmp280_operMode;
-typedef enum { UltraLow = 0, Low, Standard, UltraHigh } bmp280_samplSettings;
+// power mode of the bmp280 sensor
+typedef enum { Uninitialized = -1, Sleep, Forced, Normal } bmp280_operMode;
+
+typedef enum {
+  Uninitialized = -1,
+  UltraLow,
+  Low,
+  Standard,
+  UltraHigh
+} bmp280_samplSettings;
 // used for IIR filter, temp and pressure oversampling coefficience
-typedef enum { x0 = 0, x1, x2, x4, x8, x16 } bmp280_Coeff;
+typedef enum { Uninitialized = -1, x0, x1, x2, x4, x8, x16 } bmp280_Coeff;
 
-// use log for array indexing in oversampling
-
-// used for getting the address of the register in BMp280
+typedef enum {
+  ERR_NO_ERR,
+  ERR_PORT_NOT_OPEN,
+  ERR_SETTING_UNITIALIZED,
+  ERR_SETTING_UNRECOGNIZED
+} bmp280_errCode;
 
 typedef struct bmp280Sensor bmp280;
 
@@ -45,7 +56,7 @@ struct bmp280Sensor
   bmp280_operMode      mode;
 
   // unit is ms
-  float standbyTime;
+  float standbyTime;  // check the data sheet for list of allowed values
 };
 
 // initialize a bmp280 struct
@@ -54,18 +65,22 @@ struct bmp280Sensor
 void bmp280_init(bmp280*                sensor,
                  bmp280_measureSettings settings,
                  bmp280_comProtocol     protocol);
-void bmp280_open(bmp280* sensor); // open the communication channel on I2C/SPI bus
-void bmp280_close(bmp280* sensor); 
+
+void bmp280_open(bmp280*         sensor,
+                 bmp280_errCode* errCode);  // open the communication channel on
+                                            // I2C/SPI bus, all setting must be
+                                            // initialized
+void bmp280_close(bmp280* sensor, bmp280_errCode* errCode);
 
 // functions used for customizing the setting of the bmp280
 // calling these functions will cause a write to the actual hardware
-void bmp280_set_temp(bmp280* sensor);
-void bmp280_set_pres(bmp280* sensor);
-void bmp280_set_filter(bmp280* sensor);
-void bmp280_set_sampling(bmp280* sensor);
-void bmp280_set_mode(bmp280* sensor);
+void bmp280_set_temp(bmp280* sensor, bmp280_errCode* errCode);
+void bmp280_set_pres(bmp280* sensor, bmp280_errCode* errCode);
+void bmp280_set_filter(bmp280* sensor, bmp280_errCode* errCode);
+void bmp280_set_sampling(bmp280* sensor, bmp280_errCode* errCode);
+void bmp280_set_mode(bmp280* sensor, bmp280_errCode* errCode);
 
-uint8_t bmp280_getID(bmp280* sensor);
-void    bmp280_reset(bmp280* sensor);
+uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode);
+void    bmp280_reset(bmp280* sensor, bmp280_errCode* errCode);
 
 #endif

@@ -64,6 +64,7 @@ int main(void)
   #ifdef I2C_TEST
   bmp280 sensor280;
   bmp280_init(&sensor280, weatherStat, I2C);
+  i2c0_open();
   #endif
 
   for(;;)
@@ -79,6 +80,7 @@ int main(void)
 
     #ifdef I2C_TEST
     bmp280_getID(&sensor280);
+    i2c0_close();
     delayms(10);
     #endif
     }
