@@ -18,7 +18,7 @@ typedef enum {
   custom
 } bmp280_measureSettings;
 // power mode of the bmp280 sensor
-typedef enum { Uninitialized = -1, Sleep, Forced, Normal } bmp280_operMode;
+typedef enum { Uninitialized_mode = -1, Sleep, Forced, Normal } bmp280_operMode;
 
 typedef enum {
   Uninitialized = -1,
@@ -28,7 +28,7 @@ typedef enum {
   UltraHigh
 } bmp280_samplSettings;
 // used for IIR filter, temp and pressure oversampling coefficience
-typedef enum { Uninitialized = -1, x0, x1, x2, x4, x8, x16 } bmp280_Coeff;
+typedef enum { Uninitialized_coeff = -1, x0, x1, x2, x4, x8, x16 } bmp280_Coeff;
 
 typedef enum {
   ERR_NO_ERR,

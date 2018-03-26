@@ -47,12 +47,10 @@ uint8_t i2c0_close(void)
   // should really disable interrupt here
   i2c0_waitBusy();
 
-
-  //turn off I2C0 clock first
+  // turn off I2C0 clock first
   SYSCTL_RCGCI2C_R &= ~SYSCTL_RCGCI2C_R0;
 
-
-  //lock the port 
+  // lock the port
   GPIO_PORTB_LOCK_R = 0x4C4F434B;
   GPIO_PORTB_CR_R |= 0x0C;
   GPIO_PORTB_AFSEL_R &= ~(0x0C);
@@ -61,23 +59,21 @@ uint8_t i2c0_close(void)
 }
 
 uint8_t i2c0_single_data_read(const uint8_t slave_address,
-                              const uint8_t remain_receive,
+                              const uint8_t no_ack,
+                              const uint8_t no_stop,
                               const uint8_t repeat_start)
 {
   uint32_t i2c0_mcs_temp = 0;
   i2c0_waitBusy();
 
-  //go into receive mode
+  // go into receive mode
   I2C0_MSA_R |= I2C_MSA_RS;
 
-  //set slave address
+  // set slave address
   I2C0_MSA_R &= ~I2C_MSA_SA_M;
   I2C0_MSA_R += slave_address << I2C_MSA_SA_S;
 
   i2c0_waitBusy();
-
-
-  
 
   // option parsing
   if (repeat_start)
@@ -88,7 +84,7 @@ uint8_t i2c0_single_data_read(const uint8_t slave_address,
     {
       i2c0_mcs_temp &= ~I2C_MCS_START;
     }
-  if (remain_receive)
+  if (no_stop)
     {
       i2c0_mcs_temp &= ~I2C_MCS_STOP;
       // I2C0_MCS_R = (I2C_MCS_ACK | I2C_MCS_START | I2C_MCS_RUN) &
@@ -101,11 +97,19 @@ uint8_t i2c0_single_data_read(const uint8_t slave_address,
       // &
       //(~I2C_MCS_HS);
     }
-  i2c0_mcs_temp |= I2C_MCS_ACK | I2C_MCS_RUN;
+
+  if (no_ack)
+    {
+      i2c0_mcs_temp &= ~I2C_MCS_ACK;
+    }
+  else
+    {
+      i2c0_mcs_temp |= I2C_MCS_ACK;
+    }
+  i2c0_mcs_temp |= I2C_MCS_RUN;
   I2C0_MCS_R = i2c0_mcs_temp;
 
   i2c0_waitBusy();
-
 
   if (i2c0_error_handling())
     {
@@ -123,19 +127,17 @@ uint8_t i2c0_single_data_write(const uint8_t slave_address,
 {
   i2c0_waitBusy();
 
-
-  //go into write mode 
+  // go into write mode
   I2C0_MSA_R &= ~(I2C_MSA_RS);
-  
+
   I2C0_MSA_R = (slave_address << I2C_MSA_SA_S) & (I2C_MSA_SA_M);
 
   I2C0_MDR_R &= I2C_MDR_DATA_M;
   I2C0_MDR_R += data_byte << I2C_MDR_DATA_S;
 
-  
   // write settings
   if (no_end_stop)
-    { 
+    {
       I2C0_MCS_R = (I2C_MCS_START | I2C_MCS_RUN) & (~I2C_MCS_STOP);
     }
   else
@@ -145,9 +147,35 @@ uint8_t i2c0_single_data_write(const uint8_t slave_address,
 
   i2c0_waitBusy();
 
-
-
+  // TODO: make error code 
   i2c0_error_handling();
+  return 0;
+}
+
+// generate the stop condition
+uint8_t i2c0_stop(void)
+{
+  i2c0_waitBusy();
+  uint32_t i2c0_mcs_temp = 0;
+  i2c0_mcs_temp &= ~I2C_MCS_RUN; 
+  i2c0_mcs_temp &= ~I2C_MCS_START;
+  i2c0_mcs_temp |= I2C_MCS_STOP;
+  I2C0_MCS_R = i2c0_mcs_temp;
+  i2c0_waitBusy();
+  i2c0_error_handling();
+  return 0;
+}
+
+// repeat the transaction with the setting currently in register 
+uint8_t i2c0_keep_state(void)
+{
+  i2c0_waitBusy();
+  uint32_t i2c0_mcs_temp = 0;
+  i2c0_mcs_temp |= I2C_MCS_RUN; 
+  i2c0_mcs_temp &= ~I2C_MCS_START;
+  i2c0_mcs_temp &= ~I2C_MCS_STOP;
+  I2C0_MCS_R = i2c0_mcs_temp;
+  i2c0_waitBusy();
   return 0;
 }
 
@@ -165,7 +193,7 @@ uint8_t i2c0_multiple_data_byte_write(const uint8_t  slave_address,
 
   // go into write mode
   I2C0_MSA_R &= ~(I2C_MSA_RS);
-  
+
   // prepare the Tiva for communications by setting the R/W bit to 0
   // and write the address to the register and make first transmit
   // after first transmit remain in transmit state
@@ -215,9 +243,9 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
     }
 
   i2c0_waitBusy();
-    {
-      // wait for the bus to stop being busy
-    }
+  {
+    // wait for the bus to stop being busy
+  }
   // go into receive mode
   I2C0_MSA_R |= I2C_MSA_RS;
 
@@ -225,16 +253,15 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
   I2C0_MSA_R = (slave_address << I2C_MSA_SA_S) & (I2C_MSA_SA_M);
 
   i2c0_waitBusy();
-    {
-      // wait for the bus to stop being busy
-    }
+  {
+    // wait for the bus to stop being busy
+  }
 
   // initiate the first read
-  
+
   I2C0_MCS_R = (I2C_MCS_START | I2C_MCS_RUN | I2C_MCS_ACK) & (~I2C_MCS_STOP);
 
   i2c0_waitBusy();
-
 
   *input_buffer = (I2C0_MDR_R & I2C_MDR_DATA_M) << I2C_MDR_DATA_S;
   ++input_buffer;
@@ -288,7 +315,7 @@ uint8_t i2c0_error_handling(void)
 // TODO: add safety options like timeout
 void i2c0_waitBusy(void)
 {
-    while ((I2C0_MCS_R & I2C_MCS_BUSY))
+  while ((I2C0_MCS_R & I2C_MCS_BUSY))
     {
       // wait for the bus to stop being busy
     }

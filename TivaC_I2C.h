@@ -16,6 +16,10 @@
 uint8_t i2c0_open(void);  /*initialize I2C registers*/
 uint8_t i2c0_close(void); /*Cleanup the I2C controller*/
 
+uint8_t i2c0_stop(void);
+
+uint8_t i2c0_keep_state(void);
+
 uint8_t i2c0_multiple_data_byte_write(const uint8_t  slave_address,
                                       const uint8_t* output_buffer,
                                       const uint8_t  output_buffer_length);
@@ -24,12 +28,16 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
                                      const uint8_t input_buffer_length);
 
 uint8_t i2c0_single_data_read(const uint8_t slave_address,
-                              const uint8_t remain_receive,
+                              const uint8_t no_ack,
+                              const uint8_t no_stop,
                               const uint8_t repeat_start);
+
 uint8_t i2c0_single_data_write(const uint8_t slave_address,
                                const uint8_t data_byte,
                                const uint8_t no_end_stop);
 
 uint8_t i2c0_error_handling(void);
+
+void i2c0_waitBusy(void);
 
 #endif

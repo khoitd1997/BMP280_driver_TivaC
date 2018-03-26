@@ -3,9 +3,9 @@
 
 int checkUnitialized(bmp280* sensor, bmp280_errCode* errCode)
 {
-  if (sensor->mode == Uninitialized || sensor->tempSamp == Uninitialized ||
-      sensor->presSamp == Uninitialized || sensor->samplSet == Uninitialized ||
-      sensor->iirFilter == Uninitialized || sensor->standbyTime == -1)
+  if (sensor->mode == Uninitialized_mode || sensor->tempSamp == Uninitialized_coeff ||
+      sensor->presSamp == Uninitialized_coeff || sensor->samplSet == Uninitialized_coeff ||
+      sensor->iirFilter == Uninitialized_coeff || sensor->standbyTime == -1)
     {
       *errCode = ERR_SETTING_UNITIALIZED;
       return -1;

@@ -4,8 +4,8 @@
  */
 
 #include "BMP280_Drv.h"
-#include "TivaC_I2C.h"
 #include "BMP280_Utils.h"
+#include "TivaC_I2C.h"
 
 typedef enum {
   Status = 0,
@@ -23,9 +23,8 @@ typedef enum {
 #define BMP280_BASEADDR 0xF3
 
 // the two special addresses
-#define BMP280_RESADDR 0xE0 
-#define BMP280_IDARR 0xD0 
-
+#define BMP280_RESADDR 0xE0
+#define BMP280_IDARR 0xD0
 
 // initialize the bmp280 with predefined value in the datasheet
 void bmp280_init(bmp280*                sensor,
@@ -45,6 +44,7 @@ void bmp280_init(bmp280*                sensor,
         sensor->iirFilter   = x4;
         sensor->standbyTime = 62.5;
         break;
+
       case handDynamic:
         sensor->mode        = Normal;
         sensor->tempSamp    = x1;
@@ -53,15 +53,16 @@ void bmp280_init(bmp280*                sensor,
         sensor->iirFilter   = x16;
         sensor->standbyTime = 0.5;
         break;
+
       case weatherStat:
-        sensor->mode      = Forced;
-        sensor->tempSamp  = x1;
-        sensor->presSamp  = x1;
-        sensor->samplSet  = UltraLow;
-        sensor->iirFilter = x0;
-        // 0.05 is placeholder for now
-        sensor->standbyTime = 0.05;
+        sensor->mode        = Forced;
+        sensor->tempSamp    = x1;
+        sensor->presSamp    = x1;
+        sensor->samplSet    = UltraLow;
+        sensor->iirFilter   = x0;
+        sensor->standbyTime = 0.5;  // 0.05 is placeholder for now
         break;
+
       case elevDetec:
         sensor->mode        = Normal;
         sensor->tempSamp    = x1;
@@ -70,6 +71,7 @@ void bmp280_init(bmp280*                sensor,
         sensor->iirFilter   = x4;
         sensor->standbyTime = 125;
         break;
+
       case dropDetec:
         sensor->mode        = Normal;
         sensor->tempSamp    = x1;
@@ -78,6 +80,7 @@ void bmp280_init(bmp280*                sensor,
         sensor->iirFilter   = x0;
         sensor->standbyTime = 0.5;
         break;
+
       case indoorNav:
         sensor->mode        = Normal;
         sensor->tempSamp    = x2;
@@ -86,14 +89,15 @@ void bmp280_init(bmp280*                sensor,
         sensor->iirFilter   = x16;
         sensor->standbyTime = 0.5;
         break;
+
       case custom:
-        sensor->mode        = Uninitialized;
-        sensor->tempSamp    = Uninitialized;
-        sensor->presSamp    = Uninitialized;
-        sensor->samplSet    = Uninitialized;
-        sensor->iirFilter   = Uninitialized;
+        sensor->mode        = Uninitialized_mode;
+        sensor->tempSamp    = Uninitialized_coeff;
+        sensor->presSamp    = Uninitialized_coeff;
+        sensor->samplSet    = Uninitialized_coeff;
+        sensor->iirFilter   = Uninitialized_coeff;
         sensor->standbyTime = -1;
-        // do nothing and let user does the config themselves
+
       default:
         for (;;)
           {
@@ -104,30 +108,34 @@ void bmp280_init(bmp280*                sensor,
 
 void bmp280_open(bmp280* sensor, bmp280_errCode* errCode)
 {
-   
+  if (checkUnitialized(sensor, errCode))
+    {
+      return;
+    }
   if (sensor->protocol == I2C)
     {
       // preparing data byte for writing to bmp280 register
-      uint8_t i2cWriteBytes[4]; // 2 for register addresses and 2 for the setting byte
-      
+      uint8_t i2cWriteBytes[4];  // 2 for register addresses and 2 for the
+                                 // setting byte
+
       // handle control byte first
-      i2cWriteBytes[0]= BMP280_BASEADDR + Ctrl_meas;
-      i2cWriteBytes[1]= createCtrlByte(sensor, errCode);
+      i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
+      i2cWriteBytes[1] = createCtrlByte(sensor, errCode);
 
-      // handle config byte 
-      i2cWriteBytes[2]= BMP280_BASEADDR + Config;
-      i2cWriteBytes[3]= createConfigByte(sensor, errCode);
+      // handle config byte
+      i2cWriteBytes[2] = BMP280_BASEADDR + Config;
+      i2cWriteBytes[3] = createConfigByte(sensor, errCode);
 
-      if(*errCode!=ERR_NO_ERR)
-      {
-        return; 
-      }
+      if (*errCode != ERR_NO_ERR)
+        {
+          return;
+        }
       i2c0_open();
       i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 4);
     }
 
-    *errCode=ERR_NO_ERR;
-    sensor->portOpened=1;
+  *errCode           = ERR_NO_ERR;
+  sensor->portOpened = 1;
 }
 
 // get manufacturer ID of the bmp280
@@ -138,15 +146,19 @@ uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode)
     {
       if (checkPortOpened(sensor, errCode))
         {
-          return;
+          return 1;
         }
       else
         {
           i2c0_waitBusy();
           // write data with no stop signal
-          i2c0_single_data_write(sensor->address, BMP280_RESADDR, 0);
+          i2c0_single_data_write(sensor->address, BMP280_IDARR, 1);
+          i2c0_waitBusy();
           // repeat start and then read the ID
-          ID = i2c0_single_data_read(sensor->address, 0, 1);
+          ID = i2c0_single_data_read(sensor->address, 1, 1, 1);
+          i2c0_waitBusy();
+          i2c0_stop();
+          i2c0_waitBusy();
         }
     }
   sensor->ID = ID;
@@ -156,9 +168,9 @@ uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode)
 // reset the bmp280 with a power-on reset
 void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode)
 {
-  if (!(sensor->portOpened))
+  if (checkPortOpened(sensor, errCode))
     {
-      *errCode = ERR_PORT_NOT_OPEN;
+      return;
     }
   uint8_t resSeq[2];
   resSeq[0] = BMP280_RESADDR;
@@ -168,31 +180,29 @@ void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode)
 
   if (sensor->protocol == I2C)
     {
-      if (checkPortOpened(sensor, errCode))
-        {
-          return;
-        }
-      else
-        {
-          i2c0_waitBusy();
-          i2c0_multiple_data_byte_write(sensor->address, resSeq, 2);
-          i2c0_close();
-        }
+      i2c0_waitBusy();
+      i2c0_multiple_data_byte_write(sensor->address, resSeq, 2);
+      i2c0_close();
     }
-
   // TODO: do SPI
 }
 
-void bmp280_set_temp(bmp280* sensor, bmp280_Coeff tempSetting, bmp280_errCode* errCode)
+void bmp280_set_temp(bmp280*         sensor,
+                     bmp280_Coeff    tempSetting,
+                     bmp280_errCode* errCode)
 {
   uint8_t i2cWriteBytes[2];
-  i2cWriteBytes[0]= BMP280_BASEADDR + Ctrl_meas;
-  sensor->tempSamp=tempSetting; 
-  i2cWriteBytes[1]= createCtrlByte(sensor, errCode);
-  if(*errCode!=ERR_NO_ERR)
-  {
-    return;
-  }
+  i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
+  sensor->tempSamp = tempSetting;
+  if (checkUnitialized(sensor, errCode))
+    {
+      return;
+    }
+  i2cWriteBytes[1] = createCtrlByte(sensor, errCode);
+  if (*errCode != ERR_NO_ERR)
+    {
+      return;
+    }
   i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 2);
-  *errCode=ERR_NO_ERR;
+  *errCode = ERR_NO_ERR;
 }
