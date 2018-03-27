@@ -30,8 +30,15 @@ typedef enum {
 // initialize the bmp280 with predefined value in the datasheet
 void bmp280_init(bmp280*                sensor,
                  bmp280_measureSettings settings,
-                 bmp280_comProtocol     protocol)
+                 bmp280_comProtocol     protocol,
+                 bmp280_errCode*        errCode)
 {
+  if (sensor == NULL)
+    {
+      *errCode = ERR_SENSOR_UNITIALIZED;
+      return;
+    }
+    
   sensor->portNum  = 0;         // 0 for now
   sensor->address  = 0x77;      // value pretty much hardcoded due to hardware
   sensor->protocol = protocol;  // settings obtained in datasheet pg 19
@@ -105,14 +112,13 @@ void bmp280_init(bmp280*                sensor,
             // stop the mcu if none of these options for now
           }
     }
+  *errCode = ERR_NO_ERR;
 }
 
 void bmp280_open(bmp280* sensor, bmp280_errCode* errCode)
 {
-  if (bmp280_checkUnitialized(sensor, errCode))
-    {
-      return;
-    }
+  if (bmp280_check_setting(sensor, errCode)) return;
+
   if (sensor->protocol == I2C)
     {
       // preparing data byte for writing to bmp280 register
@@ -140,10 +146,7 @@ void bmp280_open(bmp280* sensor, bmp280_errCode* errCode)
 
 uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode)
 {
-  if (bmp280_portPrep(sensor, errCode))
-    {
-      return 1;
-    }
+  if (bmp280_portPrep(sensor, errCode)) return 1;
 
   uint8_t ID;
   if (sensor->protocol == I2C)
@@ -164,14 +167,11 @@ uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode)
 
 void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode)
 {
-  if (bmp280_portPrep(sensor, errCode))
-  {
-    return;
-  }
+  if (bmp280_portPrep(sensor, errCode)) return;
 
   uint8_t resSeq[2];
   resSeq[0] = BMP280_RESADDR;
-  resSeq[1] = 0xB6; // obtain from page 24 datasheet
+  resSeq[1] = 0xB6;  // obtain from page 24 datasheet
 
   if (sensor->protocol == I2C)
     {
@@ -186,23 +186,11 @@ void bmp280_set_temp(bmp280*         sensor,
                      bmp280_Coeff    tempSetting,
                      bmp280_errCode* errCode)
 {
-  if (bmp280_portPrep(sensor, errCode))
+  if (sensor == NULL)
     {
+      errCode = ERR_SENSOR_UNITIALIZED;
       return;
     }
-
-  uint8_t i2cWriteBytes[2];
-  i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
   sensor->tempSamp = tempSetting;
-  if (bmp280_checkUnitialized(sensor, errCode))
-    {
-      return;
-    }
-  i2cWriteBytes[1] = bmp280_createCtrlByte(sensor, errCode);
-  if (*errCode != ERR_NO_ERR)
-    {
-      return;
-    }
-  i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 2);
-  *errCode = ERR_NO_ERR;
+  *errCode         = ERR_NO_ERR;
 }

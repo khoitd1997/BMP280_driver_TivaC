@@ -1,7 +1,8 @@
+#include <stdio.h>
 #include "BMP280_Utils.h"
 #include "BMP280_Drv.h"
 
-int bmp280_checkUnitialized(bmp280* sensor, bmp280_errCode* errCode)
+int bmp280_check_setting(bmp280* sensor, bmp280_errCode* errCode)
 {
   if (sensor->mode == Uninitialized_mode || sensor->tempSamp == Uninitialized_coeff ||
       sensor->presSamp == Uninitialized_coeff || sensor->samplSet == Uninitialized_coeff ||
@@ -213,9 +214,14 @@ uint8_t bmp280_createConfigByte(bmp280* sensor,
 
 int bmp280_portPrep(bmp280* sensor, bmp280_errCode* errCode)
 {
-
+  if(sensor==NULL)
+  {
+    *errCode=ERR_SENSOR_UNITIALIZED;
+    return -1;
+  }
   if(!bmp280_checkPortOpened(sensor, errCode))
   {
+    *errCode=ERR_PORT_NOT_OPEN;
     return -1;
   }
   else

@@ -1,3 +1,7 @@
+/**
+ * Main API file for the driver, settings and register names are mostly taken
+ * from the BMP280 datasheet
+ */
 #ifndef _BMP280_DRV_
 #define _BMP280_DRV_
 
@@ -36,12 +40,13 @@ typedef enum {
   ERR_NO_ERR,  // report that there is no error
   ERR_PORT_NOT_OPEN,
   ERR_SETTING_UNITIALIZED,
-  ERR_SETTING_UNRECOGNIZED
+  ERR_SETTING_UNRECOGNIZED,
+  ERR_SENSOR_UNITIALIZED  // indicate that bmp280 struct is not valid
 } bmp280_errCode;
 
 typedef struct bmp280Sensor bmp280;
 
-// represent one bmp280 sensor along with its settings
+/*data structure of a bmp280*/
 struct bmp280Sensor
 {
   // protocol information
@@ -61,13 +66,16 @@ struct bmp280Sensor
                       // values
 };
 
+/*functions used for beginning or wrapping up communications*/
 // initialized the bmp280 struct with either predefined settings or customized
+// calling this functions will not result in a write to the hardware
 void bmp280_init(bmp280*                sensor,
                  bmp280_measureSettings settings,
-                 bmp280_comProtocol     protocol);
+                 bmp280_comProtocol     protocol,
+                 bmp280_errCode*        errCode);
 
 // open the communication channel on SPI/I2C, all settings must have been
-// initialized
+// initialized, will write settings to hardware
 void bmp280_open(bmp280* sensor, bmp280_errCode* errCode);
 
 // clean up after communication
@@ -75,7 +83,7 @@ void bmp280_close(bmp280* sensor, bmp280_errCode* errCode);
 
 /*functions used for customizing the setting of the bmp280 like
 temperature, pressure, general oversampling and power mode
-calling these functions will cause a write to the actual hardware*/
+calling these functions will not a write to the actual hardware*/
 void bmp280_set_temp(bmp280*         sensor,
                      bmp280_Coeff    tempSetting,
                      bmp280_errCode* errCode);
@@ -91,6 +99,17 @@ void bmp280_set_sampling(bmp280*              sensor,
 void bmp280_set_mode(bmp280*         sensor,
                      bmp280_operMode powerMode,
                      bmp280_errCode* errCode);
+// set standby time between read, will be checked against predefined value
+void bmp280_set_standby(bmp280*         sensor,
+                        float           standbyTime,
+                        bmp280_errCode* errCode);
+
+/*write settings to the actual hardware, settings must have already been
+intialized*/
+void bmp280_writeMeasSetting(
+    bmp280*, bmp280_errCode* errCode);  // write to the measure register
+void bmp280_writeConfSetting(
+    bmp280*, bmp280_errCode* errCode);  // write to the config register
 
 /*functions used for obtaining data or controlling the bmp280*/
 uint8_t  bmp280_getID(bmp280* sensor, bmp280_errCode* errCode);

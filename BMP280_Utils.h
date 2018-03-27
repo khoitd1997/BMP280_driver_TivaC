@@ -14,7 +14,7 @@ uint8_t bmp280_createConfigByte(bmp280* sensor, bmp280_errCode* errCode);
 
 /* error checking */
 // check for unitialized value in sensor settings
-int bmp280_checkUnitialized(bmp280* sensor, bmp280_errCode* errC);
+int bmp280_check_setting(bmp280* sensor, bmp280_errCode* errC);
 // check if port is opened
 int bmp280_checkPortOpened(bmp280* sensor, bmp280_errCode* errCode);
 
