@@ -1,7 +1,7 @@
 #include "BMP280_Utils.h"
 #include "BMP280_Drv.h"
 
-int checkUnitialized(bmp280* sensor, bmp280_errCode* errCode)
+int bmp280_checkUnitialized(bmp280* sensor, bmp280_errCode* errCode)
 {
   if (sensor->mode == Uninitialized_mode || sensor->tempSamp == Uninitialized_coeff ||
       sensor->presSamp == Uninitialized_coeff || sensor->samplSet == Uninitialized_coeff ||
@@ -17,22 +17,24 @@ int checkUnitialized(bmp280* sensor, bmp280_errCode* errCode)
     }
 }
 
-// TODO: use register to check for open port instead 
-int checkPortOpened(bmp280* sensor, bmp280_errCode* errCode)
+int bmp280_checkPortOpened(bmp280* sensor, bmp280_errCode* errCode)
 {
-  if (!(sensor->portOpened))
+  if(sensor->protocol==I2C)
+  {
+  if (!i2c0_check_master_enabled())
     {
       *errCode = ERR_PORT_NOT_OPEN;
-      return -1;
+      return 0;
     }
   else
     {
       *errCode = ERR_NO_ERR;
-      return 0;
+      return 1;
     }
+  }
 }
 
-uint8_t createCtrlByte(bmp280* sensor,
+uint8_t bmp280_createCtrlByte(bmp280* sensor,
                        bmp280_errCode* errCode)
 {
   // start with all 1 and zero out the needed bits
@@ -125,7 +127,7 @@ uint8_t createCtrlByte(bmp280* sensor,
   return tempByte;
 }
 
-uint8_t createConfigByte(bmp280* sensor,
+uint8_t bmp280_createConfigByte(bmp280* sensor,
                          bmp280_errCode*    errCode)
 {
   // start with all 1 and zero out the needed bits
@@ -207,4 +209,21 @@ uint8_t createConfigByte(bmp280* sensor,
 
   *errCode = ERR_NO_ERR;
   return tempByte;
+}
+
+int bmp280_portPrep(bmp280* sensor, bmp280_errCode* errCode)
+{
+
+  if(!bmp280_checkPortOpened(sensor, errCode))
+  {
+    return -1;
+  }
+  else
+  {
+    if(sensor->protocol==I2C)
+    {
+    i2c0_waitBusy();
+    }
+    return 0;
+  }
 }

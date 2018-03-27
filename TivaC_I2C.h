@@ -38,6 +38,8 @@ uint8_t i2c0_single_data_write(const uint8_t slave_address,
 
 uint8_t i2c0_error_handling(void);
 
+uint8_t i2c0_check_master_enabled(void);
+
 void i2c0_waitBusy(void);
 
 #endif

@@ -108,7 +108,7 @@ void bmp280_init(bmp280*                sensor,
 
 void bmp280_open(bmp280* sensor, bmp280_errCode* errCode)
 {
-  if (checkUnitialized(sensor, errCode))
+  if (bmp280_checkUnitialized(sensor, errCode))
     {
       return;
     }
@@ -120,11 +120,11 @@ void bmp280_open(bmp280* sensor, bmp280_errCode* errCode)
 
       // handle control byte first
       i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
-      i2cWriteBytes[1] = createCtrlByte(sensor, errCode);
+      i2cWriteBytes[1] = bmp280_createCtrlByte(sensor, errCode);
 
       // handle config byte
       i2cWriteBytes[2] = BMP280_BASEADDR + Config;
-      i2cWriteBytes[3] = createConfigByte(sensor, errCode);
+      i2cWriteBytes[3] = bmp280_createConfigByte(sensor, errCode);
 
       if (*errCode != ERR_NO_ERR)
         {
@@ -134,32 +134,29 @@ void bmp280_open(bmp280* sensor, bmp280_errCode* errCode)
       i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 4);
     }
 
-  *errCode           = ERR_NO_ERR;
-  sensor->portOpened = 1;
+  *errCode = ERR_NO_ERR;
 }
 
 // get manufacturer ID of the bmp280
 uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode)
 {
+  if (bmp280_portPrep(sensor, errCode))
+    {
+      return 1;
+    }
+
   uint8_t ID;
   if (sensor->protocol == I2C)
     {
-      if (checkPortOpened(sensor, errCode))
-        {
-          return 1;
-        }
-      else
-        {
-          i2c0_waitBusy();
-          // write data with no stop signal
-          i2c0_single_data_write(sensor->address, BMP280_IDARR, 1);
-          i2c0_waitBusy();
-          // repeat start and then read the ID
-          ID = i2c0_single_data_read(sensor->address, 1, 1, 1);
-          i2c0_waitBusy();
-          i2c0_stop();
-          i2c0_waitBusy();
-        }
+      i2c0_waitBusy();
+      // write data with no stop signal
+      i2c0_single_data_write(sensor->address, BMP280_IDARR, 1);
+      i2c0_waitBusy();
+      // repeat start and then read the ID
+      ID = i2c0_single_data_read(sensor->address, 1, 1, 1);
+      i2c0_waitBusy();
+      i2c0_stop();
+      i2c0_waitBusy();
     }
   sensor->ID = ID;
   return ID;
@@ -168,15 +165,14 @@ uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode)
 // reset the bmp280 with a power-on reset
 void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode)
 {
-  if (checkPortOpened(sensor, errCode))
-    {
-      return;
-    }
+  if (bmp280_portPrep(sensor, errCode))
+  {
+    return;
+  }
+
   uint8_t resSeq[2];
   resSeq[0] = BMP280_RESADDR;
-
-  // obtain from page 24 datasheet
-  resSeq[1] = 0xB6;
+  resSeq[1] = 0xB6; // obtain from page 24 datasheet
 
   if (sensor->protocol == I2C)
     {
@@ -191,14 +187,19 @@ void bmp280_set_temp(bmp280*         sensor,
                      bmp280_Coeff    tempSetting,
                      bmp280_errCode* errCode)
 {
-  uint8_t i2cWriteBytes[2];
-  i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
-  sensor->tempSamp = tempSetting;
-  if (checkUnitialized(sensor, errCode))
+  if (bmp280_portPrep(sensor, errCode))
     {
       return;
     }
-  i2cWriteBytes[1] = createCtrlByte(sensor, errCode);
+
+  uint8_t i2cWriteBytes[2];
+  i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
+  sensor->tempSamp = tempSetting;
+  if (bmp280_checkUnitialized(sensor, errCode))
+    {
+      return;
+    }
+  i2cWriteBytes[1] = bmp280_createCtrlByte(sensor, errCode);
   if (*errCode != ERR_NO_ERR)
     {
       return;

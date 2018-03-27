@@ -84,16 +84,15 @@ int main(void)
 
 #ifdef I2C_TEST
       i2c0_open();
-      sensor280.portOpened = 1;  // bypass initialization
 
       i2c0_stop();
 
       redled_on();
       delayms(100);
-      bmp280_reset(&sensor280, &errCode);
+      bmp280_set_temp(&sensor280, x4, &errCode);
       redled_off();
-
       i2c0_close();
+      delayms(100);
 
 #endif
     }

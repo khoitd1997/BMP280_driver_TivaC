@@ -111,14 +111,7 @@ uint8_t i2c0_single_data_read(const uint8_t slave_address,
 
   i2c0_waitBusy();
 
-  if (i2c0_error_handling())
-    {
-      return 1;
-    }
-  else
-    {
-      return ((I2C0_MDR_R) & (I2C_MDR_DATA_M)) >> I2C_MDR_DATA_S;
-    }
+  return i2c0_error_handling() ? 1 : ((I2C0_MDR_R) & (I2C_MDR_DATA_M)) >> I2C_MDR_DATA_S;
 }
 
 uint8_t i2c0_single_data_write(const uint8_t slave_address,
@@ -309,6 +302,11 @@ uint8_t i2c0_error_handling(void)
     {
       return 0;
     }
+}
+
+uint8_t i2c0_check_master_enabled(void)
+{
+  return (I2C0_MCR_R & I2C_MCR_MFE);
 }
 
 // will wait until the bus stops being busy

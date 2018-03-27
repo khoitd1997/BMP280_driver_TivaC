@@ -42,7 +42,6 @@ typedef struct bmp280Sensor bmp280;
 // represent one bmp280 sensor along with its settings
 struct bmp280Sensor
 {
-  int     portOpened;  // status flag to see if the I2C/SPI port is open
   uint8_t ID;
   uint8_t address;
   bmp280_comProtocol protocol;
