@@ -14,23 +14,23 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
- 
+
+#include "BMP280_Drv.h"
 #include "TivaC_GEN.h"
 #include "TivaC_I2C.h"
-#include "BMP280_Drv.h"
 
 #define TRUE 1
 #define FALSE 0
 
-//testing macro area
+// testing macro area
 
-//basic test
+// basic test
 #define OUTPUT_BUFFER_LENGTH 4
 #define INPUT_BUFFER_LENGTH 4
 #define BMP280_CONFIG_ADDRESS 0xF4
 #define BMP280_ADDR 0x77
 
-//i2c test
+// i2c test
 #define I2C_TEST
 
 // interrupt void interruptHandler(void);
@@ -38,9 +38,8 @@ int main(void)
 {
   pll_enable(80);
 
-  blueled_init();
+  redled_init();
 
-  #ifdef BASIC_TEST
   uint8_t bmp280_obuffer[OUTPUT_BUFFER_LENGTH];
   uint8_t bmp280_ibuffer[INPUT_BUFFER_LENGTH];
 
@@ -48,45 +47,55 @@ int main(void)
   bmp280_obuffer[1] = 0x01;
   bmp280_obuffer[2] = 0xF5;
   bmp280_obuffer[3] = 0x88;
-  // for (int output_index = 0; output_index < OUTPUT_BUFFER_LENGTH;
-  //      ++output_index)
-  //   {
-  //     if(output_index%2){
-  //       output[output_index]=
-  //     }
-  //     output[output_index] = 246 + output_index;
-  //   }
-  // i2c0_open();
-  // i2c0_multiple_data_byte_write(BMP280_ADDR, bmp280_obuffer,
-  // OUTPUT_BUFFER_LENGTH);
-  #endif
 
-  #ifdef I2C_TEST
-  bmp280 sensor280;
+#ifdef BASIC_TEST
+
+// for (int output_index = 0; output_index < OUTPUT_BUFFER_LENGTH;
+//      ++output_index)
+//   {
+//     if(output_index%2){
+//       output[output_index]=
+//     }
+//     output[output_index] = 246 + output_index;
+//   }
+// i2c0_open();
+// i2c0_multiple_data_byte_write(BMP280_ADDR, bmp280_obuffer,
+// OUTPUT_BUFFER_LENGTH);
+#endif
+
+#ifdef I2C_TEST
+  bmp280         sensor280;
   bmp280_errCode errCode;
   bmp280_init(&sensor280, weatherStat, I2C);
   i2c0_open();
-  #endif
+#endif
 
-  for(;;)
+  for (;;)
     {
-     #ifdef BASIC_TEST 
-     // i2c0_single_data_write(119, 246);
-     i2c0_open();
-     i2c0_single_data_write(BMP280_ADDR, 0xF6, REMAIN_TRANSMIT);
-     i2c0_multiple_data_byte_read(BMP280_ADDR, bmp280_ibuffer, INPUT_BUFFER_LENGTH);
-     delayms(10);
-    i2c0_close();
-    #endif 
+#ifdef BASIC_TEST
+      // i2c0_single_data_write(119, 246);
+      i2c0_open();
+      i2c0_single_data_write(BMP280_ADDR, 0xF6, REMAIN_TRANSMIT);
+      i2c0_multiple_data_byte_read(
+          BMP280_ADDR, bmp280_ibuffer, INPUT_BUFFER_LENGTH);
+      // delayms(10);
+      // i2c0_close();
+#endif
 
-    #ifdef I2C_TEST
-    i2c0_open();
-    i2c0_stop();
-    sensor280.portOpened=1; // bypass initialization 
-    bmp280_getID(&sensor280, &errCode);
-    i2c0_close();
-    delayms(10);
-    #endif
+#ifdef I2C_TEST
+      i2c0_open();
+      sensor280.portOpened = 1;  // bypass initialization
+
+      i2c0_stop();
+
+      redled_on();
+      delayms(100);
+      bmp280_reset(&sensor280, &errCode);
+      redled_off();
+
+      i2c0_close();
+
+#endif
     }
 }
 

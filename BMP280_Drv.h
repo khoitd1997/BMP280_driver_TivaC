@@ -31,7 +31,7 @@ typedef enum {
 typedef enum { Uninitialized_coeff = -1, x0, x1, x2, x4, x8, x16 } bmp280_Coeff;
 
 typedef enum {
-  ERR_NO_ERR,
+  ERR_NO_ERR, // report that there is no error 
   ERR_PORT_NOT_OPEN,
   ERR_SETTING_UNITIALIZED,
   ERR_SETTING_UNRECOGNIZED
@@ -74,13 +74,19 @@ void bmp280_close(bmp280* sensor, bmp280_errCode* errCode);
 
 // functions used for customizing the setting of the bmp280
 // calling these functions will cause a write to the actual hardware
+
+// set temperature oversampling
 void bmp280_set_temp(bmp280* sensor, bmp280_Coeff tempSetting, bmp280_errCode* errCode);
+
+// set pressure oversampling
 void bmp280_set_pres(bmp280* sensor, bmp280_Coeff presSetting, bmp280_errCode* errCode);
 void bmp280_set_filter(bmp280* sensor, bmp280_Coeff iirSetting, bmp280_errCode* errCode);
 void bmp280_set_sampling(bmp280* sensor, bmp280_samplSettings samplingSetting, bmp280_errCode* errCode);
 void bmp280_set_mode(bmp280* sensor, bmp280_operMode powerMode, bmp280_errCode* errCode);
 
 uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode);
+uint8_t bmp280_getTemp(bmp280* sensor, bmp280_errCode* errCode);
+uint32_t bmp280_getPres(bmp280* sensor, bmp280_errCode* errCode);
 void    bmp280_reset(bmp280* sensor, bmp280_errCode* errCode);
 
 #endif

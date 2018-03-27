@@ -147,7 +147,7 @@ uint8_t i2c0_single_data_write(const uint8_t slave_address,
 
   i2c0_waitBusy();
 
-  // TODO: make error code 
+  // TODO: make error code
   i2c0_error_handling();
   return 0;
 }
@@ -157,7 +157,7 @@ uint8_t i2c0_stop(void)
 {
   i2c0_waitBusy();
   uint32_t i2c0_mcs_temp = 0;
-  i2c0_mcs_temp &= ~I2C_MCS_RUN; 
+  i2c0_mcs_temp &= ~I2C_MCS_RUN;
   i2c0_mcs_temp &= ~I2C_MCS_START;
   i2c0_mcs_temp |= I2C_MCS_STOP;
   I2C0_MCS_R = i2c0_mcs_temp;
@@ -166,12 +166,12 @@ uint8_t i2c0_stop(void)
   return 0;
 }
 
-// repeat the transaction with the setting currently in register 
+// repeat the transaction with the setting currently in register
 uint8_t i2c0_keep_state(void)
 {
   i2c0_waitBusy();
   uint32_t i2c0_mcs_temp = 0;
-  i2c0_mcs_temp |= I2C_MCS_RUN; 
+  i2c0_mcs_temp |= I2C_MCS_RUN;
   i2c0_mcs_temp &= ~I2C_MCS_START;
   i2c0_mcs_temp &= ~I2C_MCS_STOP;
   I2C0_MCS_R = i2c0_mcs_temp;
@@ -206,14 +206,14 @@ uint8_t i2c0_multiple_data_byte_write(const uint8_t  slave_address,
 
   i2c0_error_handling();
 
-  for (int buffer_index = 1; buffer_index < output_buffer_length - 1;
+  for (int buffer_index = 1; buffer_index < output_buffer_length -1;
        ++buffer_index)
     {
       // transmit until the element before the last one
       I2C0_MDR_R |= I2C_MDR_DATA_M & ((*output_buffer++) << I2C_MDR_DATA_S);
       I2C0_MSA_R &= ~(I2C_MSA_RS);
       I2C0_MCS_R =
-          ((~I2C_MCS_START) & (~I2C_MCS_STOP) & (~I2C_MCS_HS)) & I2C_MCS_RUN;
+          ((~I2C_MCS_START) & (~I2C_MCS_STOP) & (~I2C_MCS_HS)) | I2C_MCS_RUN;
 
       i2c0_waitBusy();
 
@@ -224,7 +224,7 @@ uint8_t i2c0_multiple_data_byte_write(const uint8_t  slave_address,
   I2C0_MDR_R |= I2C_MDR_DATA_M & ((*output_buffer) << I2C_MDR_DATA_S);
   I2C0_MSA_R &= ~(I2C_MSA_RS);
   I2C0_MCS_R =
-      ((~I2C_MCS_START) & (~I2C_MCS_HS)) & ((I2C_MCS_STOP) | (I2C_MCS_RUN));
+      ((~I2C_MCS_START) & (~I2C_MCS_HS)) | ((I2C_MCS_STOP) | (I2C_MCS_RUN));
 
   i2c0_waitBusy();
 
@@ -267,7 +267,7 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
   ++input_buffer;
 
   // read up till the data before the last one
-  for (int buffer_index = 1; buffer_index < input_buffer_length - 1;
+  for (int buffer_index = 1; buffer_index < input_buffer_length -1;
        ++buffer_index, ++input_buffer)
     {
       I2C0_MSA_R |= I2C_MSA_RS;

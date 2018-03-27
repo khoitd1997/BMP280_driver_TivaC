@@ -181,8 +181,8 @@ void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode)
   if (sensor->protocol == I2C)
     {
       i2c0_waitBusy();
+      i2c0_stop();
       i2c0_multiple_data_byte_write(sensor->address, resSeq, 2);
-      i2c0_close();
     }
   // TODO: do SPI
 }

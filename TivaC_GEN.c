@@ -35,14 +35,15 @@ uint8_t pll_enable(uint8_t target_frequency)
   return 0;
 }
 
+// TODO: check the delayms function for correctness 
 uint8_t delayms(uint32_t milliseconds)
 {
   // setup systick assuming 80MHz system clock frequency
-
   NVIC_ST_CTRL_R &= ~NVIC_ST_CTRL_ENABLE;
   NVIC_ST_RELOAD_R &= ~NVIC_ST_RELOAD_M;
   NVIC_ST_RELOAD_R += (80000 - 1) << NVIC_ST_RELOAD_S;
   NVIC_ST_CTRL_R |= NVIC_ST_CTRL_CLK_SRC;
+  NVIC_ST_CURRENT_R=0; // clear the current reg to preepare
   NVIC_ST_CTRL_R |= NVIC_ST_CTRL_ENABLE;
   while (milliseconds-- > 0)
     {
@@ -50,6 +51,7 @@ uint8_t delayms(uint32_t milliseconds)
         {
           // wait for the count bit to hit 0
         }
+
     }
   return 0;
 }
