@@ -7,6 +7,7 @@
 #include "BMP280_Utils.h"
 #include "TivaC_I2C.h"
 
+// offset from BMP280 base register
 typedef enum {
   Status = 0,
   Ctrl_meas,
@@ -36,7 +37,7 @@ void bmp280_init(bmp280*                sensor,
   sensor->protocol = protocol;  // settings obtained in datasheet pg 19
   switch (settings)
     {
-      case handLow:
+      case HandLow:
         sensor->mode        = Normal;
         sensor->tempSamp    = x2;
         sensor->presSamp    = x16;
@@ -45,7 +46,7 @@ void bmp280_init(bmp280*                sensor,
         sensor->standbyTime = 62.5;
         break;
 
-      case handDynamic:
+      case HandDynamic:
         sensor->mode        = Normal;
         sensor->tempSamp    = x1;
         sensor->presSamp    = x4;
@@ -54,7 +55,7 @@ void bmp280_init(bmp280*                sensor,
         sensor->standbyTime = 0.5;
         break;
 
-      case weatherStat:
+      case WeatherStat:
         sensor->mode        = Forced;
         sensor->tempSamp    = x1;
         sensor->presSamp    = x1;
@@ -63,7 +64,7 @@ void bmp280_init(bmp280*                sensor,
         sensor->standbyTime = 0.5;  // 0.05 is placeholder for now
         break;
 
-      case elevDetec:
+      case ElevDetec:
         sensor->mode        = Normal;
         sensor->tempSamp    = x1;
         sensor->presSamp    = x4;
@@ -72,7 +73,7 @@ void bmp280_init(bmp280*                sensor,
         sensor->standbyTime = 125;
         break;
 
-      case dropDetec:
+      case DropDetec:
         sensor->mode        = Normal;
         sensor->tempSamp    = x1;
         sensor->presSamp    = x2;
@@ -81,7 +82,7 @@ void bmp280_init(bmp280*                sensor,
         sensor->standbyTime = 0.5;
         break;
 
-      case indoorNav:
+      case IndoorNav:
         sensor->mode        = Normal;
         sensor->tempSamp    = x2;
         sensor->presSamp    = x16;
@@ -90,7 +91,7 @@ void bmp280_init(bmp280*                sensor,
         sensor->standbyTime = 0.5;
         break;
 
-      case custom:
+      case Custom:
         sensor->mode        = Uninitialized_mode;
         sensor->tempSamp    = Uninitialized_coeff;
         sensor->presSamp    = Uninitialized_coeff;
@@ -137,7 +138,6 @@ void bmp280_open(bmp280* sensor, bmp280_errCode* errCode)
   *errCode = ERR_NO_ERR;
 }
 
-// get manufacturer ID of the bmp280
 uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode)
 {
   if (bmp280_portPrep(sensor, errCode))
@@ -162,7 +162,6 @@ uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode)
   return ID;
 }
 
-// reset the bmp280 with a power-on reset
 void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode)
 {
   if (bmp280_portPrep(sensor, errCode))

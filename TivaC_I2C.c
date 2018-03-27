@@ -87,15 +87,10 @@ uint8_t i2c0_single_data_read(const uint8_t slave_address,
   if (no_stop)
     {
       i2c0_mcs_temp &= ~I2C_MCS_STOP;
-      // I2C0_MCS_R = (I2C_MCS_ACK | I2C_MCS_START | I2C_MCS_RUN) &
-      //      ((~I2C_MCS_STOP) & (~I2C_MCS_HS));
     }
   else
     {
       i2c0_mcs_temp |= I2C_MCS_STOP;
-      // I2C0_MCS_R = (I2C_MCS_ACK | I2C_MCS_STOP | I2C_MCS_START | I2C_MCS_RUN)
-      // &
-      //(~I2C_MCS_HS);
     }
 
   if (no_ack)
@@ -145,7 +140,6 @@ uint8_t i2c0_single_data_write(const uint8_t slave_address,
   return 0;
 }
 
-// generate the stop condition
 uint8_t i2c0_stop(void)
 {
   i2c0_waitBusy();
@@ -159,7 +153,6 @@ uint8_t i2c0_stop(void)
   return 0;
 }
 
-// repeat the transaction with the setting currently in register
 uint8_t i2c0_keep_state(void)
 {
   i2c0_waitBusy();
@@ -225,7 +218,6 @@ uint8_t i2c0_multiple_data_byte_write(const uint8_t  slave_address,
   return 0;
 }
 
-// Receive data byte until buffer full then return
 uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
                                      uint8_t*      input_buffer,
                                      const uint8_t input_buffer_length)
@@ -236,9 +228,7 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
     }
 
   i2c0_waitBusy();
-  {
-    // wait for the bus to stop being busy
-  }
+  
   // go into receive mode
   I2C0_MSA_R |= I2C_MSA_RS;
 
@@ -246,9 +236,6 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
   I2C0_MSA_R = (slave_address << I2C_MSA_SA_S) & (I2C_MSA_SA_M);
 
   i2c0_waitBusy();
-  {
-    // wait for the bus to stop being busy
-  }
 
   // initiate the first read
 

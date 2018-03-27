@@ -3,23 +3,23 @@
 
 #include <stdint.h>
 
-// enum of all the sensors' settings
+/*enum of all the sensors' settings and error code*/
 typedef enum { SPI, I2C } bmp280_comProtocol;
 
-// measurement settings based on the datasheet of BMP280
-// may just ask user to enter the settings
+// predefined settings given by datasheet
 typedef enum {
-  handLow = 0,
-  handDynamic,
-  weatherStat,
-  elevDetec,
-  dropDetec,
-  indoorNav,
-  custom
+  HandLow = 0,
+  HandDynamic,
+  WeatherStat,
+  ElevDetec,
+  DropDetec,
+  IndoorNav,
+  Custom
 } bmp280_measureSettings;
 // power mode of the bmp280 sensor
 typedef enum { Uninitialized_mode = -1, Sleep, Forced, Normal } bmp280_operMode;
 
+// name of predefined oversampling settings
 typedef enum {
   Uninitialized = -1,
   UltraLow,
@@ -27,11 +27,13 @@ typedef enum {
   Standard,
   UltraHigh
 } bmp280_samplSettings;
+
 // used for IIR filter, temp and pressure oversampling coefficience
 typedef enum { Uninitialized_coeff = -1, x0, x1, x2, x4, x8, x16 } bmp280_Coeff;
 
+// error code for the bmp280
 typedef enum {
-  ERR_NO_ERR, // report that there is no error 
+  ERR_NO_ERR,  // report that there is no error
   ERR_PORT_NOT_OPEN,
   ERR_SETTING_UNITIALIZED,
   ERR_SETTING_UNRECOGNIZED
@@ -42,50 +44,58 @@ typedef struct bmp280Sensor bmp280;
 // represent one bmp280 sensor along with its settings
 struct bmp280Sensor
 {
-  uint8_t ID;
-  uint8_t address;
+  // protocol information
+  uint8_t            ID;
+  uint8_t            address;
   bmp280_comProtocol protocol;
-  uint8_t            portNum;  // I2C or SPI controller is it assigned to
+  uint8_t            portNum;
 
-  // temperature and pressure oversampling settings
+  // oversampling settings
   bmp280_Coeff         tempSamp;
   bmp280_Coeff         presSamp;
   bmp280_Coeff         iirFilter;
   bmp280_samplSettings samplSet;
   bmp280_operMode      mode;
 
-  // unit is ms
-  float standbyTime;  // check the data sheet for list of allowed values
+  float standbyTime;  // unit is ms, check the data sheet for list of allowed
+                      // values
 };
 
-// initialize a bmp280 struct
-// will be use in a big switch statement for initializing based on
-// both predefined option and customizable value
+// initialized the bmp280 struct with either predefined settings or customized
 void bmp280_init(bmp280*                sensor,
                  bmp280_measureSettings settings,
                  bmp280_comProtocol     protocol);
 
-void bmp280_open(bmp280*         sensor,
-                 bmp280_errCode* errCode);  // open the communication channel on
-                                            // I2C/SPI bus, all setting must be
-                                            // initialized
+// open the communication channel on SPI/I2C, all settings must have been
+// initialized
+void bmp280_open(bmp280* sensor, bmp280_errCode* errCode);
+
+// clean up after communication
 void bmp280_close(bmp280* sensor, bmp280_errCode* errCode);
 
-// functions used for customizing the setting of the bmp280
-// calling these functions will cause a write to the actual hardware
+/*functions used for customizing the setting of the bmp280 like
+temperature, pressure, general oversampling and power mode
+calling these functions will cause a write to the actual hardware*/
+void bmp280_set_temp(bmp280*         sensor,
+                     bmp280_Coeff    tempSetting,
+                     bmp280_errCode* errCode);
+void bmp280_set_pres(bmp280*         sensor,
+                     bmp280_Coeff    presSetting,
+                     bmp280_errCode* errCode);
+void bmp280_set_filter(bmp280*         sensor,
+                       bmp280_Coeff    iirSetting,
+                       bmp280_errCode* errCode);
+void bmp280_set_sampling(bmp280*              sensor,
+                         bmp280_samplSettings samplingSetting,
+                         bmp280_errCode*      errCode);
+void bmp280_set_mode(bmp280*         sensor,
+                     bmp280_operMode powerMode,
+                     bmp280_errCode* errCode);
 
-// set temperature oversampling
-void bmp280_set_temp(bmp280* sensor, bmp280_Coeff tempSetting, bmp280_errCode* errCode);
-
-// set pressure oversampling
-void bmp280_set_pres(bmp280* sensor, bmp280_Coeff presSetting, bmp280_errCode* errCode);
-void bmp280_set_filter(bmp280* sensor, bmp280_Coeff iirSetting, bmp280_errCode* errCode);
-void bmp280_set_sampling(bmp280* sensor, bmp280_samplSettings samplingSetting, bmp280_errCode* errCode);
-void bmp280_set_mode(bmp280* sensor, bmp280_operMode powerMode, bmp280_errCode* errCode);
-
-uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode);
-uint8_t bmp280_getTemp(bmp280* sensor, bmp280_errCode* errCode);
+/*functions used for obtaining data or controlling the bmp280*/
+uint8_t  bmp280_getID(bmp280* sensor, bmp280_errCode* errCode);
+uint8_t  bmp280_getTemp(bmp280* sensor, bmp280_errCode* errCode);
 uint32_t bmp280_getPres(bmp280* sensor, bmp280_errCode* errCode);
-void    bmp280_reset(bmp280* sensor, bmp280_errCode* errCode);
+void     bmp280_reset(bmp280* sensor, bmp280_errCode* errCode);
 
 #endif
