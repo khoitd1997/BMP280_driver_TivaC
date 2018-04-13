@@ -66,7 +66,7 @@ int main(void)
 #ifdef I2C_TEST
   bmp280         sensor280;
   bmp280_errCode errCode;
-  bmp280_init(&sensor280, weatherStat, I2C);
+  bmp280_init(&sensor280, WeatherStat, I2C, &errCode);
   i2c0_open();
 #endif
 
