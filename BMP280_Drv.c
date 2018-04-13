@@ -117,6 +117,8 @@ void bmp280_init(bmp280*                sensor,
 
 void bmp280_open(bmp280* sensor, bmp280_errCode* errCode)
 {
+  assert(errCode);
+
   if (bmp280_check_setting(sensor, errCode)) return;
 
   if (sensor->protocol == I2C)
