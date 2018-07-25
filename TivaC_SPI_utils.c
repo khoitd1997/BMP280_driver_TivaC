@@ -8,7 +8,7 @@
 
 #define SPI_MAX_CONTROLLER 3
 
-spi_errCode spi_wait_busy(uint8_t spiControllerNum) {
+spi_errCode spi_wait_busy(const uint8_t spiControllerNum) {
   assert(spiControllerNum < SPI_MAX_CONTROLLER);
   if (spiControllerNum == 0) {
     while (SSI0_SR_R & SSI_SR_BSY) {
@@ -18,12 +18,12 @@ spi_errCode spi_wait_busy(uint8_t spiControllerNum) {
   }
 }
 
-spi_errCode spi_check_rx_full(uint8_t spiControllerNum) {
+spi_errCode spi_check_rx_full(const uint8_t spiControllerNum) {
   assert(spiControllerNum < SPI_MAX_CONTROLLER);
   if (spiControllerNum == 0) { return (SSI0_SR_R & SSI_SR_RFF) ? ERR_RX_FULL : ERR_NO_ERR; }
 }
 
-spi_errCode spi_check_tx_full(uint8_t spiControllerNum) {
+spi_errCode spi_check_tx_full(const uint8_t spiControllerNum) {
   assert(spiControllerNum < SPI_MAX_CONTROLLER);
   if (spiControllerNum == 0) { return (SSI0_SR_R & SSI_SR_TNF) ? ERR_NO_ERR : ERR_TX_FULL; }
 }
@@ -60,7 +60,7 @@ spi_errCode spi_check_setting(const spi_settings setting) {
   return ERR_NO_ERR;
 }
 
-spi_errCode spi_check_rx_not_empty(uint8_t spiControllerNum) {
+spi_errCode spi_check_rx_not_empty(const uint8_t spiControllerNum) {
   assert(spiControllerNum < SPI_MAX_CONTROLLER);
   if (spiControllerNum == 0) { return (SSI0_SR_R & SSI_SR_RNE) ? ERR_NO_ERR : ERR_RX_EMPTY; }
 }
@@ -87,7 +87,7 @@ spi_errCode spi_recv_one_data_unit(const spi_settings setting,
 
 spi_errCode spi_send_one_data_unit(const spi_settings setting,
                                    uint8_t*           totalBitSend,
-                                   uint16_t*          dataSend) {
+                                   const uint16_t*    dataSend) {
   uint8_t tempSendData   = 0;
   uint8_t curBitTransfer = 0;
 

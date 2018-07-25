@@ -34,7 +34,7 @@ spi_errCode spi_open(const spi_settings setting) {
     GPIO_PORTA_DIR_R |= 0x8;
     GPIO_PORTA_DATA_R |= 0x8;  // pull CS high
 
-    GPIO_PORTA_ODR_R |= 0x10;
+    GPIO_PORTA_ODR_R |= 0x10;  // open drain necessary for MISO
     GPIO_PORTA_DR8R_R |= 0x30;
 
     //  pull up/ pull down pull-up for clock pin if high steady state in SPO
@@ -46,8 +46,8 @@ spi_errCode spi_open(const spi_settings setting) {
       return ERR_SPI_CPA_UNDEFINED;
     }
 
-    // GPIO_PORTA_CR_R &= ~0x3C;
-    // GPIO_PORTA_LOCK_R = 0;  // relock the register
+    GPIO_PORTA_CR_R &= ~0x3C;
+    GPIO_PORTA_LOCK_R = 0;  // relock the register
 
     /* Setting the SPI register based on user settings */
     SSI0_CR1_R &= ~SSI_CR1_SSE;  // disable SSI port before changing setting
@@ -173,18 +173,17 @@ spi_errCode spi_transfer(const spi_settings setting,
 }
 
 void main(void) {
-  spi_settings spiSetting;
-  spiSetting.spiControlerNum = 0;
-  spiSetting.enableDMA       = false;
-  spiSetting.spiBitRateMbits = 0.3;
-  spiSetting.currCpuClockMHz = 16;
-  spiSetting.cpol            = 0;
-  spiSetting.cpha            = 0;
-  spiSetting.operMode        = Freescale;
-  spiSetting.isLoopBack      = false;
-  spiSetting.transferSizeBit = 16;
-  spiSetting.role            = Master;
-  spiSetting.clockSource     = Systemclock;
+  const spi_settings spiSetting = {.spiControlerNum = 0,
+                                   .enableDMA       = false,
+                                   .spiBitRateMbits = 0.3,
+                                   .currCpuClockMHz = 16,
+                                   .cpol            = 0,
+                                   .cpha            = 0,
+                                   .operMode        = Freescale,
+                                   .isLoopBack      = false,
+                                   .transferSizeBit = 16,
+                                   .role            = Master,
+                                   .clockSource     = Systemclock};
 
   if (spi_open(spiSetting) != ERR_NO_ERR) {
     for (;;) {
