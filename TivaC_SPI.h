@@ -3,6 +3,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/**
+ * @brief the smallest transfer size of the spi, note that this is different from the transfer size
+ * in the spi structure, a complete transfer is made up of small 8 bit transfer
+ *
+ */
+#define SPI_TRF_SIZE 8
+
 typedef enum {
   ERR_NO_ERR,
   ERR_SPI_CPA_UNDEFINED,
@@ -34,7 +41,7 @@ typedef struct {
   uint8_t           cpha;
   spi_protocol_mode operMode;
   bool              isLoopBack;
-  uint8_t           transferSizeBit;  // how much to send/recv per SPI transfer
+  uint8_t           transferSizeBit;  // how much to tx/rx per SPI transfer
   spi_role          role;
   clock_source      clockSource;
   // TODO: maybe add interrupts support
@@ -51,12 +58,12 @@ spi_errCode spi_close(void);
 
 /* Data Transfer */
 // used for both single and multiple bytes
-// used for both send receive
+// used for both tx receive
 spi_errCode spi_transfer(const spi_settings setting,
-                         uint16_t*          dataSend,
-                         uint8_t            dataSendLenByte,
-                         uint16_t*          dataRecv,
-                         uint8_t            dataRecvLenByte,
+                         uint16_t*          dataTx,
+                         uint8_t            dataTxLenByte,
+                         uint16_t*          dataRx,
+                         uint8_t            dataRxLenByte,
                          spi_transfer_mode  transferMode);
 
 #endif

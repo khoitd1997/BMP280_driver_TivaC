@@ -5,24 +5,26 @@
 #include "tm4c123gh6pm.h"
 
 spi_errCode spi_open(const spi_settings setting) {
-  if (spi_check_setting(setting) != ERR_NO_ERR) { return spi_check_setting(setting); }
+  uint8_t errCode;
+  if ((errCode = spi_check_setting(setting)) != ERR_NO_ERR) { return errCode; }
 
   uint8_t preScalc    = 0;
   uint8_t scr         = 0;
   uint8_t tempErrCode = 0;
 
-  // TODO: add support for SPI controller other than spi0
-
   /* Prepping GPIO pin for SPI functionalities */
   SYSCTL_RCGCSSI_R |= SYSCTL_RCGCSSI_R0;    // turn on SPI module
   SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R0;  // enable clock for SPI pins
 
-  GPIO_PORTA_LOCK_R = 0x4C4F434B;  // unlock register
-  GPIO_PORTA_CR_R |= 0x3C;         // allow bits in the register to be written
+  // unlock register and allow bits in the register to be written
+  GPIO_PORTA_LOCK_R = 0x4C4F434B;
+  GPIO_PORTA_CR_R |= 0x3C;
 
-  // need afsel for 19(PA2)(clock), 20(frame signal), 21(RX), 22(TX)
+  // need afsel for 19(PA2)(clock), 21(RX), 22(TX)
+  // enable every pin except the CS pin for special function
+  // not making the CS a special function allows us to control it manually
   GPIO_PORTA_AFSEL_R &= ~0x3C;
-  GPIO_PORTA_AFSEL_R |= 0x00000034;  // enable every pin except the CS pin for special function
+  GPIO_PORTA_AFSEL_R |= 0x00000034;
 
   // PMCn for the pins above to 2
   GPIO_PORTA_PCTL_R &= 0xFF0000FF;
@@ -30,13 +32,13 @@ spi_errCode spi_open(const spi_settings setting) {
 
   // GPIODEN for all those pins
   GPIO_PORTA_DEN_R |= 0x0000003C;
-  GPIO_PORTA_DIR_R |= 0x8;
+  GPIO_PORTA_DIR_R |= 0x8;   // allow CS pin to be an output
   GPIO_PORTA_DATA_R |= 0x8;  // pull CS high
 
-  GPIO_PORTA_ODR_R |= 0x10;  // open drain necessary for MISO
-  GPIO_PORTA_DR8R_R |= 0x30;
+  GPIO_PORTA_ODR_R |= 0x10;   // open drain necessary for MISO
+  GPIO_PORTA_DR8R_R |= 0x30;  // Increase Drive Strength to 8mA for MOSI pin
 
-  //  pull up/ pull down pull-up for clock pin if high steady state in SPO
+  //  pull up/ pull down pull-up for clock pin depending on steady state of clock pin
   if (setting.cpol == 0) {
     GPIO_PORTA_PDR_R |= 0x4;
   } else if (setting.cpol == 1) {
@@ -45,11 +47,12 @@ spi_errCode spi_open(const spi_settings setting) {
     return ERR_SPI_CPA_UNDEFINED;
   }
 
+  // relock the register
   GPIO_PORTA_CR_R &= ~0x3C;
-  GPIO_PORTA_LOCK_R = 0;  // relock the register
+  GPIO_PORTA_LOCK_R = 0;
 
   /* Setting the SPI register based on user settings */
-  SSI0_CR1_R &= ~SSI_CR1_SSE;  // disable SSI port before changing setting
+  spi_disable_spi();  // disable SSI port before changing setting
 
   if (setting.role == Master) {
     SSI0_CR1_R &= ~SSI_CR1_MS;
@@ -63,15 +66,14 @@ spi_errCode spi_open(const spi_settings setting) {
     SSI0_CC_R &= SSI_CC_CS_SYSPLL;
   }
 
-  if (spi_calc_clock_prescalc(setting, &preScalc, &scr) == ERR_NO_ERR) {
+  if ((errCode = spi_calc_clock_prescalc(setting, &preScalc, &scr)) == ERR_NO_ERR) {
     SSI0_CR0_R &= ~SSI_CR0_SCR_M;
     SSI0_CR0_R += scr << SSI_CR0_SCR_S;
 
     SSI0_CPSR_R &= ~SSI_CPSR_CPSDVSR_M;
     SSI0_CPSR_R += preScalc << SSI_CPSR_CPSDVSR_S;
   } else {
-    // TODO: check for more efficient error return
-    return spi_calc_clock_prescalc(setting, &preScalc, &scr);
+    return errCode;
   }
 
   if (setting.cpha == 1) {
@@ -122,49 +124,50 @@ spi_errCode spi_open(const spi_settings setting) {
 }
 
 spi_errCode spi_transfer(const spi_settings setting,
-                         uint16_t*          dataSend,
-                         uint8_t            dataSendLenByte,
-                         uint16_t*          dataRecv,
-                         uint8_t            dataRecvLenByte,
+                         uint16_t*          dataTx,
+                         uint8_t            dataTxLenByte,
+                         uint16_t*          dataRx,
+                         uint8_t            dataRxLenByte,
                          spi_transfer_mode  transferMode) {
+  uint8_t errCode;
   /* Pre-Transfer Error Checking and Computation Start Here */
-  if (spi_check_setting(setting) != ERR_NO_ERR) { return spi_check_setting(setting); }
-  uint8_t totalBitToSend = 0;
-  uint8_t totalBitToRecv = 0;
+  if ((errCode = spi_check_setting(setting)) != ERR_NO_ERR) { return errCode; }
+  uint8_t totalBitToTx = 0;
+  uint8_t totalBitToRx = 0;
 
   if (transferMode == Tx || transferMode == Both) {
-    assert(dataSend);
-    assert(dataSendLenByte > 0);
-    // convert from byte to bit for amount of data need to be sent/recv
-    totalBitToSend = dataSendLenByte * 8;
+    assert(dataTx);
+    assert(dataTxLenByte > 0);
+    // convert from byte to bit for amount of data need to be sent/rx
+    totalBitToTx = dataTxLenByte * 8;
   }
 
   if (transferMode == Rx || transferMode == Both) {
-    assert(dataRecv);
-    assert(dataRecvLenByte > 0);
-    for (int i = 0; i < dataRecvLenByte; ++i) { dataRecv[i] = 0; }
-    // convert from byte to bit for amount of data need to be sent/recv
-    totalBitToRecv = dataRecvLenByte * 8;
+    assert(dataRx);
+    assert(dataRxLenByte > 0);
+    for (int i = 0; i < dataRxLenByte; ++i) { dataRx[i] = 0; }
+    // convert from byte to bit for amount of data need to be sent/rx
+    totalBitToRx = dataRxLenByte * 8;
   }
 
   /* Begin Transfer */
-  uint8_t totalBitSend = 0;
-  uint8_t totalBitRecv = 0;
+  uint8_t totalBitTx = 0;
+  uint8_t totalBitRx = 0;
 
-  while (totalBitSend < totalBitToSend || totalBitRecv < totalBitToRecv) {
+  while (totalBitTx < totalBitToTx || totalBitRx < totalBitToRx) {
     // TODO: implement some kind of timeout if possible
-    if ((transferMode == Tx || transferMode == Both) && (totalBitSend < totalBitToSend)) {
-      spi_send_one_data_unit(setting, &totalBitSend, dataSend);
+    if ((transferMode == Tx || transferMode == Both) && (totalBitTx < totalBitToTx)) {
+      spi_tx_one_data_unit(setting, &totalBitTx, dataTx);
     }
 
-    if ((transferMode == Rx || transferMode == Both) && totalBitRecv < totalBitToRecv) {
-      spi_recv_one_data_unit(setting, &totalBitRecv, dataRecv);
+    if ((transferMode == Rx || transferMode == Both) && totalBitRx < totalBitToRx) {
+      spi_rx_one_data_unit(setting, &totalBitRx, dataRx);
     }
   }
   for (int i = 0; i < 50; ++i) {}  // delay
   spi_wait_busy();
   GPIO_PORTA_DATA_R |= 0x8;
-  SSI0_CR1_R &= ~SSI_CR1_SSE;  // cease SPI operation
+  spi_disable_spi();  // cease SPI operation
   return ERR_NO_ERR;
 }
 
@@ -180,17 +183,13 @@ void main(void) {
                                    .role            = Master,
                                    .clockSource     = Systemclock};
 
-  if (spi_open(spiSetting) != ERR_NO_ERR) {
-    for (;;) {
-      // debug loop
-    }
-  }
+  if (spi_open(spiSetting) != ERR_NO_ERR) { exit(-1); }
 
-  uint16_t sendData[1] = {0xD0};
-  uint16_t recvData[1];
+  uint16_t txData[1] = {0xD0};
+  uint16_t rxData[1];
 
   for (;;) {
     for (int i = 0; i < 50000; ++i) {}  // add delay
-    spi_transfer(spiSetting, sendData, 1, recvData, 1, Both);
+    spi_transfer(spiSetting, txData, 1, rxData, 1, Both);
   }
 }

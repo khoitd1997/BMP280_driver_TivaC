@@ -5,19 +5,24 @@
 #include "TivaC_SPI.h"
 #include "tm4c123gh6pm.h"
 
-/* Utility Function */
-spi_errCode spi_wait_busy(void);                            // wait until spi bus is done
+/* Error Checking */                                        // wait until spi bus is done
 spi_errCode spi_check_setting(const spi_settings setting);  // make sure readings are initialized
 spi_errCode spi_check_rx_full(void);
 spi_errCode spi_check_tx_full(void);
 spi_errCode spi_check_rx_not_empty(void);
+
+/* Calculation */
 spi_errCode spi_calc_clock_prescalc(const spi_settings setting, uint8_t* preScalc, uint8_t* scr);
 
-spi_errCode spi_recv_one_data_unit(const spi_settings setting,
-                                   uint8_t*           totalBitRecv,
-                                   uint16_t*          dataRecv);
+/* Common Utility Action */
+void spi_wait_busy(void);
+void spi_enable_spi(void);
+void spi_disable_spi(void);
 
-spi_errCode spi_send_one_data_unit(const spi_settings setting,
-                                   uint8_t*           totalBitSend,
-                                   const uint16_t*    dataSend);
+/* Protocol Handling */
+spi_errCode spi_Rx_one_data_unit(const spi_settings setting, uint8_t* totalBitRx, uint16_t* dataRx);
+
+spi_errCode spi_tx_one_data_unit(const spi_settings setting,
+                                 uint8_t*           totalBitTx,
+                                 const uint16_t*    dataTx);
 #endif
