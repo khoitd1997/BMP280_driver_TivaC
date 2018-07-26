@@ -25,7 +25,6 @@ typedef enum { Systemclock, Piosc } clock_source;
 
 typedef enum { Tx, Rx, Both } spi_transfer_mode;
 typedef struct {
-  uint8_t           spiControlerNum;
   bool              enableDMA;
   float             spiBitRateMbits;
   float             currCpuClockMHz;
