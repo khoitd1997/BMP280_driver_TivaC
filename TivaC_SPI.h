@@ -15,8 +15,10 @@ typedef enum {
   ERR_INVAL_DATA_SIZE,
   ERR_INVAL_CPOL,
   ERR_INVAL_CPHA,
-  ERR_INVAL_SPI_CTRL,
-  ERR_INVAL_PROTOCOL
+  ERR_INVAL_PROTOCOL,
+  ERR_INVAL_ROLE,
+  ERR_INVAL_OPERMODE,
+  ERR_INVAL_CLOCKSOURCE
 } spi_errCode;
 
 typedef enum { Freescale, Tissf, Microwire } spi_protocol_mode;
@@ -27,7 +29,7 @@ typedef enum { Tx, Rx, Both } spi_transfer_mode;
 typedef struct {
   bool              enableDMA;
   float             spiBitRateMbits;
-  float             currCpuClockMHz;
+  float             cpuClockMHz;
   uint8_t           cpol;
   uint8_t           cpha;
   spi_protocol_mode operMode;

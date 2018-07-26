@@ -28,7 +28,7 @@ spi_errCode spi_calc_clock_prescalc(const spi_settings setting, uint8_t* preScal
   assert(preScalc);
   assert(scr);
 
-  uint8_t tempProduct = (setting.currCpuClockMHz) / (setting.spiBitRateMbits);
+  uint8_t tempProduct = (setting.cpuClockMHz) / (setting.spiBitRateMbits);
   uint8_t CPSDVSR;
 
   for (uint16_t SCR = 1; SCR < 256; ++SCR) {
@@ -43,14 +43,18 @@ spi_errCode spi_calc_clock_prescalc(const spi_settings setting, uint8_t* preScal
 }
 
 spi_errCode spi_check_setting(const spi_settings setting) {
-  if (setting.currCpuClockMHz <= 0 || setting.currCpuClockMHz > 80) {
-    return ERR_INVAL_SYS_CLK_RATE;
-  }
+  if (setting.cpuClockMHz <= 0 || setting.cpuClockMHz > 80) { return ERR_INVAL_SYS_CLK_RATE; }
   if (setting.spiBitRateMbits <= 0 || setting.spiBitRateMbits > 2) { return ERR_INVAL_BIT_RATE; }
   if (setting.transferSizeBit > 16 || setting.transferSizeBit < 4) { return ERR_INVAL_DATA_SIZE; }
-  if (setting.cpol > 1) { return ERR_INVAL_CPOL; }
-  if (setting.cpha > 1) { return ERR_INVAL_CPHA; }
-
+  if (setting.cpol > 1 || setting.cpol < 0) { return ERR_INVAL_CPOL; }
+  if (setting.cpha > 1 || setting.cpha < 0) { return ERR_INVAL_CPHA; }
+  if (setting.role != Master && setting.role != Slave) { return ERR_INVAL_ROLE; }
+  if (setting.operMode != Freescale && setting.operMode != Tissf && setting.operMode != Microwire) {
+    return ERR_INVAL_OPERMODE;
+  }
+  if (setting.clockSource != Piosc && setting.clockSource != Systemclock) {
+    return ERR_INVAL_CLOCKSOURCE;
+  }
   return ERR_NO_ERR;
 }
 

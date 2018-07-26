@@ -171,7 +171,7 @@ spi_errCode spi_transfer(const spi_settings setting,
 void main(void) {
   const spi_settings spiSetting = {.enableDMA       = false,
                                    .spiBitRateMbits = 0.3,
-                                   .currCpuClockMHz = 16,
+                                   .cpuClockMHz     = 16,
                                    .cpol            = 0,
                                    .cpha            = 0,
                                    .operMode        = Freescale,
