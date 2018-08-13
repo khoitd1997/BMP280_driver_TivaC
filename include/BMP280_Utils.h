@@ -5,11 +5,11 @@
 #define _BMP280_UTILS_H
 #include <stdint.h>
 
-#include "BMP280_Drv.h"
+#include "include/BMP280_Drv.h"
 
 /* functions used for creating data byte to write to bmp280 based on bmp280
  settings */
-uint8_t bmp280_bmp280_createCtrlByte(bmp280* sensor, bmp280_errCode* errCode);
+uint8_t bmp280_createCtrlByte(bmp280* sensor, bmp280_errCode* errCode);
 uint8_t bmp280_createConfigByte(bmp280* sensor, bmp280_errCode* errCode);
 
 /* error checking */

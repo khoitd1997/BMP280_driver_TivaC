@@ -1,11 +1,12 @@
 #ifndef _TIVA_C_SPI_H
 #define _TIVA_C_SPI_H
+
 #include <stdbool.h>
 #include <stdint.h>
 
 /**
  * @brief the smallest transfer size of the spi, note that this is different from the transfer size
- * in the spi structure, a complete transfer is made up of small 8 bit transfer
+ * in the spi structure, a complete transfer is made up of small 8 bit transfers
  *
  */
 #define SPI_TRF_SIZE 8
@@ -60,9 +61,9 @@ spi_errCode spi_close(void);
 // used for both single and multiple bytes
 // used for both tx receive
 spi_errCode spi_transfer(const spi_settings setting,
-                         uint16_t*          dataTx,
+                         uint8_t*           dataTx,
                          uint8_t            dataTxLenByte,
-                         uint16_t*          dataRx,
+                         uint8_t*           dataRx,
                          uint8_t            dataRxLenByte,
                          spi_transfer_mode  transferMode);
 

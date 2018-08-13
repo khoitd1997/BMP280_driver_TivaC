@@ -1,6 +1,10 @@
-#include "BMP280_Utils.h"
+#include "include/BMP280_Utils.h"
+
+#include <assert.h>
 #include <stdio.h>
-#include "BMP280_Drv.h"
+
+#include "include/BMP280_Drv.h"
+#include "include/TivaC_I2C.h"
 
 int bmp280_check_setting(bmp280* sensor, bmp280_errCode* errCode) {
   assert(errCode);

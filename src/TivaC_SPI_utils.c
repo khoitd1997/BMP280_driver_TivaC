@@ -2,9 +2,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "TivaC_SPI.h"
-#include "TivaC_SPI_utils.h"
-#include "tm4c123gh6pm.h"
+#include "external/TivaC_Utils/include/TivaC_Other_Utils.h"
+#include "external/TivaC_Utils/include/bit_manipulation.h"
+#include "external/TivaC_Utils/include/tm4c123gh6pm.h"
+#include "include/TivaC_SPI.h"
+#include "include/TivaC_SPI_utils.h"
 
 #define MAX_TIVAC_CLOCK 80
 #define MAX_SCR 255      // max SSI serial clock rate
@@ -14,7 +16,6 @@ void spi_wait_busy(void) {
   while (SSI0_SR_R & SSI_SR_BSY) {
     // wait until the busy bit is unset
   }
-  return ERR_NO_ERR;
 }
 
 spi_errCode spi_check_rx_full(void) { return (SSI0_SR_R & SSI_SR_RFF) ? ERR_RX_FULL : ERR_NO_ERR; }
@@ -63,49 +64,38 @@ spi_errCode spi_check_rx_not_empty(void) {
   return (SSI0_SR_R & SSI_SR_RNE) ? ERR_NO_ERR : ERR_RX_EMPTY;
 }
 
-spi_errCode spi_Rx_one_data_unit(const spi_settings setting,
-                                 uint8_t*           totalBitRx,
-                                 uint16_t*          dataRx) {
+spi_errCode spi_rx_one_data_unit(const spi_settings setting,
+                                 uint8_t*           totalByteRxed,
+                                 uint8_t*           dataRx) {
   GPIO_PORTA_DATA_R &= ~0x8;  // pull CS low to signal ready to read
   spi_enable_spi();           // begin SPI operation
-  for (int i = 0; i < 30; ++i) {}
+  delayms(5);
 
   if (spi_check_rx_not_empty() == ERR_NO_ERR) {
-    uint8_t  curBitRx   = 0;
-    uint16_t tempRxData = SSI0_DR_R & 0x0000FFFF;
     spi_wait_busy();
-    while (curBitRx < SPI_TRF_SIZE) {
-      dataRx[*totalBitRx / SPI_TRF_SIZE] += ((tempRxData & (1 << curBitRx)) >> curBitRx)
-                                            << (*totalBitRx % SPI_TRF_SIZE);
-
-      ++curBitRx;
-      *totalBitRx = *totalBitRx + 1;
-    }
+    uint8_t tempRxData     = SSI0_DR_R & 0x000000FF;
+    dataRx[*totalByteRxed] = tempRxData;
+    *totalByteRxed         = *totalByteRxed + 1;
   }
   return ERR_NO_ERR;
 }
 
+// TODO: refactor this
 spi_errCode spi_tx_one_data_unit(const spi_settings setting,
-                                 uint8_t*           totalBitTx,
-                                 const uint16_t*    dataTx) {
-  uint8_t tempTxData     = 0;
-  uint8_t curBitTransfer = 0;
+                                 uint8_t*           totalByteTxed,
+                                 const uint8_t*     dataTx) {
+  uint8_t tempTxData = 0;
 
   // prep the data to be sent
-  while (curBitTransfer < SPI_TRF_SIZE) {
-    if (spi_check_tx_full() == ERR_NO_ERR) {
-      tempTxData += (((dataTx[*totalBitTx / 8] & (0b1 << (*totalBitTx % 8))) >> *totalBitTx)
-                     << curBitTransfer);
-      ++curBitTransfer;
-      *totalBitTx = *totalBitTx + 1;
-    }
+  if (spi_check_tx_full() == ERR_NO_ERR) {
+    tempTxData     = dataTx[*totalByteTxed];
+    *totalByteTxed = *totalByteTxed + 1;
   }
   spi_wait_busy();
-  SSI0_DR_R += (tempTxData) << (setting.transferSizeBit -
-                                8);  // shift so the data is in MSB to be sent first
-  for (int i = 0; i < 5000; ++i) {}
-  GPIO_PORTA_DATA_R &= ~0x8;  // pre-load then pull CS low
-  spi_enable_spi();           // begin SPI operation
+  SSI0_DR_R = tempTxData;  // shift so the data is in MSB to be sent first
+  delayms(5);
+  spi_pull_cs_low();
+  spi_enable_spi();
   spi_wait_busy();
   return ERR_NO_ERR;
 }
@@ -113,3 +103,6 @@ spi_errCode spi_tx_one_data_unit(const spi_settings setting,
 void spi_enable_spi(void) { SSI0_CR1_R |= SSI_CR1_SSE; }
 
 void spi_disable_spi(void) { SSI0_CR1_R &= ~SSI_CR1_SSE; }
+
+void spi_pull_cs_low(void) { bit_clear(GPIO_PORTA_DATA_R, 0x8); }
+void spi_pull_cs_high(void) { bit_set(GPIO_PORTA_DATA_R, 0x8); }

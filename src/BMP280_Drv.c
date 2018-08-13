@@ -3,9 +3,12 @@
  *
  */
 
-#include "BMP280_Drv.h"
-#include "BMP280_Utils.h"
-#include "TivaC_I2C.h"
+#include "include/BMP280_Drv.h"
+
+#include <assert.h>
+
+#include "include/BMP280_Utils.h"
+#include "include/TivaC_I2C.h"
 
 // offset from BMP280 base register
 typedef enum {
@@ -173,7 +176,7 @@ void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode) {
 
 void bmp280_set_temp(bmp280* sensor, bmp280_Coeff tempSetting, bmp280_errCode* errCode) {
   if (sensor == NULL) {
-    errCode = ERR_SENSOR_UNITIALIZED;
+    *errCode = ERR_SENSOR_UNITIALIZED;
     return;
   }
   sensor->tempSamp = tempSetting;

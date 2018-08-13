@@ -1,8 +1,12 @@
-#include <assert.h>
+#include "include/TivaC_SPI.h"
 
-#include "TivaC_SPI.h"
-#include "TivaC_SPI_utils.h"
-#include "tm4c123gh6pm.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#include "external/TivaC_Utils/include/TivaC_Other_Utils.h"
+#include "external/TivaC_Utils/include/tm4c123gh6pm.h"
+#include "include/TivaC_SPI_utils.h"
 
 spi_errCode spi_open(const spi_settings setting) {
   uint8_t errCode;
@@ -124,50 +128,46 @@ spi_errCode spi_open(const spi_settings setting) {
 }
 
 spi_errCode spi_transfer(const spi_settings setting,
-                         uint16_t*          dataTx,
+                         uint8_t*           dataTx,
                          uint8_t            dataTxLenByte,
-                         uint16_t*          dataRx,
+                         uint8_t*           dataRx,
                          uint8_t            dataRxLenByte,
                          spi_transfer_mode  transferMode) {
   uint8_t errCode;
   /* Pre-Transfer Error Checking and Computation Start Here */
   if ((errCode = spi_check_setting(setting)) != ERR_NO_ERR) { return errCode; }
-  uint8_t totalBitToTx = 0;
-  uint8_t totalBitToRx = 0;
 
-  if (transferMode == Tx || transferMode == Both) {
+  if (Tx == transferMode || Both == transferMode) {
     assert(dataTx);
     assert(dataTxLenByte > 0);
     // convert from byte to bit for amount of data need to be sent/rx
-    totalBitToTx = dataTxLenByte * 8;
   }
 
-  if (transferMode == Rx || transferMode == Both) {
+  if (Rx == transferMode || Both == transferMode) {
     assert(dataRx);
     assert(dataRxLenByte > 0);
     for (int i = 0; i < dataRxLenByte; ++i) { dataRx[i] = 0; }
     // convert from byte to bit for amount of data need to be sent/rx
-    totalBitToRx = dataRxLenByte * 8;
   }
 
   /* Begin Transfer */
-  uint8_t totalBitTx = 0;
-  uint8_t totalBitRx = 0;
+  uint8_t totalByteTxed = 0;
+  uint8_t totalByteRxed = 0;
 
-  while (totalBitTx < totalBitToTx || totalBitRx < totalBitToRx) {
+  while (totalByteTxed < dataTxLenByte || totalByteRxed < dataRxLenByte) {
     // TODO: implement some kind of timeout if possible
-    if ((transferMode == Tx || transferMode == Both) && (totalBitTx < totalBitToTx)) {
-      spi_tx_one_data_unit(setting, &totalBitTx, dataTx);
+    if ((Tx == transferMode || Both == transferMode) && (totalByteTxed < dataTxLenByte)) {
+      spi_tx_one_data_unit(setting, &totalByteTxed, dataTx);
     }
 
-    if ((transferMode == Rx || transferMode == Both) && totalBitRx < totalBitToRx) {
-      spi_rx_one_data_unit(setting, &totalBitRx, dataRx);
+    if ((Rx == transferMode || Both == transferMode) && (totalByteRxed < dataRxLenByte)) {
+      spi_rx_one_data_unit(setting, &totalByteRxed, dataRx);
     }
   }
-  for (int i = 0; i < 50; ++i) {}  // delay
+  delayms(5);
   spi_wait_busy();
-  GPIO_PORTA_DATA_R |= 0x8;
-  spi_disable_spi();  // cease SPI operation
+  spi_pull_cs_high();
+  spi_disable_spi();
   return ERR_NO_ERR;
 }
 
@@ -185,11 +185,8 @@ void main(void) {
 
   if (spi_open(spiSetting) != ERR_NO_ERR) { exit(-1); }
 
-  uint16_t txData[1] = {0xD0};
-  uint16_t rxData[1];
+  uint8_t txData[1] = {0xD0};
+  uint8_t rxData[1];
 
-  for (;;) {
-    for (int i = 0; i < 50000; ++i) {}  // add delay
-    spi_transfer(spiSetting, txData, 1, rxData, 1, Both);
-  }
+  for (;;) { spi_transfer(spiSetting, txData, 1, rxData, 1, Both); }
 }
