@@ -1,0 +1,3 @@
+[submodule "external/TivaC_Utils"]
+	path = external/TivaC_Utils
+	url = https://github.com/khoitd1997/TivaC_Utils.git

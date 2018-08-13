@@ -6,3 +6,4 @@ Design Notes
 !.gitignore
 !src/
 !include/
+!external/

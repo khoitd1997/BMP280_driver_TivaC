@@ -17,6 +17,7 @@
 
 #include "BMP280_Drv.h"
 #include "TivaC_I2C.h"
+#include "external/TivaC_Utils/include/TivaC_Other_Utils.h"
 
 #define TRUE 1
 #define FALSE 0
