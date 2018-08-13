@@ -24,13 +24,7 @@ typedef enum {
 typedef enum { Uninitialized_mode = -1, Sleep, Forced, Normal } bmp280_operMode;
 
 // name of predefined oversampling settings
-typedef enum {
-  Uninitialized = -1,
-  UltraLow,
-  Low,
-  Standard,
-  UltraHigh
-} bmp280_samplSettings;
+typedef enum { Uninitialized = -1, UltraLow, Low, Standard, UltraHigh } bmp280_samplSettings;
 
 // used for IIR filter, temp and pressure oversampling coefficience
 typedef enum { Uninitialized_coeff = -1, x0, x1, x2, x4, x8, x16 } bmp280_Coeff;
@@ -47,8 +41,7 @@ typedef enum {
 typedef struct bmp280Sensor bmp280;
 
 /*data structure of a bmp280*/
-struct bmp280Sensor
-{
+struct bmp280Sensor {
   // protocol information
   uint8_t            ID;
   uint8_t            address;
@@ -84,32 +77,20 @@ void bmp280_close(bmp280* sensor, bmp280_errCode* errCode);
 /*functions used for customizing the setting of the bmp280 like
 temperature, pressure, general oversampling and power mode
 calling these functions will not a write to the actual hardware*/
-void bmp280_set_temp(bmp280*         sensor,
-                     bmp280_Coeff    tempSetting,
-                     bmp280_errCode* errCode);
-void bmp280_set_pres(bmp280*         sensor,
-                     bmp280_Coeff    presSetting,
-                     bmp280_errCode* errCode);
-void bmp280_set_filter(bmp280*         sensor,
-                       bmp280_Coeff    iirSetting,
-                       bmp280_errCode* errCode);
+void bmp280_set_temp(bmp280* sensor, bmp280_Coeff tempSetting, bmp280_errCode* errCode);
+void bmp280_set_pres(bmp280* sensor, bmp280_Coeff presSetting, bmp280_errCode* errCode);
+void bmp280_set_filter(bmp280* sensor, bmp280_Coeff iirSetting, bmp280_errCode* errCode);
 void bmp280_set_sampling(bmp280*              sensor,
                          bmp280_samplSettings samplingSetting,
                          bmp280_errCode*      errCode);
-void bmp280_set_mode(bmp280*         sensor,
-                     bmp280_operMode powerMode,
-                     bmp280_errCode* errCode);
+void bmp280_set_mode(bmp280* sensor, bmp280_operMode powerMode, bmp280_errCode* errCode);
 // set standby time between read, will be checked against predefined value
-void bmp280_set_standby(bmp280*         sensor,
-                        float           standbyTime,
-                        bmp280_errCode* errCode);
+void bmp280_set_standby(bmp280* sensor, float standbyTime, bmp280_errCode* errCode);
 
 /*write settings to the actual hardware, settings must have already been
 intialized*/
-void bmp280_writeMeasSetting(
-    bmp280*, bmp280_errCode* errCode);  // write to the measure register
-void bmp280_writeConfSetting(
-    bmp280*, bmp280_errCode* errCode);  // write to the config register
+void bmp280_writeMeasSetting(bmp280*, bmp280_errCode* errCode);  // write to the measure register
+void bmp280_writeConfSetting(bmp280*, bmp280_errCode* errCode);  // write to the config register
 
 /*functions used for obtaining data or controlling the bmp280*/
 uint8_t  bmp280_getID(bmp280* sensor, bmp280_errCode* errCode);
