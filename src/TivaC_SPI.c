@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "external/TivaC_Utils/include/TivaC_Other_Utils.h"
+#include "external/TivaC_Utils/include/bit_manipulation.h"
 #include "external/TivaC_Utils/include/tm4c123gh6pm.h"
 #include "include/TivaC_SPI_utils.h"
 
@@ -81,16 +82,16 @@ spi_errCode spi_open(const spi_settings setting) {
   }
 
   if (setting.cpha == 1) {
-    SSI0_CR0_R |= SSI_CR0_SPH;
+    bit_set(SSI0_CR0_R, SSI_CR0_SPH);
   } else {
-    SSI0_CR0_R &= ~SSI_CR0_SPH;
+    bit_clear(SSI0_CR0_R, SSI_CR0_SPH);
   }
 
-  if (setting.cpol == 1)
-    SSI0_CR0_R |= SSI_CR0_SPO;
-  else
-    SSI0_CR0_R &= ~SSI_CR0_SPO;
-
+  if (setting.cpol == 1) {
+    bit_set(SSI0_CR0_R, SSI_CR0_SPO);
+  } else {
+    bit_clear(SSI0_CR0_R, SSI_CR0_SPO);
+  }
   SSI0_CR0_R &= ~SSI_CR0_DSS_M;
   SSI0_CR0_R += setting.transferSizeBit - 1;
 
@@ -155,16 +156,26 @@ spi_errCode spi_transfer(const spi_settings setting,
   uint8_t totalByteRxed = 0;
 
   while (totalByteTxed < dataTxLenByte || totalByteRxed < dataRxLenByte) {
+    spi_enable_spi();
+    spi_pull_cs_low();
     // TODO: implement some kind of timeout if possible
     if ((Tx == transferMode || Both == transferMode) && (totalByteTxed < dataTxLenByte)) {
       spi_tx_one_data_unit(setting, &totalByteTxed, dataTx);
     }
 
     if ((Rx == transferMode || Both == transferMode) && (totalByteRxed < dataRxLenByte)) {
+      if (dataTxLenByte == totalByteTxed) {
+        spi_wait_busy();
+        SSI0_DR_R = 0;  // used to maybe stretch the clock
+      }
       spi_rx_one_data_unit(setting, &totalByteRxed, dataRx);
     }
+    spi_wait_busy();
+    if ((setting.cpol == 0 && setting.cpha == 0) || (setting.cpol == 1 && setting.cpha == 0)) {
+      spi_pull_cs_high();  // the spi module requires that cs is pulled high on these settings btw
+                           // transfer
+    }
   }
-  delayms(5);
   spi_wait_busy();
   spi_pull_cs_high();
   spi_disable_spi();
@@ -175,15 +186,17 @@ void main(void) {
   const spi_settings spiSetting = {.enableDMA       = false,
                                    .spiBitRateMbits = 0.3,
                                    .cpuClockMHz     = 16,
-                                   .cpol            = 0,
-                                   .cpha            = 0,
+                                   .cpol            = 1,
+                                   .cpha            = 1,
                                    .operMode        = Freescale,
                                    .isLoopBack      = false,
-                                   .transferSizeBit = 16,
+                                   .transferSizeBit = 8,
                                    .role            = Master,
                                    .clockSource     = Systemclock};
 
   if (spi_open(spiSetting) != ERR_NO_ERR) { exit(-1); }
+
+  spi_single_frame frameList[4];
 
   uint8_t txData[1] = {0xD0};
   uint8_t rxData[1];

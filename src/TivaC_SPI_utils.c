@@ -67,14 +67,9 @@ spi_errCode spi_check_rx_not_empty(void) {
 spi_errCode spi_rx_one_data_unit(const spi_settings setting,
                                  uint8_t*           totalByteRxed,
                                  uint8_t*           dataRx) {
-  GPIO_PORTA_DATA_R &= ~0x8;  // pull CS low to signal ready to read
-  spi_enable_spi();           // begin SPI operation
-  delayms(5);
-
+  spi_wait_busy();
   if (spi_check_rx_not_empty() == ERR_NO_ERR) {
-    spi_wait_busy();
-    uint8_t tempRxData     = SSI0_DR_R & 0x000000FF;
-    dataRx[*totalByteRxed] = tempRxData;
+    dataRx[*totalByteRxed] = SSI0_DR_R & 0x000000FF;
     *totalByteRxed         = *totalByteRxed + 1;
   }
   return ERR_NO_ERR;
@@ -84,25 +79,23 @@ spi_errCode spi_rx_one_data_unit(const spi_settings setting,
 spi_errCode spi_tx_one_data_unit(const spi_settings setting,
                                  uint8_t*           totalByteTxed,
                                  const uint8_t*     dataTx) {
-  uint8_t tempTxData = 0;
-
-  // prep the data to be sent
   if (spi_check_tx_full() == ERR_NO_ERR) {
-    tempTxData     = dataTx[*totalByteTxed];
+    spi_wait_busy();
+    SSI0_DR_R      = (uint8_t)(dataTx[*totalByteTxed]) << (setting.transferSizeBit - SPI_TRF_SIZE);
     *totalByteTxed = *totalByteTxed + 1;
+    return ERR_NO_ERR;
+  } else {
+    return ERR_TX_FULL;
   }
-  spi_wait_busy();
-  SSI0_DR_R = tempTxData;  // shift so the data is in MSB to be sent first
-  delayms(5);
-  spi_pull_cs_low();
-  spi_enable_spi();
-  spi_wait_busy();
-  return ERR_NO_ERR;
 }
 
-void spi_enable_spi(void) { SSI0_CR1_R |= SSI_CR1_SSE; }
+void spi_enable_spi(void) {
+  bit_set(SSI0_CR1_R, SSI_CR1_SSE);
+  while (bit_get(SYSCTL_PRSSI_R, SYSCTL_PRSSI_R0) == 0) {
+    // wait until the SSI is ready to be accessed
+  }
+}
 
-void spi_disable_spi(void) { SSI0_CR1_R &= ~SSI_CR1_SSE; }
-
+void spi_disable_spi(void) { bit_clear(SSI0_CR1_R, SSI_CR1_SSE); }
 void spi_pull_cs_low(void) { bit_clear(GPIO_PORTA_DATA_R, 0x8); }
 void spi_pull_cs_high(void) { bit_set(GPIO_PORTA_DATA_R, 0x8); }

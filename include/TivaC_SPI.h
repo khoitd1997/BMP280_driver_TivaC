@@ -48,6 +48,13 @@ typedef struct {
   // TODO: maybe add interrupts support
 } spi_settings;
 
+typedef enum { TxFrame, RxFrame } spi_frame_type;
+
+typedef struct {
+  spi_frame_type frameType;
+  uint8_t        frameData;  // rx or tx data depends on frame type
+} spi_single_frame;
+
 /* Communication setup */
 spi_errCode spi_open(const spi_settings setting);  // setup all necessary register, but don't
                                                    // start communication until spi_transfer
