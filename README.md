@@ -1,6 +1,10 @@
 # BMP280 Driver using TivaC
 
-Library used for interacting bmp280 with tivaC tm4c123gh6pm processor, the dev board used is the TivaC line of Texas Instrument
+Library used for interacting the bmp280 with tivaC tm4c123gh6pm processor, the dev board used is the TivaC line of Texas Instrument
+
+The bmp280 board used is from Adafruit: https://www.adafruit.com/product/2651
+
+The project was developed using Segger Embedded Studio but you should be able to use other IDE or build system with it
 
 ## Style Guide
 
@@ -15,6 +19,8 @@ Library used for interacting bmp280 with tivaC tm4c123gh6pm processor, the dev b
 - spi function begins with spi_
 - All enum member at least has its first character in name capitalized
 
----
+## Folder structure
 
-As of 4/13/2018, I'm in the process of restructuring error handling and refactor both i2c and spi code
+- src/: driver .c files in here
+- include/: .h file here
+- external/: Dependencies here, for example git submodules are here
