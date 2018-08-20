@@ -31,18 +31,7 @@ typedef enum {
 #define BMP280_IDARR 0xD0
 
 // initialize the bmp280 with predefined value in the datasheet
-void bmp280_init(bmp280*                sensor,
-                 bmp280_measureSettings settings,
-                 bmp280_comProtocol     protocol,
-                 bmp280_errCode*        errCode) {
-  if (sensor == NULL) {
-    *errCode = ERR_SENSOR_UNITIALIZED;
-    return;
-  }
-
-  sensor->portNum  = 0;         // 0 for now
-  sensor->address  = 0x77;      // value pretty much hardcoded due to hardware
-  sensor->protocol = protocol;  // settings obtained in datasheet pg 19
+bmp280_errCode bmp280_create_predefined_settings(bmp280* sensor, bmp280_measureSettings settings) {
   switch (settings) {
     case HandLow:
       sensor->mode        = Normal;
@@ -98,26 +87,27 @@ void bmp280_init(bmp280*                sensor,
       sensor->standbyTime = 0.5;
       break;
 
-    case Custom:
-      sensor->mode        = Uninitialized_mode;
-      sensor->tempSamp    = Uninitialized_coeff;
-      sensor->presSamp    = Uninitialized_coeff;
-      sensor->samplSet    = Uninitialized_coeff;
-      sensor->iirFilter   = Uninitialized_coeff;
-      sensor->standbyTime = -1;
-
     default:
-      for (;;) {
-        // stop the mcu if none of these options for now
-      }
+      return ERR_SETTING_UNRECOGNIZED;
   }
-  *errCode = ERR_NO_ERR;
+  return ERR_NO_ERR;
 }
 
-void bmp280_open(bmp280* sensor, bmp280_errCode* errCode) {
-  assert(errCode);
+bmp280_errCode bmp280_init(bmp280*                sensor,
+                           bmp280_measureSettings settings,
+                           bmp280_comProtocol     protocol) {
+  if (sensor == NULL) { return ERR_SENSOR_UNITIALIZED; }
+  BMP280_TRY_FUNC(bmp280_check_setting(sensor));
 
-  if (bmp280_check_setting(sensor, errCode)) return;
+  sensor->portNum  = 0;         // 0 for now
+  sensor->address  = 0x77;      // value pretty much hardcoded due to hardware
+  sensor->protocol = protocol;  // settings obtained in datasheet pg 19
+
+  return ERR_NO_ERR;
+}
+
+bmp280_errCode bmp280_open(bmp280* sensor) {
+  BMP280_TRY_FUNC(bmp280_check_setting(sensor));
 
   if (sensor->protocol == I2C) {
     // preparing data byte for writing to bmp280 register
@@ -126,22 +116,21 @@ void bmp280_open(bmp280* sensor, bmp280_errCode* errCode) {
 
     // handle control byte first
     i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
-    i2cWriteBytes[1] = bmp280_createCtrlByte(sensor, errCode);
+    bmp280_createCtrlByte(sensor, &i2cWriteBytes[1]);
 
     // handle config byte
     i2cWriteBytes[2] = BMP280_BASEADDR + Config;
-    i2cWriteBytes[3] = bmp280_createConfigByte(sensor, errCode);
+    bmp280_createConfigByte(sensor, i2cWriteBytes[3]);
 
-    if (*errCode != ERR_NO_ERR) { return; }
     i2c0_open();
     i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 4);
   }
 
-  *errCode = ERR_NO_ERR;
+  return ERR_NO_ERR;
 }
 
-uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode) {
-  if (bmp280_portPrep(sensor, errCode)) return 1;
+bmp280_errCode bmp280_getID(bmp280* sensor, uint8_t* ID) {
+  BMP280_TRY_FUNC(bmp280_port_prep(sensor));
 
   uint8_t ID;
   if (sensor->protocol == I2C) {
@@ -156,11 +145,12 @@ uint8_t bmp280_getID(bmp280* sensor, bmp280_errCode* errCode) {
     i2c0_waitBusy();
   }
   sensor->ID = ID;
-  return ID;
+  *ID        = ID;
+  return ERR_NO_ERR;
 }
 
-void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode) {
-  if (bmp280_portPrep(sensor, errCode)) return;
+bmp280_errCode bmp280_reset(bmp280* sensor) {
+  BMP280_TRY_FUNC(bmp280_port_prep(sensor));
 
   uint8_t resSeq[2];
   resSeq[0] = BMP280_RESADDR;
@@ -172,13 +162,6 @@ void bmp280_reset(bmp280* sensor, bmp280_errCode* errCode) {
     i2c0_multiple_data_byte_write(sensor->address, resSeq, 2);
   }
   // TODO: do SPI
-}
 
-void bmp280_set_temp(bmp280* sensor, bmp280_Coeff tempSetting, bmp280_errCode* errCode) {
-  if (sensor == NULL) {
-    *errCode = ERR_SENSOR_UNITIALIZED;
-    return;
-  }
-  sensor->tempSamp = tempSetting;
-  *errCode         = ERR_NO_ERR;
+  return ERR_NO_ERR;
 }

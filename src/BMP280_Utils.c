@@ -6,39 +6,34 @@
 #include "include/BMP280_Drv.h"
 #include "include/TivaC_I2C.h"
 
-int bmp280_check_setting(bmp280* sensor, bmp280_errCode* errCode) {
-  assert(errCode);
+bmp280_errCode bmp280_check_setting(bmp280* sensor) {
   if (sensor == NULL) {
-    *errCode = ERR_SENSOR_UNITIALIZED;
-    return -1;
+    return ERR_SENSOR_UNITIALIZED;
   }
 
   else {
     if (sensor->mode == Uninitialized_mode || sensor->tempSamp == Uninitialized_coeff ||
         sensor->presSamp == Uninitialized_coeff || sensor->samplSet == Uninitialized_coeff ||
         sensor->iirFilter == Uninitialized_coeff || sensor->standbyTime == -1) {
-      *errCode = ERR_SETTING_UNITIALIZED;
-      return -1;
+      return ERR_SETTING_UNITIALIZED;
+
     } else {
-      *errCode = ERR_NO_ERR;
-      return 0;
+      return ERR_NO_ERR;
     }
   }
 }
 
-int bmp280_checkPortOpened(bmp280* sensor, bmp280_errCode* errCode) {
+bmp280_errCode bmp280_checkPortOpened(bmp280* sensor) {
   if (sensor->protocol == I2C) {
     if (!i2c0_check_master_enabled()) {
-      *errCode = ERR_PORT_NOT_OPEN;
-      return 0;
+      return ERR_PORT_NOT_OPEN;
     } else {
-      *errCode = ERR_NO_ERR;
-      return 1;
+      return ERR_NO_ERR;
     }
   }
 }
 
-uint8_t bmp280_createCtrlByte(bmp280* sensor, bmp280_errCode* errCode) {
+bmp280_errCode bmp280_createCtrlByte(bmp280* sensor, uint8_t* controlByte) {
   // start with all 1 and zero out the needed bits
   uint8_t tempByte = 0xFF;
   switch (sensor->tempSamp) {
@@ -67,8 +62,7 @@ uint8_t bmp280_createCtrlByte(bmp280* sensor, bmp280_errCode* errCode) {
       break;
 
     default:
-      *errCode = ERR_SETTING_UNRECOGNIZED;
-      return 1;
+      return ERR_SETTING_UNRECOGNIZED;
       break;
   }
 
@@ -98,8 +92,7 @@ uint8_t bmp280_createCtrlByte(bmp280* sensor, bmp280_errCode* errCode) {
       break;
 
     default:
-      *errCode = ERR_SETTING_UNRECOGNIZED;
-      return 1;
+      return ERR_SETTING_UNRECOGNIZED;
       break;
   }
 
@@ -117,16 +110,15 @@ uint8_t bmp280_createCtrlByte(bmp280* sensor, bmp280_errCode* errCode) {
       break;
 
     default:
-      *errCode = ERR_SETTING_UNRECOGNIZED;
-      return 1;
+      return ERR_SETTING_UNRECOGNIZED;
       break;
   }
 
-  *errCode = ERR_NO_ERR;
-  return tempByte;
+  *controlByte = tempByte;
+  return ERR_NO_ERR;
 }
 
-uint8_t bmp280_createConfigByte(bmp280* sensor, bmp280_errCode* errCode) {
+uint8_t bmp280_createConfigByte(bmp280* sensor, uint8_t* returnByte) {
   // start with all 1 and zero out the needed bits
   uint8_t tempByte = 0xFF;
 
@@ -148,8 +140,7 @@ uint8_t bmp280_createConfigByte(bmp280* sensor, bmp280_errCode* errCode) {
   } else if (sensor->standbyTime == 4000) {
     tempByte &= 0xFF;
   } else {
-    *errCode = ERR_SETTING_UNRECOGNIZED;
-    return 1;
+    return ERR_SETTING_UNRECOGNIZED;
   }
 
   // handle iir filter sampling
@@ -175,7 +166,7 @@ uint8_t bmp280_createConfigByte(bmp280* sensor, bmp280_errCode* errCode) {
       break;
 
     default:
-      *errCode = ERR_SETTING_UNRECOGNIZED;
+      return ERR_SETTING_UNRECOGNIZED;
       return 1;
       break;
   }
@@ -183,21 +174,20 @@ uint8_t bmp280_createConfigByte(bmp280* sensor, bmp280_errCode* errCode) {
   // set protocol to be I2C or SPI
   if (sensor->protocol == I2C) { tempByte &= 0xFE; }
 
-  *errCode = ERR_NO_ERR;
-  return tempByte;
+  return ERR_NO_ERR;
+  *returnByte = tempByte;
 }
 
-int bmp280_portPrep(bmp280* sensor, bmp280_errCode* errCode) {
+bmp280_errCode bmp280_port_prep(bmp280* sensor) {
   if (sensor == NULL) {
-    *errCode = ERR_SENSOR_UNITIALIZED;
-    return -1;
+    return ERR_SENSOR_UNITIALIZED;
   } else {
-    if (!bmp280_checkPortOpened(sensor, errCode)) {
-      *errCode = ERR_PORT_NOT_OPEN;
-      return -1;
+    if (!bmp280_checkPortOpened(sensor)) {
+      return ERR_PORT_NOT_OPEN;
+
     } else {
       if (sensor->protocol == I2C) { i2c0_waitBusy(); }
-      return 0;
+      return ERR_NO_ERR;
     }
   }
 }

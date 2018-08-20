@@ -7,19 +7,26 @@
 
 #include "include/BMP280_Drv.h"
 
+#define BMP280_TRY_FUNC(funcToExecute)             \
+  do {                                             \
+    bmp280_errCode errCode;                        \
+    errCode = funcToExecute;                       \
+    if (errCode != ERR_NO_ERR) { return errCode; } \
+  } while (0)
+
 /* functions used for creating data byte to write to bmp280 based on bmp280
  settings */
-uint8_t bmp280_createCtrlByte(bmp280* sensor, bmp280_errCode* errCode);
-uint8_t bmp280_createConfigByte(bmp280* sensor, bmp280_errCode* errCode);
+bmp280_errCode bmp280_createCtrlByte(bmp280* sensor, uint8_t* controlByte);
+uint8_t        bmp280_createConfigByte(bmp280* sensor, uint8_t* returnByte);
 
 /* error checking */
 // check for unitialized value in sensor settings
-int bmp280_check_setting(bmp280* sensor, bmp280_errCode* errC);
+bmp280_errCode bmp280_check_setting(bmp280* sensor);
 // check if port is opened
-int bmp280_checkPortOpened(bmp280* sensor, bmp280_errCode* errCode);
+bmp280_errCode bmp280_checkPortOpened(bmp280* sensor);
 
 /* port prepping, including error checking and prepping for data transfer return
  true for having errors typically call at beginning of any port operation */
-int bmp280_portPrep(bmp280* sensor, bmp280_errCode* errCode);
+bmp280_errCode bmp280_port_prep(bmp280* sensor);
 
 #endif

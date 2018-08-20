@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "external/TivaC_Utils/include/TivaC_LED.h"
 #include "external/TivaC_Utils/include/TivaC_Other_Utils.h"
 #include "external/TivaC_Utils/include/bit_manipulation.h"
 #include "external/TivaC_Utils/include/tm4c123gh6pm.h"
@@ -194,7 +195,7 @@ void main(void) {
                                    .role            = Master,
                                    .clockSource     = Systemclock};
 
-  if (spi_open(spiSetting) != ERR_NO_ERR) { exit(-1); }
+  if (spi_open(spiSetting) != ERR_NO_ERR) { return; }
 
   spi_single_frame frameList[4];
 
