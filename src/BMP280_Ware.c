@@ -47,42 +47,42 @@
 #include <stdint.h>
 
 // Returns rawCalibDataerature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23
-// DegC. calData.t_fine carries fine rawCalibDataerature as global value
-int32_t bmp280_compensate_T_int32(int32_t adc_T, const bmp280_calib_param calData) {
-  int32_t var1, var2, T;
-  var1 = ((((adc_T >> 3) - ((int32_t)calData.dig_t1 << 1))) * ((int32_t)calData.dig_t2)) >> 11;
-  var2 =
-      (((((adc_T >> 4) - ((int32_t)calData.dig_t1)) * ((adc_T >> 4) - ((int32_t)calData.dig_t1))) >>
-        12) *
-       ((int32_t)calData.dig_t3)) >>
-      14;
-  calData.t_fine = var1 + var2;
-  T              = (calData.t_fine * 5 + 128) >> 8;
-  return T;
+// DegC. calData->t_fine carries fine rawCalibDataerature as global value
+float bmp280_compensate_T_int32(int32_t adc_T, bmp280_calib_param* calData) {
+  int32_t var1, var2;
+  var1 = ((((adc_T >> 3) - ((int32_t)calData->dig_t1 << 1))) * ((int32_t)calData->dig_t2)) >> 11;
+  var2 = (((((adc_T >> 4) - ((int32_t)calData->dig_t1)) *
+            ((adc_T >> 4) - ((int32_t)calData->dig_t1))) >>
+           12) *
+          ((int32_t)calData->dig_t3)) >>
+         14;
+  calData->t_fine = var1 + var2;
+  return (float)((calData->t_fine * 5 + 128) >> 8);
 }
 
 // Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24 integer bits and 8
 // fractional bits). Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa
-uint32_t bmp280_compensate_P_int64(int32_t adc_P, const bmp280_calib_param calData) {
+float bmp280_compensate_P_int64(int32_t adc_P, bmp280_calib_param* calData) {
   int64_t var1, var2, p;
-  var1 = ((int64_t)calData.t_fine) - 128000;
-  var2 = var1 * var1 * (int64_t)calData.dig_p6;
-  var2 = var2 + ((var1 * (int64_t)calData.dig_p5) << 17);
-  var2 = var2 + (((int64_t)calData.dig_p4) << 35);
-  var1 = ((var1 * var1 * (int64_t)calData.dig_p3) >> 8) + ((var1 * (int64_t)calData.dig_p2) << 12);
-  var1 = (((((int64_t)1) << 47) + var1)) * ((int64_t)calData.dig_p1) >> 33;
+  var1 = ((int64_t)calData->t_fine) - 128000;
+  var2 = var1 * var1 * (int64_t)calData->dig_p6;
+  var2 = var2 + ((var1 * (int64_t)calData->dig_p5) << 17);
+  var2 = var2 + (((int64_t)calData->dig_p4) << 35);
+  var1 =
+      ((var1 * var1 * (int64_t)calData->dig_p3) >> 8) + ((var1 * (int64_t)calData->dig_p2) << 12);
+  var1 = (((((int64_t)1) << 47) + var1)) * ((int64_t)calData->dig_p1) >> 33;
   if (var1 == 0) {
     return 0;  // avoid exception caused by division by zero
   }
   p    = 1048576 - adc_P;
   p    = (((p << 31) - var2) * 3125) / var1;
-  var1 = (((int64_t)calData.dig_p9) * (p >> 13) * (p >> 13)) >> 25;
-  var2 = (((int64_t)calData.dig_p8) * p) >> 19;
-  p    = ((p + var1 + var2) >> 8) + (((int64_t)calData.dig_p7) << 4);
-  return (uint32_t)p;
+  var1 = (((int64_t)calData->dig_p9) * (p >> 13) * (p >> 13)) >> 25;
+  var2 = (((int64_t)calData->dig_p8) * p) >> 19;
+  p    = ((p + var1 + var2) >> 8) + (((int64_t)calData->dig_p7) << 4);
+  return (float)p;
 }
 
-int8_t get_calib_param(uint8_t rawCalibData, bmp280_calib_param *outputParam) {
+int8_t bmp280_get_calib_param(uint8_t* rawCalibData, bmp280_calib_param* outputParam) {
   outputParam->dig_t1 = (uint16_t)(((uint16_t)rawCalibData[BMP280_DIG_T1_MSB_POS] << 8) |
                                    ((uint16_t)rawCalibData[BMP280_DIG_T1_LSB_POS]));
   outputParam->dig_t2 = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_T2_MSB_POS] << 8) |

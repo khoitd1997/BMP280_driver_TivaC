@@ -8,6 +8,7 @@
 #include <assert.h>
 
 #include "include/BMP280_Utils.h"
+#include "include/BMP280_Ware.h"
 #include "include/TivaC_I2C.h"
 
 // offset from BMP280 base register
@@ -15,7 +16,7 @@ typedef enum {
   Status = 0,
   Ctrl_meas,
   Config,
-  Cress_msb,
+  Press_msb = 4,
   Press_lsb,
   Press_xlsb,
   Temp_msb,
@@ -25,6 +26,10 @@ typedef enum {
 
 // added with the bmp280_regName to get the correct address
 #define BMP280_BASEADDR 0xF3
+
+#define RAW_TEM_TOTAL_BIT 3
+#define RAW_PRESS_TOTAL_BIT 3
+#define BMP280_CALIB_START_ADDR 0x88
 
 // the two special addresses
 #define BMP280_RESADDR 0xE0
@@ -154,19 +159,54 @@ bmp280_errCode bmp280_update_setting(bmp280* sensor) {
 
     // handle control byte first
     i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
-    bmp280_createCtrlByte(sensor, &i2cWriteBytes[1]);
+    // bmp280_createCtrlByte(sensor, &i2cWriteBytes[1]);
+    i2cWriteBytes[1] = 0x3F;
 
     // handle config byte
     i2cWriteBytes[2] = BMP280_BASEADDR + Config;
-    bmp280_createConfigByte(sensor, &i2cWriteBytes[3]);
-    i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 4);
+    // bmp280_createConfigByte(sensor, &i2cWriteBytes[3]);
+    i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 2);
   }
 
   return ERR_NO_ERR;
 }
 
 bmp280_errCode bmp280_get_ctr_meas(bmp280* sensor, uint8_t* ctrlMeasReturn) {
-  uint8_t ctrlMeasReg;
-  bmp280_get_one_register(sensor, BMP280_BASEADDR + Ctrl_meas, &ctrlMeasReg);
+  bmp280_get_one_register(sensor, BMP280_BASEADDR + Ctrl_meas, ctrlMeasReturn);
+  return ERR_NO_ERR;
+}
+
+bmp280_errCode bmp280_get_config(bmp280* sensor, uint8_t* configReturn) {
+  bmp280_get_one_register(sensor, BMP280_BASEADDR + Config, configReturn);
+  return ERR_NO_ERR;
+}
+
+bmp280_errCode bmp280_get_temp_press(bmp280*            sensor,
+                                     float*             temperatureC,
+                                     float*             pressPa,
+                                     bmp280_calib_param calibParam) {
+  BMP280_TRY_FUNC(bmp280_port_prep(sensor));
+  uint8_t rawData[RAW_TEM_TOTAL_BIT + RAW_PRESS_TOTAL_BIT + 4];
+  bmp280_get_multiple_register(
+      sensor, BMP280_BASEADDR + Press_msb, rawData, RAW_TEM_TOTAL_BIT + RAW_PRESS_TOTAL_BIT + 4);
+  int32_t rawPress = (int32_t)((((uint32_t)(rawData[0])) << 12) | (((uint32_t)(rawData[1])) << 4) |
+                               ((uint32_t)rawData[2] >> 4));
+
+  int32_t rawTemp = (int32_t)((((int32_t)(rawData[3])) << 12) | (((int32_t)(rawData[4])) << 4) |
+                              (((int32_t)(rawData[5])) >> 4));
+  *temperatureC   = (float)bmp280_compensate_T_int32(rawTemp, &calibParam) * 0.01;
+  *pressPa        = (float)bmp280_compensate_P_int64(rawPress, &calibParam) / 256.0;
+  return ERR_NO_ERR;
+}
+
+bmp280_errCode bmp280_get_calibration_data(bmp280* sensor, bmp280_calib_param* calibParam) {
+  BMP280_TRY_FUNC(bmp280_port_prep(sensor));
+  uint8_t rawCalibData[BMP280_CALIB_DATA_SIZE + 5];
+
+  // LSB bits are at lower addr compared to MSB so the first number read will be LSB
+  bmp280_get_multiple_register(
+      sensor, BMP280_CALIB_START_ADDR, rawCalibData, BMP280_CALIB_DATA_SIZE + 5);
+  bmp280_get_calib_param(rawCalibData, calibParam);
+
   return ERR_NO_ERR;
 }

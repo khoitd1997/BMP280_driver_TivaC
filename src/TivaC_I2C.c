@@ -205,6 +205,7 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
   if (input_buffer == NULL || input_buffer_length < 2) { return 2; }
 
   i2c0_waitBusy();
+  int buffer_index = 0;
 
   // go into receive mode
   I2C0_MSA_R |= I2C_MSA_RS;
@@ -221,12 +222,10 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
 
   i2c0_waitBusy();
 
-  *input_buffer = (I2C0_MDR_R & I2C_MDR_DATA_M) << I2C_MDR_DATA_S;
-  ++input_buffer;
+  input_buffer[buffer_index] = (I2C0_MDR_R & I2C_MDR_DATA_M) << I2C_MDR_DATA_S;
 
   // read up till the data before the last one
-  for (int buffer_index = 1; buffer_index < input_buffer_length - 1;
-       ++buffer_index, ++input_buffer) {
+  for (buffer_index = 1; buffer_index < input_buffer_length - 1; ++buffer_index) {
     I2C0_MSA_R |= I2C_MSA_RS;
     I2C0_MCS_R = (I2C_MCS_RUN | I2C_MCS_ACK) & (~I2C_MCS_STOP) & (~I2C_MCS_START);
 
@@ -234,7 +233,7 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
 
     i2c0_error_handling();
 
-    *input_buffer = (I2C0_MDR_R & I2C_MDR_DATA_M) >> I2C_MDR_DATA_S;
+    input_buffer[buffer_index] = (I2C0_MDR_R & I2C_MDR_DATA_M);
   }
 
   // Read the last data byte and close the transaction
@@ -245,7 +244,7 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
 
   i2c0_error_handling();
 
-  *input_buffer = (I2C0_MDR_R & I2C_MDR_DATA_M) << I2C_MDR_DATA_S;
+  input_buffer[buffer_index] = (I2C0_MDR_R & I2C_MDR_DATA_M);
 
   i2c0_waitBusy();
 

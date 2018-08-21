@@ -7,6 +7,8 @@
 
 #include <stdint.h>
 
+#include "include/BMP280_Ware.h"
+
 /*enum of all the sensors' settings and error code*/
 typedef enum { SPI, I2C } bmp280_comProtocol;
 
@@ -81,7 +83,13 @@ bmp280_errCode bmp280_update_setting(bmp280* sensor);
 bmp280_errCode bmp280_getID(bmp280* sensor, uint8_t* ID);
 bmp280_errCode bmp280_get_temp(bmp280* sensor, float* temperature);
 bmp280_errCode bmp280_get_press(bmp280* sensor, float* pressure);
+bmp280_errCode bmp280_get_temp_press(bmp280*            sensor,
+                                     float*             temperatureC,
+                                     float*             pressPa,
+                                     bmp280_calib_param calibParam);
 bmp280_errCode bmp280_reset(bmp280* sensor);
 bmp280_errCode bmp280_get_ctr_meas(bmp280* sensor, uint8_t* ctrlMeasRtr);
+bmp280_errCode bmp280_get_config(bmp280* sensor, uint8_t* configReturn);
+bmp280_errCode bmp280_get_calibration_data(bmp280* sensor, bmp280_calib_param* calibParam);
 
 #endif

@@ -47,8 +47,25 @@
 
 #include <stdint.h>
 
-int32_t  bmp280_compensate_T_int32(int32_t adc_T);
-uint32_t bmp280_compensate_P_int64(int32_t adc_P);
+/*! @name Calibration parameters' structure */
+typedef struct {
+  uint16_t dig_t1;
+  int16_t  dig_t2;
+  int16_t  dig_t3;
+  uint16_t dig_p1;
+  int16_t  dig_p2;
+  int16_t  dig_p3;
+  int16_t  dig_p4;
+  int16_t  dig_p5;
+  int16_t  dig_p6;
+  int16_t  dig_p7;
+  int16_t  dig_p8;
+  int16_t  dig_p9;
+  int32_t  t_fine;
+} bmp280_calib_param;
+
+float bmp280_compensate_T_int32(int32_t adc_T, bmp280_calib_param* calData);
+float bmp280_compensate_P_int64(int32_t adc_P, bmp280_calib_param* calData);
 
 #define BMP280_DIG_T1_LSB_POS UINT8_C(0)
 #define BMP280_DIG_T1_MSB_POS UINT8_C(1)
@@ -76,23 +93,6 @@ uint32_t bmp280_compensate_P_int64(int32_t adc_P);
 #define BMP280_DIG_P9_MSB_POS UINT8_C(23)
 #define BMP280_CALIB_DATA_SIZE UINT8_C(24)
 
-/*! @name Calibration parameters' structure */
-typedef struct {
-  uint16_t dig_t1;
-  int16_t  dig_t2;
-  int16_t  dig_t3;
-  uint16_t dig_p1;
-  int16_t  dig_p2;
-  int16_t  dig_p3;
-  int16_t  dig_p4;
-  int16_t  dig_p5;
-  int16_t  dig_p6;
-  int16_t  dig_p7;
-  int16_t  dig_p8;
-  int16_t  dig_p9;
-  int32_t  t_fine;
-} bmp280_calib_param;
-
-int8_t get_calib_param(uint8_t rawCalibData, bmp280_calib_param *outputParam);
+int8_t bmp280_get_calib_param(uint8_t* rawCalibData, bmp280_calib_param* outputParam);
 
 #endif

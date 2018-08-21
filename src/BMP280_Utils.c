@@ -208,3 +208,16 @@ bmp280_errCode bmp280_get_one_register(bmp280*       sensor,
   }
   return ERR_NO_ERR;
 }
+
+bmp280_errCode bmp280_get_multiple_register(bmp280*       sensor,
+                                            const uint8_t startAddr,
+                                            uint8_t*      regData,
+                                            uint8_t       dataLen) {
+  if (sensor->protocol == I2C) {
+    i2c0_waitBusy();
+    // write data with no stop signal
+    i2c0_single_data_write(sensor->address, startAddr, 1);
+    i2c0_multiple_data_byte_read(sensor->address, regData, dataLen);
+  }
+  return ERR_NO_ERR;
+}

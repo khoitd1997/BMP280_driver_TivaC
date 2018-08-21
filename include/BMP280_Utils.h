@@ -33,4 +33,9 @@ bmp280_errCode bmp280_get_one_register(bmp280*       sensor,
                                        const uint8_t regAddr,
                                        uint8_t*      registerData);
 
+bmp280_errCode bmp280_get_multiple_register(bmp280*       sensor,
+                                            const uint8_t startAddr,
+                                            uint8_t*      regData,
+                                            uint8_t       dataLen);
+
 #endif
