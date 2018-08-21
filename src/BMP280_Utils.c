@@ -182,12 +182,29 @@ bmp280_errCode bmp280_port_prep(bmp280* sensor) {
   if (sensor == NULL) {
     return ERR_SENSOR_UNITIALIZED;
   } else {
-    if (!bmp280_checkPortOpened(sensor)) {
-      return ERR_PORT_NOT_OPEN;
+    BMP280_TRY_FUNC(bmp280_checkPortOpened(sensor));
 
-    } else {
-      if (sensor->protocol == I2C) { i2c0_waitBusy(); }
-      return ERR_NO_ERR;
-    }
+    if (sensor->protocol == I2C) { i2c0_waitBusy(); }
+    return ERR_NO_ERR;
   }
+}
+
+bmp280_errCode bmp280_get_one_register(bmp280*       sensor,
+                                       const uint8_t regAddr,
+                                       uint8_t*      registerData) {
+  BMP280_TRY_FUNC(bmp280_port_prep(sensor));
+
+  uint8_t ID;
+  if (sensor->protocol == I2C) {
+    i2c0_waitBusy();
+    // write data with no stop signal
+    i2c0_single_data_write(sensor->address, regAddr, 1);
+    i2c0_waitBusy();
+
+    // read 3 bytes bc reading single byte seems to create a bug
+    uint8_t inputBuffer[3];
+    i2c0_multiple_data_byte_read(sensor->address, inputBuffer, 3);
+    inputBuffer[0] = *registerData;
+  }
+  return ERR_NO_ERR;
 }

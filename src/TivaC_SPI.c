@@ -183,24 +183,24 @@ spi_errCode spi_transfer(const spi_settings setting,
   return ERR_NO_ERR;
 }
 
-void main(void) {
-  const spi_settings spiSetting = {.enableDMA       = false,
-                                   .spiBitRateMbits = 0.3,
-                                   .cpuClockMHz     = 16,
-                                   .cpol            = 1,
-                                   .cpha            = 1,
-                                   .operMode        = Freescale,
-                                   .isLoopBack      = false,
-                                   .transferSizeBit = 8,
-                                   .role            = Master,
-                                   .clockSource     = Systemclock};
+// void main(void) {
+//   const spi_settings spiSetting = {.enableDMA       = false,
+//                                    .spiBitRateMbits = 0.3,
+//                                    .cpuClockMHz     = 16,
+//                                    .cpol            = 1,
+//                                    .cpha            = 1,
+//                                    .operMode        = Freescale,
+//                                    .isLoopBack      = false,
+//                                    .transferSizeBit = 8,
+//                                    .role            = Master,
+//                                    .clockSource     = Systemclock};
 
-  if (spi_open(spiSetting) != ERR_NO_ERR) { return; }
+//   if (spi_open(spiSetting) != ERR_NO_ERR) { return; }
 
-  spi_single_frame frameList[4];
+//   spi_single_frame frameList[4];
 
-  uint8_t txData[1] = {0xD0};
-  uint8_t rxData[1];
+//   uint8_t txData[1] = {0xD0};
+//   uint8_t rxData[1];
 
-  for (;;) { spi_transfer(spiSetting, txData, 1, rxData, 1, Both); }
-}
+//   for (;;) { spi_transfer(spiSetting, txData, 1, rxData, 1, Both); }
+// }

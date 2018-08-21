@@ -31,7 +31,7 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
 uint8_t i2c0_single_data_read(const uint8_t slave_address,
                               const uint8_t no_ack,
                               const uint8_t no_stop,
-                              const uint8_t repeat_start);
+                              const uint8_t no_start);
 
 uint8_t i2c0_single_data_write(const uint8_t slave_address,
                                const uint8_t data_byte,
@@ -40,6 +40,8 @@ uint8_t i2c0_single_data_write(const uint8_t slave_address,
 uint8_t i2c0_error_handling(void);  // general error handling for i2c error
 
 uint8_t i2c0_check_master_enabled(void);  // check if the master mode is enabled on tivaC
+
+uint8_t i2c0_calculate_tpr(float i2cSclClockPeriodNs, float cpuClockPeriodNs, uint8_t* tprOut);
 
 void i2c0_waitBusy(
     void);  // wait until the i2c bus is not busy, do not call unless master/slave mode enabled

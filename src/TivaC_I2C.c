@@ -1,6 +1,9 @@
 #include "include/TivaC_I2C.h"
 #include "external/TivaC_Utils/include/tm4c123gh6pm.h"
 
+#define SCL_LP 6
+#define SCL_HP 4
+
 /**
  * @brief
  * Use I2C0 controller and support single or multiple bytes transfer up to high
@@ -31,13 +34,14 @@ uint8_t i2c0_open(void) {
   GPIO_PORTB_ODR_R &= ~(0x04);
 
   // I2CMCR0 init master
-  I2C0_MCR_R &= I2C_MCR_SFE;
   I2C0_MCR_R = I2C_MCR_MFE;
 
   // calculate the clock cycle and input into I2CMTPR
   // rn assume 80MHz, later add support for variable frequency
+  uint8_t tpr;
+  i2c0_calculate_tpr(10000, 62.5, &tpr);
   I2C0_MTPR_R &= ~(I2C_MTPR_TPR_M);
-  I2C0_MTPR_R += 0x09 << I2C_MTPR_TPR_S;
+  I2C0_MTPR_R += tpr << I2C_MTPR_TPR_S;
   return 0;
 }
 
@@ -59,7 +63,7 @@ uint8_t i2c0_close(void) {
 uint8_t i2c0_single_data_read(const uint8_t slave_address,
                               const uint8_t no_ack,
                               const uint8_t no_stop,
-                              const uint8_t repeat_start) {
+                              const uint8_t no_start) {
   uint32_t i2c0_mcs_temp = 0;
   i2c0_waitBusy();
 
@@ -68,16 +72,17 @@ uint8_t i2c0_single_data_read(const uint8_t slave_address,
 
   // set slave address
   I2C0_MSA_R &= ~I2C_MSA_SA_M;
-  I2C0_MSA_R += slave_address << I2C_MSA_SA_S;
+  I2C0_MSA_R += (slave_address << I2C_MSA_SA_S) & (I2C_MSA_SA_M);
 
   i2c0_waitBusy();
 
   // option parsing
-  if (repeat_start) {
-    i2c0_mcs_temp |= I2C_MCS_START;
-  } else {
+  if (no_start) {
     i2c0_mcs_temp &= ~I2C_MCS_START;
+  } else {
+    i2c0_mcs_temp |= I2C_MCS_START;
   }
+
   if (no_stop) {
     i2c0_mcs_temp &= ~I2C_MCS_STOP;
   } else {
@@ -102,19 +107,21 @@ uint8_t i2c0_single_data_write(const uint8_t slave_address,
                                const uint8_t no_end_stop) {
   i2c0_waitBusy();
 
+  I2C0_MSA_R &= ~(I2C_MSA_SA_M);
+  I2C0_MSA_R += (slave_address << I2C_MSA_SA_S);
+
   // go into write mode
   I2C0_MSA_R &= ~(I2C_MSA_RS);
 
-  I2C0_MSA_R = (slave_address << I2C_MSA_SA_S) & (I2C_MSA_SA_M);
+  I2C0_MDR_R |= I2C_MDR_DATA_M & (data_byte << I2C_MDR_DATA_S);
 
-  I2C0_MDR_R &= I2C_MDR_DATA_M;
-  I2C0_MDR_R += data_byte << I2C_MDR_DATA_S;
+  i2c0_waitBusy();
 
   // write settings
   if (no_end_stop) {
-    I2C0_MCS_R = (I2C_MCS_START | I2C_MCS_RUN) & (~I2C_MCS_STOP);
+    I2C0_MCS_R = (I2C_MCS_START | I2C_MCS_RUN) & (~I2C_MCS_STOP) & (~I2C_MCS_HS);
   } else {
-    I2C0_MCS_R = I2C_MCS_START | I2C_MCS_RUN | I2C_MCS_STOP;
+    I2C0_MCS_R = (I2C_MCS_START | I2C_MCS_RUN | I2C_MCS_STOP) & (~I2C_MCS_HS);
   }
 
   i2c0_waitBusy();
@@ -161,7 +168,8 @@ uint8_t i2c0_multiple_data_byte_write(const uint8_t  slave_address,
   // prepare the Tiva for communications by setting the R/W bit to 0
   // and write the address to the register and make first transmit
   // after first transmit remain in transmit state
-  I2C0_MSA_R = (slave_address << I2C_MSA_SA_S) & (I2C_MSA_SA_M);
+  I2C0_MSA_R &= ~(I2C_MSA_SA_M);
+  I2C0_MSA_R += (slave_address << I2C_MSA_SA_S);
   I2C0_MDR_R |= I2C_MDR_DATA_M & ((*output_buffer++) << I2C_MDR_DATA_S);
   I2C0_MCS_R = (I2C_MCS_START | I2C_MCS_RUN) & ((~I2C_MCS_STOP) & (~I2C_MCS_HS));
 
@@ -202,7 +210,8 @@ uint8_t i2c0_multiple_data_byte_read(const uint8_t slave_address,
   I2C0_MSA_R |= I2C_MSA_RS;
 
   // load slave address and the first data element
-  I2C0_MSA_R = (slave_address << I2C_MSA_SA_S) & (I2C_MSA_SA_M);
+  I2C0_MSA_R &= ~(I2C_MSA_SA_M);
+  I2C0_MSA_R += (slave_address << I2C_MSA_SA_S) & (I2C_MSA_SA_M);
 
   i2c0_waitBusy();
 
@@ -261,4 +270,9 @@ void i2c0_waitBusy(void) {
   while ((I2C0_MCS_R & I2C_MCS_BUSY)) {
     // wait for the bus to stop being busy
   }
+}
+
+uint8_t i2c0_calculate_tpr(float i2cSclClockPeriodNs, float cpuClockPeriodNs, uint8_t* tprOut) {
+  *tprOut = (uint8_t)((i2cSclClockPeriodNs / (cpuClockPeriodNs * (SCL_LP + SCL_HP) * 2)) - 1);
+  return 0;
 }
