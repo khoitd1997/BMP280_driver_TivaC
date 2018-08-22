@@ -5,6 +5,7 @@
 #ifndef _BMP280_DRV_
 #define _BMP280_DRV_
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "include/BMP280_Ware.h"
@@ -40,10 +41,13 @@ typedef enum {
   ERR_SENSOR_UNITIALIZED  // indicate that bmp280 struct is not valid
 } bmp280_errCode;
 
-typedef struct bmp280Sensor bmp280;
+typedef struct {
+  bool isMeasuring;
+  bool isUpdating;
+} bmp280Status;
 
 /*data structure of a bmp280*/
-struct bmp280Sensor {
+typedef struct bmp280Sensor {
   // protocol information
   uint8_t            ID;
   uint8_t            address;
@@ -59,13 +63,15 @@ struct bmp280Sensor {
 
   float standbyTime;  // unit is ms, check the data sheet for list of allowed
                       // values
-};
+
+  bmp280Status lastKnowStatus;
+} bmp280;
 
 /*functions used for beginning or wrapping up communications*/
 // initialized the bmp280 struct with either predefined settings or customized
 // calling this functions will not result in a write to the hardware
 bmp280_errCode bmp280_create_predefined_settings(bmp280* sensor, bmp280_measureSettings settings);
-bmp280_errCode bmp280_init(bmp280* sensor, bmp280_comProtocol protocol);
+bmp280_errCode bmp280_init(bmp280* sensor, bmp280_comProtocol protocol, uint8_t address);
 
 // open the communication channel on SPI/I2C, all settings must have been
 // initialized, will write settings to hardware
@@ -91,5 +97,6 @@ bmp280_errCode bmp280_reset(bmp280* sensor);
 bmp280_errCode bmp280_get_ctr_meas(bmp280* sensor, uint8_t* ctrlMeasRtr);
 bmp280_errCode bmp280_get_config(bmp280* sensor, uint8_t* configReturn);
 bmp280_errCode bmp280_get_calibration_data(bmp280* sensor, bmp280_calib_param* calibParam);
+bmp280_errCode bmp280_get_status(bmp280* sensor);
 
 #endif

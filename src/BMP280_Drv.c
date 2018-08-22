@@ -6,7 +6,9 @@
 #include "include/BMP280_Drv.h"
 
 #include <assert.h>
+#include <stdbool.h>
 
+#include "external/TivaC_Utils/include/bit_manipulation.h"
 #include "include/BMP280_Utils.h"
 #include "include/BMP280_Ware.h"
 #include "include/TivaC_I2C.h"
@@ -34,6 +36,9 @@ typedef enum {
 // the two special addresses
 #define BMP280_RESADDR 0xE0
 #define BMP280_IDARR 0xD0
+
+#define BMP280_MEASURING_MASK 0x8
+#define BMP280_UPDATING_MASK 0x1
 
 // initialize the bmp280 with predefined value in the datasheet
 bmp280_errCode bmp280_create_predefined_settings(bmp280* sensor, bmp280_measureSettings settings) {
@@ -98,12 +103,12 @@ bmp280_errCode bmp280_create_predefined_settings(bmp280* sensor, bmp280_measureS
   return ERR_NO_ERR;
 }
 
-bmp280_errCode bmp280_init(bmp280* sensor, bmp280_comProtocol protocol) {
-  if (sensor == NULL) { return ERR_SENSOR_UNITIALIZED; }
+bmp280_errCode bmp280_init(bmp280* sensor, bmp280_comProtocol protocol, uint8_t address) {
+  if (NULL == sensor) { return ERR_SENSOR_UNITIALIZED; }
   BMP280_TRY_FUNC(bmp280_check_setting(sensor));
 
-  sensor->portNum  = 0;         // 0 for now
-  sensor->address  = 0x77;      // value pretty much hardcoded due to hardware
+  sensor->portNum  = 0;  // hard coded for 0
+  sensor->address  = address;
   sensor->protocol = protocol;  // settings obtained in datasheet pg 19
 
   return ERR_NO_ERR;
@@ -112,7 +117,7 @@ bmp280_errCode bmp280_init(bmp280* sensor, bmp280_comProtocol protocol) {
 bmp280_errCode bmp280_open(bmp280* sensor) {
   BMP280_TRY_FUNC(bmp280_check_setting(sensor));
 
-  if (sensor->protocol == I2C) {
+  if (I2C == sensor->protocol) {
     // preparing data byte for writing to bmp280 register
     uint8_t i2cWriteBytes[4];  // 2 for register addresses and 2 for the
                                // setting byte
@@ -132,9 +137,8 @@ bmp280_errCode bmp280_open(bmp280* sensor) {
 }
 
 bmp280_errCode bmp280_getID(bmp280* sensor, uint8_t* returnID) {
-  uint8_t ID;
-  bmp280_get_one_register(sensor, BMP280_IDARR, &ID);
-  sensor->ID = ID;
+  bmp280_get_one_register(sensor, BMP280_IDARR, returnID);
+  sensor->ID = *returnID;
   return ERR_NO_ERR;
 }
 
@@ -145,27 +149,26 @@ bmp280_errCode bmp280_reset(bmp280* sensor) {
   resSeq[0] = BMP280_RESADDR;
   resSeq[1] = 0xB6;  // obtain from page 24 datasheet
 
-  if (sensor->protocol == I2C) { i2c0_multiple_data_byte_write(sensor->address, resSeq, 2); }
+  if (I2C == sensor->protocol) { i2c0_multiple_data_byte_write(sensor->address, resSeq, 2); }
   // TODO: do SPI
 
   return ERR_NO_ERR;
 }
 
 bmp280_errCode bmp280_update_setting(bmp280* sensor) {
-  if (sensor->protocol == I2C) {
+  if (I2C == sensor->protocol) {
     // preparing data byte for writing to bmp280 register
     uint8_t i2cWriteBytes[4];  // 2 for register addresses and 2 for the
                                // setting byte
 
     // handle control byte first
     i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
-    // bmp280_createCtrlByte(sensor, &i2cWriteBytes[1]);
-    i2cWriteBytes[1] = 0x3F;
+    bmp280_createCtrlByte(sensor, &i2cWriteBytes[1]);
 
     // handle config byte
     i2cWriteBytes[2] = BMP280_BASEADDR + Config;
-    // bmp280_createConfigByte(sensor, &i2cWriteBytes[3]);
-    i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 2);
+    bmp280_createConfigByte(sensor, &i2cWriteBytes[3]);
+    i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 4);
   }
 
   return ERR_NO_ERR;
@@ -178,6 +181,16 @@ bmp280_errCode bmp280_get_ctr_meas(bmp280* sensor, uint8_t* ctrlMeasReturn) {
 
 bmp280_errCode bmp280_get_config(bmp280* sensor, uint8_t* configReturn) {
   bmp280_get_one_register(sensor, BMP280_BASEADDR + Config, configReturn);
+  return ERR_NO_ERR;
+}
+
+bmp280_errCode bmp280_get_status(bmp280* sensor) {
+  uint8_t statusReturn;
+  bmp280_get_one_register(sensor, BMP280_BASEADDR + Status, &statusReturn);
+  bit_get(statusReturn, BMP280_MEASURING_MASK) ? (sensor->lastKnowStatus.isMeasuring = true)
+                                               : (sensor->lastKnowStatus.isMeasuring = false);
+  bit_get(statusReturn, BMP280_UPDATING_MASK) ? (sensor->lastKnowStatus.isUpdating = true)
+                                              : (sensor->lastKnowStatus.isUpdating = false);
   return ERR_NO_ERR;
 }
 

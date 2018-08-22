@@ -46,7 +46,7 @@ int main(void) {
   uint8_t            configReturn;
 
   bmp280_create_predefined_settings(&sensor280, WeatherStat);
-  bmp280_init(&sensor280, I2C);
+  bmp280_init(&sensor280, I2C, 0x77);
   bmp280_open(&sensor280);
   bmp280_reset(&sensor280);
   delayms(5);
