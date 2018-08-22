@@ -27,51 +27,43 @@ typedef enum {
   ERR_INVAL_ROLE,
   ERR_INVAL_OPERMODE,
   ERR_INVAL_CLOCKSOURCE
-} spi_errCode;
+} SpiErrCode;
 
-typedef enum { Freescale, Tissf, Microwire } spi_protocol_mode;
-typedef enum { Slave, Master } spi_role;
-typedef enum { Systemclock, Piosc } clock_source;
+typedef enum { Freescale, Tissf, Microwire } SpiProtocolMode;
+typedef enum { Slave, Master } SpiRole;
+typedef enum { Systemclock, Piosc } ClockSource;
 
-typedef enum { Tx, Rx, Both } spi_transfer_mode;
+typedef enum { Tx, Rx, Both } SpiTransferMode;
 typedef struct {
-  bool              enableDMA;
-  float             spiBitRateMbits;
-  float             cpuClockMHz;
-  uint8_t           cpol;
-  uint8_t           cpha;
-  spi_protocol_mode operMode;
-  bool              isLoopBack;
-  uint8_t           transferSizeBit;  // how much to tx/rx per SPI transfer
-  spi_role          role;
-  clock_source      clockSource;
+  bool            enableDMA;
+  float           spiBitRateMbits;
+  float           cpuClockMHz;
+  uint8_t         cpol;
+  uint8_t         cpha;
+  SpiProtocolMode operMode;
+  bool            isLoopBack;
+  uint8_t         transferSizeBit;  // how much to tx/rx per SPI transfer
+  SpiRole         role;
+  ClockSource     clockSource;
   // TODO: maybe add interrupts support
-} spi_settings;
-
-typedef enum { TxFrame, RxFrame } spi_frame_type;
-
-typedef struct {
-  spi_frame_type frameType;
-  uint8_t        frameData;  // rx or tx data depends on frame type
-} spi_single_frame;
+} SpiSettings;
 
 /* Communication setup */
-spi_errCode spi_open(const spi_settings setting);  // setup all necessary register, but don't
-                                                   // start communication until spi_transfer
-                                                   // is called
+SpiErrCode spi_open(const SpiSettings setting);  // setup all necessary register, but don't
+                                                 // start communication until spi_transfer
+                                                 // is called
 // clean reg and disable SSI
 // calling this will disable clock for spi and change all
 // spi pins to general digital pins
-spi_errCode spi_close(void);
+SpiErrCode spi_close(void);
 
 /* Data Transfer */
 // used for both single and multiple bytes
 // used for both tx receive
-spi_errCode spi_transfer(const spi_settings setting,
-                         uint8_t*           dataTx,
-                         uint8_t            dataTxLenByte,
-                         uint8_t*           dataRx,
-                         uint8_t            dataRxLenByte,
-                         spi_transfer_mode  transferMode);
+SpiErrCode spi_transfer(const SpiSettings setting,
+                        uint8_t*          dataTx,
+                        const uint8_t     dataTxLenByte,
+                        uint8_t*          dataRx,
+                        const uint8_t     dataRxLenByte);
 
 #endif
