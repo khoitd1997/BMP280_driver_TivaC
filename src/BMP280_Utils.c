@@ -1,6 +1,7 @@
 #include "include/BMP280_Utils.h"
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "include/BMP280_Drv.h"
@@ -25,7 +26,7 @@ bmp280_errCode bmp280_check_setting(bmp280* sensor) {
 
 bmp280_errCode bmp280_checkPortOpened(bmp280* sensor) {
   if (sensor->protocol == I2C) {
-    if (!i2c0_check_master_enabled()) {
+    if (i2c0_check_master_enabled() != I2C0_NO_ERR) {
       return ERR_PORT_NOT_OPEN;
     } else {
       return ERR_NO_ERR;
@@ -184,7 +185,7 @@ bmp280_errCode bmp280_port_prep(bmp280* sensor) {
   } else {
     BMP280_TRY_FUNC(bmp280_checkPortOpened(sensor));
 
-    if (sensor->protocol == I2C) { i2c0_waitBusy(); }
+    if (sensor->protocol == I2C) { i2c0_wait_bus(); }
     return ERR_NO_ERR;
   }
 }
@@ -196,10 +197,10 @@ bmp280_errCode bmp280_get_one_register(bmp280*       sensor,
 
   uint8_t ID;
   if (sensor->protocol == I2C) {
-    i2c0_waitBusy();
+    i2c0_wait_bus();
     // write data with no stop signal
-    i2c0_single_data_write(sensor->address, regAddr, 1);
-    i2c0_waitBusy();
+    i2c0_single_data_write(sensor->address, regAddr, true);
+    i2c0_wait_bus();
 
     // read 3 bytes bc reading single byte seems to create a bug
     uint8_t inputBuffer[3];
@@ -214,9 +215,9 @@ bmp280_errCode bmp280_get_multiple_register(bmp280*       sensor,
                                             uint8_t*      regData,
                                             uint8_t       dataLen) {
   if (sensor->protocol == I2C) {
-    i2c0_waitBusy();
+    i2c0_wait_bus();
     // write data with no stop signal
-    i2c0_single_data_write(sensor->address, startAddr, 1);
+    i2c0_single_data_write(sensor->address, startAddr, true);
     i2c0_multiple_data_byte_read(sensor->address, regData, dataLen);
   }
   return ERR_NO_ERR;
