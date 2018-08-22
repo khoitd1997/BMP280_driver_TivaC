@@ -7,7 +7,7 @@
 #include "include/BMP280_Drv.h"
 #include "include/TivaC_I2C.h"
 
-bmp280_errCode bmp280_check_setting(bmp280* sensor) {
+Bmp280ErrCode bmp280_check_setting(bmp280* sensor) {
   if (sensor == NULL) {
     return ERR_SENSOR_UNITIALIZED;
   }
@@ -24,7 +24,7 @@ bmp280_errCode bmp280_check_setting(bmp280* sensor) {
   }
 }
 
-bmp280_errCode bmp280_checkPortOpened(bmp280* sensor) {
+Bmp280ErrCode bmp280_port_check(bmp280* sensor) {
   if (sensor->protocol == I2C) {
     if (i2c0_check_master_enabled() != I2C0_NO_ERR) {
       return ERR_PORT_NOT_OPEN;
@@ -34,7 +34,7 @@ bmp280_errCode bmp280_checkPortOpened(bmp280* sensor) {
   }
 }
 
-bmp280_errCode bmp280_createCtrlByte(bmp280* sensor, uint8_t* controlByte) {
+Bmp280ErrCode bmp280_make_ctrl_byte(bmp280* sensor, uint8_t* controlByte) {
   // start with all 1 and zero out the needed bits
   uint8_t tempByte = 0xFF;
   switch (sensor->tempSamp) {
@@ -119,7 +119,7 @@ bmp280_errCode bmp280_createCtrlByte(bmp280* sensor, uint8_t* controlByte) {
   return ERR_NO_ERR;
 }
 
-uint8_t bmp280_createConfigByte(bmp280* sensor, uint8_t* returnByte) {
+uint8_t bmp280_make_cfg_byte(bmp280* sensor, uint8_t* returnByte) {
   // start with all 1 and zero out the needed bits
   uint8_t tempByte = 0xFF;
 
@@ -179,30 +179,30 @@ uint8_t bmp280_createConfigByte(bmp280* sensor, uint8_t* returnByte) {
   *returnByte = tempByte;
 }
 
-bmp280_errCode bmp280_port_prep(bmp280* sensor) {
+Bmp280ErrCode bmp280_port_prep(bmp280* sensor) {
   if (sensor == NULL) {
     return ERR_SENSOR_UNITIALIZED;
   } else {
-    BMP280_TRY_FUNC(bmp280_checkPortOpened(sensor));
+    BMP280_TRY_FUNC(bmp280_port_check(sensor));
 
-    if (sensor->protocol == I2C) { i2c0_wait_bus(); }
+    if (sensor->protocol == I2C) { I2C0_TRY_FUNC(i2c0_wait_bus()); }
     return ERR_NO_ERR;
   }
 }
 
-bmp280_errCode bmp280_get_one_register(bmp280*       sensor,
-                                       const uint8_t regAddr,
-                                       uint8_t*      registerData) {
+Bmp280ErrCode bmp280_get_one_register(bmp280*       sensor,
+                                      const uint8_t regAddr,
+                                      uint8_t*      registerData) {
   BMP280_TRY_FUNC(bmp280_port_prep(sensor));
 
   uint8_t ID;
   if (sensor->protocol == I2C) {
-    i2c0_wait_bus();
+    I2C0_TRY_FUNC(i2c0_wait_bus());
     // write data with no stop signal
     i2c0_single_data_write(sensor->address, regAddr, true);
-    i2c0_wait_bus();
+    I2C0_TRY_FUNC(i2c0_wait_bus());
 
-    // read 3 bytes bc reading single byte seems to create a bug
+    // read 3 bytes bc reading single byte seems to create weird behaviours with this sensor
     uint8_t inputBuffer[3];
     i2c0_multiple_data_byte_read(sensor->address, inputBuffer, 3);
     inputBuffer[0] = *registerData;
@@ -210,12 +210,12 @@ bmp280_errCode bmp280_get_one_register(bmp280*       sensor,
   return ERR_NO_ERR;
 }
 
-bmp280_errCode bmp280_get_multiple_register(bmp280*       sensor,
-                                            const uint8_t startAddr,
-                                            uint8_t*      regData,
-                                            uint8_t       dataLen) {
+Bmp280ErrCode bmp280_get_multiple_register(bmp280*       sensor,
+                                           const uint8_t startAddr,
+                                           uint8_t*      regData,
+                                           const uint8_t dataLen) {
   if (sensor->protocol == I2C) {
-    i2c0_wait_bus();
+    I2C0_TRY_FUNC(i2c0_wait_bus());
     // write data with no stop signal
     i2c0_single_data_write(sensor->address, startAddr, true);
     i2c0_multiple_data_byte_read(sensor->address, regData, dataLen);

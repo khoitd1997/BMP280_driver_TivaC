@@ -48,7 +48,7 @@
 
 // Returns rawCalibDataerature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23
 // DegC. calData->t_fine carries fine rawCalibDataerature as global value
-float bmp280_compensate_T_int32(int32_t adc_T, bmp280_calib_param* calData) {
+float bmp280_compensate_T_int32(int32_t adc_T, Bmp280CalibParam* calData) {
   int32_t var1, var2;
   var1 = ((((adc_T >> 3) - ((int32_t)calData->dig_t1 << 1))) * ((int32_t)calData->dig_t2)) >> 11;
   var2 = (((((adc_T >> 4) - ((int32_t)calData->dig_t1)) *
@@ -62,7 +62,7 @@ float bmp280_compensate_T_int32(int32_t adc_T, bmp280_calib_param* calData) {
 
 // Returns pressure in Pa as unsigned 32 bit integer in Q24.8 format (24 integer bits and 8
 // fractional bits). Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa
-float bmp280_compensate_P_int64(int32_t adc_P, bmp280_calib_param* calData) {
+float bmp280_compensate_P_int64(int32_t adc_P, Bmp280CalibParam* calData) {
   int64_t var1, var2, p;
   var1 = ((int64_t)calData->t_fine) - 128000;
   var2 = var1 * var1 * (int64_t)calData->dig_p6;
@@ -82,31 +82,31 @@ float bmp280_compensate_P_int64(int32_t adc_P, bmp280_calib_param* calData) {
   return (float)p;
 }
 
-int8_t bmp280_get_calib_param(uint8_t* rawCalibData, bmp280_calib_param* outputParam) {
-  outputParam->dig_t1 = (uint16_t)(((uint16_t)rawCalibData[BMP280_DIG_T1_MSB_POS] << 8) |
-                                   ((uint16_t)rawCalibData[BMP280_DIG_T1_LSB_POS]));
-  outputParam->dig_t2 = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_T2_MSB_POS] << 8) |
-                                  ((int16_t)rawCalibData[BMP280_DIG_T2_LSB_POS]));
-  outputParam->dig_t3 = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_T3_MSB_POS] << 8) |
-                                  ((int16_t)rawCalibData[BMP280_DIG_T3_LSB_POS]));
-  outputParam->dig_p1 = (uint16_t)(((uint16_t)rawCalibData[BMP280_DIG_P1_MSB_POS] << 8) |
-                                   ((uint16_t)rawCalibData[BMP280_DIG_P1_LSB_POS]));
-  outputParam->dig_p2 = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P2_MSB_POS] << 8) |
-                                  ((int16_t)rawCalibData[BMP280_DIG_P2_LSB_POS]));
-  outputParam->dig_p3 = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P3_MSB_POS] << 8) |
-                                  ((int16_t)rawCalibData[BMP280_DIG_P3_LSB_POS]));
-  outputParam->dig_p4 = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P4_MSB_POS] << 8) |
-                                  ((int16_t)rawCalibData[BMP280_DIG_P4_LSB_POS]));
-  outputParam->dig_p5 = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P5_MSB_POS] << 8) |
-                                  ((int16_t)rawCalibData[BMP280_DIG_P5_LSB_POS]));
-  outputParam->dig_p6 = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P6_MSB_POS] << 8) |
-                                  ((int16_t)rawCalibData[BMP280_DIG_P6_LSB_POS]));
-  outputParam->dig_p7 = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P7_MSB_POS] << 8) |
-                                  ((int16_t)rawCalibData[BMP280_DIG_P7_LSB_POS]));
-  outputParam->dig_p8 = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P8_MSB_POS] << 8) |
-                                  ((int16_t)rawCalibData[BMP280_DIG_P8_LSB_POS]));
-  outputParam->dig_p9 = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P9_MSB_POS] << 8) |
-                                  ((int16_t)rawCalibData[BMP280_DIG_P9_LSB_POS]));
+int8_t bmp280_get_calib_param(uint8_t* rawCalibData, Bmp280CalibParam* outputParam) {
+    outputParam->dig_t1 = (uint16_t)(((uint16_t)rawCalibData[BMP280_DIG_T1_MSB_POS] << 8) |
+                                     ((uint16_t)rawCalibData[BMP280_DIG_T1_LSB_POS]));
+outputParam->dig_t2     = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_T2_MSB_POS] << 8) |
+                                ((int16_t)rawCalibData[BMP280_DIG_T2_LSB_POS]));
+outputParam->dig_t3     = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_T3_MSB_POS] << 8) |
+                                ((int16_t)rawCalibData[BMP280_DIG_T3_LSB_POS]));
+outputParam->dig_p1     = (uint16_t)(((uint16_t)rawCalibData[BMP280_DIG_P1_MSB_POS] << 8) |
+                                 ((uint16_t)rawCalibData[BMP280_DIG_P1_LSB_POS]));
+outputParam->dig_p2     = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P2_MSB_POS] << 8) |
+                                ((int16_t)rawCalibData[BMP280_DIG_P2_LSB_POS]));
+outputParam->dig_p3     = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P3_MSB_POS] << 8) |
+                                ((int16_t)rawCalibData[BMP280_DIG_P3_LSB_POS]));
+outputParam->dig_p4     = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P4_MSB_POS] << 8) |
+                                ((int16_t)rawCalibData[BMP280_DIG_P4_LSB_POS]));
+outputParam->dig_p5     = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P5_MSB_POS] << 8) |
+                                ((int16_t)rawCalibData[BMP280_DIG_P5_LSB_POS]));
+outputParam->dig_p6     = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P6_MSB_POS] << 8) |
+                                ((int16_t)rawCalibData[BMP280_DIG_P6_LSB_POS]));
+outputParam->dig_p7     = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P7_MSB_POS] << 8) |
+                                ((int16_t)rawCalibData[BMP280_DIG_P7_LSB_POS]));
+outputParam->dig_p8     = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P8_MSB_POS] << 8) |
+                                ((int16_t)rawCalibData[BMP280_DIG_P8_LSB_POS]));
+outputParam->dig_p9     = (int16_t)(((int16_t)rawCalibData[BMP280_DIG_P9_MSB_POS] << 8) |
+                                ((int16_t)rawCalibData[BMP280_DIG_P9_LSB_POS]));
 
-  return 0;
+return 0;
 }

@@ -14,6 +14,11 @@
 #define NO_REPEAT_START 0
 #define REPEAT_START 1
 
+#define I2C0_TRY_FUNC(funcToExecute)                \
+  do {                                              \
+    I2c0ErrCode errCode = funcToExecute;            \
+    if (errCode != I2C0_NO_ERR) { return errCode; } \
+  } while (0)
 typedef enum { I2C0_NO_ERR = 0, I2C0_TIMEOUT, I2C0_BUS_ERROR, I2C0_MASTER_DISABLED } I2c0ErrCode;
 
 I2c0ErrCode i2c0_open(void);   // initialize i2c registers

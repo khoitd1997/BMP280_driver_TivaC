@@ -62,10 +62,10 @@ typedef struct {
   int16_t  dig_p8;
   int16_t  dig_p9;
   int32_t  t_fine;
-} bmp280_calib_param;
+} Bmp280CalibParam;
 
-float bmp280_compensate_T_int32(int32_t adc_T, bmp280_calib_param* calData);
-float bmp280_compensate_P_int64(int32_t adc_P, bmp280_calib_param* calData);
+float bmp280_compensate_T_int32(int32_t adc_T, Bmp280CalibParam* calData);
+float bmp280_compensate_P_int64(int32_t adc_P, Bmp280CalibParam* calData);
 
 #define BMP280_DIG_T1_LSB_POS UINT8_C(0)
 #define BMP280_DIG_T1_MSB_POS UINT8_C(1)
@@ -93,6 +93,6 @@ float bmp280_compensate_P_int64(int32_t adc_P, bmp280_calib_param* calData);
 #define BMP280_DIG_P9_MSB_POS UINT8_C(23)
 #define BMP280_CALIB_DATA_SIZE UINT8_C(24)
 
-int8_t bmp280_get_calib_param(uint8_t* rawCalibData, bmp280_calib_param* outputParam);
+int8_t bmp280_get_calib_param(uint8_t* rawCalibData, Bmp280CalibParam* outputParam);
 
 #endif

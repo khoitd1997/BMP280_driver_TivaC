@@ -1,8 +1,3 @@
-/**
- * This is the main driver file for bmp280 but need i2c file from tivaC to work
- *
- */
-
 #include "include/BMP280_Drv.h"
 
 #include <assert.h>
@@ -41,7 +36,8 @@ typedef enum {
 #define BMP280_UPDATING_MASK 0x1
 
 // initialize the bmp280 with predefined value in the datasheet
-bmp280_errCode bmp280_create_predefined_settings(bmp280* sensor, bmp280_measureSettings settings) {
+Bmp280ErrCode bmp280_create_predefined_settings(bmp280*                     sensor,
+                                                const Bmp280MeasureSettings settings) {
   switch (settings) {
     case HandLow:
       sensor->mode        = Normal;
@@ -103,7 +99,24 @@ bmp280_errCode bmp280_create_predefined_settings(bmp280* sensor, bmp280_measureS
   return ERR_NO_ERR;
 }
 
-bmp280_errCode bmp280_init(bmp280* sensor, bmp280_comProtocol protocol, uint8_t address) {
+Bmp280ErrCode bmp280_create_custom_setting(bmp280*                   sensor,
+                                           const Bmp280Coeff         tempSamp,
+                                           const Bmp280Coeff         presSamp,
+                                           const Bmp280Coeff         iirFilter,
+                                           const Bmp280SamplSettings samplSet,
+                                           const Bmp280OperMode      mode,
+                                           const float               standbyTime) {
+  sensor->mode        = mode;
+  sensor->tempSamp    = tempSamp;
+  sensor->presSamp    = presSamp;
+  sensor->samplSet    = samplSet;
+  sensor->iirFilter   = iirFilter;
+  sensor->standbyTime = standbyTime;
+  BMP280_TRY_FUNC(bmp280_check_setting(sensor));
+  return ERR_NO_ERR;
+}
+
+Bmp280ErrCode bmp280_init(bmp280* sensor, const Bmp280ComProtocol protocol, const uint8_t address) {
   if (NULL == sensor) { return ERR_SENSOR_UNITIALIZED; }
   BMP280_TRY_FUNC(bmp280_check_setting(sensor));
 
@@ -114,7 +127,7 @@ bmp280_errCode bmp280_init(bmp280* sensor, bmp280_comProtocol protocol, uint8_t 
   return ERR_NO_ERR;
 }
 
-bmp280_errCode bmp280_open(bmp280* sensor) {
+Bmp280ErrCode bmp280_open(bmp280* sensor) {
   BMP280_TRY_FUNC(bmp280_check_setting(sensor));
 
   if (I2C == sensor->protocol) {
@@ -124,11 +137,11 @@ bmp280_errCode bmp280_open(bmp280* sensor) {
 
     // handle control byte first
     i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
-    bmp280_createCtrlByte(sensor, &i2cWriteBytes[1]);
+    bmp280_make_ctrl_byte(sensor, &i2cWriteBytes[1]);
 
     // handle config byte
     i2cWriteBytes[2] = BMP280_BASEADDR + Config;
-    bmp280_createConfigByte(sensor, &i2cWriteBytes[3]);
+    bmp280_make_cfg_byte(sensor, &i2cWriteBytes[3]);
 
     i2c0_open();
   }
@@ -136,55 +149,55 @@ bmp280_errCode bmp280_open(bmp280* sensor) {
   return ERR_NO_ERR;
 }
 
-bmp280_errCode bmp280_getID(bmp280* sensor, uint8_t* returnID) {
+Bmp280ErrCode bmp280_get_id(bmp280* sensor, uint8_t* returnID) {
   bmp280_get_one_register(sensor, BMP280_IDARR, returnID);
   sensor->ID = *returnID;
   return ERR_NO_ERR;
 }
 
-bmp280_errCode bmp280_reset(bmp280* sensor) {
+Bmp280ErrCode bmp280_reset(bmp280* sensor) {
   BMP280_TRY_FUNC(bmp280_port_prep(sensor));
 
   uint8_t resSeq[2];
   resSeq[0] = BMP280_RESADDR;
   resSeq[1] = 0xB6;  // obtain from page 24 datasheet
 
-  if (I2C == sensor->protocol) { i2c0_multiple_data_byte_write(sensor->address, resSeq, 2); }
+  if (sensor->protocol == I2C) { i2c0_multiple_data_byte_write(sensor->address, resSeq, 2); }
   // TODO: do SPI
 
   return ERR_NO_ERR;
 }
 
-bmp280_errCode bmp280_update_setting(bmp280* sensor) {
-  if (I2C == sensor->protocol) {
+Bmp280ErrCode bmp280_update_setting(bmp280* sensor) {
+  if (sensor->protocol == I2C) {
     // preparing data byte for writing to bmp280 register
     uint8_t i2cWriteBytes[4];  // 2 for register addresses and 2 for the
                                // setting byte
 
     // handle control byte first
     i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
-    bmp280_createCtrlByte(sensor, &i2cWriteBytes[1]);
+    bmp280_make_ctrl_byte(sensor, &i2cWriteBytes[1]);
 
     // handle config byte
     i2cWriteBytes[2] = BMP280_BASEADDR + Config;
-    bmp280_createConfigByte(sensor, &i2cWriteBytes[3]);
+    bmp280_make_cfg_byte(sensor, &i2cWriteBytes[3]);
     i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 4);
   }
 
   return ERR_NO_ERR;
 }
 
-bmp280_errCode bmp280_get_ctr_meas(bmp280* sensor, uint8_t* ctrlMeasReturn) {
+Bmp280ErrCode bmp280_get_ctr_meas(bmp280* sensor, uint8_t* ctrlMeasReturn) {
   bmp280_get_one_register(sensor, BMP280_BASEADDR + Ctrl_meas, ctrlMeasReturn);
   return ERR_NO_ERR;
 }
 
-bmp280_errCode bmp280_get_config(bmp280* sensor, uint8_t* configReturn) {
+Bmp280ErrCode bmp280_get_config(bmp280* sensor, uint8_t* configReturn) {
   bmp280_get_one_register(sensor, BMP280_BASEADDR + Config, configReturn);
   return ERR_NO_ERR;
 }
 
-bmp280_errCode bmp280_get_status(bmp280* sensor) {
+Bmp280ErrCode bmp280_get_status(bmp280* sensor) {
   uint8_t statusReturn;
   bmp280_get_one_register(sensor, BMP280_BASEADDR + Status, &statusReturn);
   bit_get(statusReturn, BMP280_MEASURING_MASK) ? (sensor->lastKnowStatus.isMeasuring = true)
@@ -194,10 +207,10 @@ bmp280_errCode bmp280_get_status(bmp280* sensor) {
   return ERR_NO_ERR;
 }
 
-bmp280_errCode bmp280_get_temp_press(bmp280*            sensor,
-                                     float*             temperatureC,
-                                     float*             pressPa,
-                                     bmp280_calib_param calibParam) {
+Bmp280ErrCode bmp280_get_temp_press(bmp280*          sensor,
+                                    float*           temperatureC,
+                                    float*           pressPa,
+                                    Bmp280CalibParam calibParam) {
   BMP280_TRY_FUNC(bmp280_port_prep(sensor));
   uint8_t rawData[RAW_TEM_TOTAL_BIT + RAW_PRESS_TOTAL_BIT + 4];
   bmp280_get_multiple_register(
@@ -212,7 +225,7 @@ bmp280_errCode bmp280_get_temp_press(bmp280*            sensor,
   return ERR_NO_ERR;
 }
 
-bmp280_errCode bmp280_get_calibration_data(bmp280* sensor, bmp280_calib_param* calibParam) {
+Bmp280ErrCode bmp280_get_calibration_data(bmp280* sensor, Bmp280CalibParam* calibParam) {
   BMP280_TRY_FUNC(bmp280_port_prep(sensor));
   uint8_t rawCalibData[BMP280_CALIB_DATA_SIZE + 5];
 

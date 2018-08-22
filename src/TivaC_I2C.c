@@ -16,12 +16,6 @@ static I2c0ErrCode i2c0_calculate_tpr(const float i2cSclClockPeriodNs,
   return I2C0_NO_ERR;
 }
 
-#define I2C0_TRY_FUNC(funcToExecute)                \
-  do {                                              \
-    I2c0ErrCode errCode = funcToExecute;            \
-    if (errCode != I2C0_NO_ERR) { return errCode; } \
-  } while (0)
-
 I2c0ErrCode i2c0_open(void) {
   // Enable RCGCI2C for i2c0
   SYSCTL_RCGCI2C_R |= SYSCTL_RCGCI2C_R0;
