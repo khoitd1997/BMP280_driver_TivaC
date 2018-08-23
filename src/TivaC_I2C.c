@@ -21,6 +21,7 @@ I2c0ErrCode i2c0_open(void) {
   SYSCTL_RCGCI2C_R |= SYSCTL_RCGCI2C_R0;
   // Enable clock for PORTB
   SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R1;
+  // TODO: add checking for clock ready to go
 
   // Enable Digital and I2C function and disable
   // the rest
@@ -41,7 +42,6 @@ I2c0ErrCode i2c0_open(void) {
   I2C0_MCR_R = I2C_MCR_MFE;
 
   // calculate the clock cycle and input into I2CMTPR
-  // rn assume 80MHz, later add support for variable frequency
   uint8_t tpr;
   i2c0_calculate_tpr(10000, 62.5, &tpr);
   I2C0_MTPR_R &= ~(I2C_MTPR_TPR_M);
@@ -202,6 +202,7 @@ I2c0ErrCode i2c0_multiple_data_byte_write(const uint8_t  slave_address,
   return I2C0_NO_ERR;
 }
 
+// TODO: inspect the i2c code to find why the BMP was behaving weirdly
 I2c0ErrCode i2c0_multiple_data_byte_read(const uint8_t slave_address,
                                          uint8_t*      input_buffer,
                                          const uint8_t input_buffer_length) {

@@ -135,7 +135,6 @@ SpiErrCode spi_transfer(const SpiSettings setting,
                         const uint8_t     dataRxLenByte) {
   uint8_t errCode;
   /* Pre-Transfer Error Checking and Computation Start Here */
-  if (ERR_NO_ERR != (errCode = spi_check_setting(setting))) { return errCode; }
 
   if ((dataTxLenByte) > 0) { assert(dataTx); }
 
@@ -152,7 +151,9 @@ SpiErrCode spi_transfer(const SpiSettings setting,
   while (totalByteTxed < dataTxLenByte || totalByteRxed < dataRxLenByte) {
     spi_pull_cs_low();
 
-    if ((totalByteTxed < dataTxLenByte)) { spi_tx_one_data_unit(setting, &totalByteTxed, dataTx); }
+    if ((totalByteTxed < dataTxLenByte)) {
+      spi_tx_one_data_unit(setting.transferSizeBit, &totalByteTxed, dataTx);
+    }
 
     spi_data_delay();
     if (true == firstRun) {
@@ -177,37 +178,37 @@ SpiErrCode spi_transfer(const SpiSettings setting,
   return ERR_NO_ERR;
 }
 
-void main(void) {
-  const SpiSettings spiSetting = {.enableDMA       = false,
-                                  .spiBitRateMbits = 0.3,
-                                  .cpuClockMHz     = 16,
-                                  .cpol            = 1,
-                                  .cpha            = 1,
-                                  .operMode        = Freescale,
-                                  .isLoopBack      = false,
-                                  .transferSizeBit = 8,
-                                  .role            = Master,
-                                  .clockSource     = Systemclock};
+// void main(void) {
+// const SpiSettings spiSetting = {.enableDMA       = false,
+//                                 .spiBitRateMbits = 0.3,
+//                                 .cpuClockMHz     = 16,
+//                                 .cpol            = 1,
+//                                 .cpha            = 1,
+//                                 .operMode        = Freescale,
+//                                 .isLoopBack      = false,
+//                                 .transferSizeBit = 8,
+//                                 .role            = Master,
+//                                 .clockSource     = Systemclock};
 
-  if (spi_open(spiSetting) != ERR_NO_ERR) { return; }
+//   if (spi_open(spiSetting) != ERR_NO_ERR) { return; }
 
-  uint8_t txData[1] = {0xD0};
-  uint8_t rxData[1];
-  greenled_init();
-  redled_init();
-  blueled_init();
-  greenled_off();
+//   uint8_t txData[1] = {0xD0};
+//   uint8_t rxData[1];
+//   greenled_init();
+//   redled_init();
+//   blueled_init();
+//   greenled_off();
 
-  for (;;) {
-    spi_transfer(spiSetting, txData, 1, rxData, 1);
-    printf("\nThe ID is %d", rxData[1]);
-    if (0x58 == rxData[0]) {
-      greenled_on();
-    } else {
-      greenled_off();
-      for (;;) {}
-    }
-    blueled_off();
-    delayms(100);
-  }
-}
+//   for (;;) {
+//     spi_transfer(spiSetting, txData, 1, rxData, 1);
+//     printf("\nThe ID is %d", rxData[1]);
+//     if (0x58 == rxData[0]) {
+//       greenled_on();
+//     } else {
+//       greenled_off();
+//       for (;;) {}
+//     }
+//     blueled_off();
+//     delayms(100);
+//   }
+// }

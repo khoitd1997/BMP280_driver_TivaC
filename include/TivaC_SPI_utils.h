@@ -26,8 +26,8 @@ void spi_data_delay(void);
 /* Protocol Handling */
 SpiErrCode spi_rx_one_data_unit(const SpiSettings setting, uint8_t* totalByteRxed, uint8_t* dataRx);
 
-SpiErrCode spi_tx_one_data_unit(const SpiSettings setting,
-                                uint8_t*          totalByteTxed,
-                                const uint8_t*    dataTx);
+SpiErrCode spi_tx_one_data_unit(const uint8_t  transferSize,
+                                uint8_t*       totalByteTxed,
+                                const uint8_t* dataTx);
 void       spi_clear_rx_buffer(void);
 #endif

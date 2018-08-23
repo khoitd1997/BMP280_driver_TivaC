@@ -34,6 +34,13 @@ Bmp280ErrCode bmp280_get_one_register(bmp280* sensor, const uint8_t regAddr, uin
 Bmp280ErrCode bmp280_get_multiple_register(bmp280*       sensor,
                                            const uint8_t startAddr,
                                            uint8_t*      regData,
-                                           const uint8_t dataLen);
+                                           const uint8_t totalRegister);
 
+Bmp280ErrCode bmp280_write_register(bmp280*        sensor,
+                                    const uint8_t* registerList,
+                                    const uint8_t  totalRegister,
+                                    const uint8_t* registerDataList);
+
+Bmp280ErrCode bmp280_open_i2c_spi(bmp280* sensor);
+Bmp280ErrCode bmp280_close_i2c_spi(bmp280* sensor);
 #endif

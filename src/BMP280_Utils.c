@@ -6,6 +6,7 @@
 
 #include "include/BMP280_Drv.h"
 #include "include/TivaC_I2C.h"
+#include "include/TivaC_SPI.h"
 
 Bmp280ErrCode bmp280_check_setting(bmp280* sensor) {
   if (sensor == NULL) {
@@ -179,6 +180,34 @@ uint8_t bmp280_make_cfg_byte(bmp280* sensor, uint8_t* returnByte) {
   *returnByte = tempByte;
 }
 
+Bmp280ErrCode bmp280_open_i2c_spi(bmp280* sensor) {
+  if (I2C == sensor->protocol) {
+    i2c0_open();
+  } else if (SPI == sensor->protocol) {
+    const SpiSettings spiSetting = {.enableDMA       = false,
+                                    .spiBitRateMbits = 0.3,
+                                    .cpuClockMHz     = 16,
+                                    .cpol            = 1,
+                                    .cpha            = 1,
+                                    .operMode        = Freescale,
+                                    .isLoopBack      = false,
+                                    .transferSizeBit = 8,
+                                    .role            = Master,
+                                    .clockSource     = Systemclock};
+
+    spi_open(spiSetting);
+  }
+  return ERR_NO_ERR;
+}
+
+Bmp280ErrCode bmp280_close_i2c_spi(bmp280* sensor) {
+  if (I2C == sensor->protocol) {
+    i2c0_close();
+  } else if (SPI == sensor->protocol) {
+    spi_close();
+  }
+}
+
 Bmp280ErrCode bmp280_port_prep(bmp280* sensor) {
   if (sensor == NULL) {
     return ERR_SENSOR_UNITIALIZED;
@@ -194,8 +223,6 @@ Bmp280ErrCode bmp280_get_one_register(bmp280*       sensor,
                                       const uint8_t regAddr,
                                       uint8_t*      registerData) {
   BMP280_TRY_FUNC(bmp280_port_prep(sensor));
-
-  uint8_t ID;
   if (sensor->protocol == I2C) {
     I2C0_TRY_FUNC(i2c0_wait_bus());
     // write data with no stop signal
@@ -213,12 +240,71 @@ Bmp280ErrCode bmp280_get_one_register(bmp280*       sensor,
 Bmp280ErrCode bmp280_get_multiple_register(bmp280*       sensor,
                                            const uint8_t startAddr,
                                            uint8_t*      regData,
-                                           const uint8_t dataLen) {
+                                           const uint8_t totalRegister) {
+  if (I2C == sensor->protocol) {
+    if (totalRegister > 1) {
+      I2C0_TRY_FUNC(i2c0_wait_bus());
+      // write data with no stop signal
+      i2c0_single_data_write(sensor->address, startAddr, true);
+      i2c0_multiple_data_byte_read(sensor->address, regData, totalRegister);
+    } else if (totalRegister == 1) {
+      I2C0_TRY_FUNC(i2c0_wait_bus());
+      // write data with no stop signal
+      i2c0_single_data_write(sensor->address, startAddr, true);
+      I2C0_TRY_FUNC(i2c0_wait_bus());
+
+      // read 3 bytes bc reading single byte seems to create weird behaviours with this sensor
+      uint8_t inputBuffer[3];
+      i2c0_multiple_data_byte_read(sensor->address, inputBuffer, 3);
+      inputBuffer[0] = regData[0];
+    }
+  } else if (SPI == sensor->protocol) {
+    const SpiSettings spiSetting = {.enableDMA       = false,
+                                    .spiBitRateMbits = 0.3,
+                                    .cpuClockMHz     = 16,
+                                    .cpol            = 1,
+                                    .cpha            = 1,
+                                    .operMode        = Freescale,
+                                    .isLoopBack      = false,
+                                    .transferSizeBit = 8,
+                                    .role            = Master,
+                                    .clockSource     = Systemclock};
+    uint8_t           addressList[1];
+    addressList[0] = startAddr;
+    spi_transfer(spiSetting, addressList, 1, regData, totalRegister);
+  }
+
+  return ERR_NO_ERR;
+}
+
+Bmp280ErrCode bmp280_write_register(bmp280*        sensor,
+                                    const uint8_t* registerList,
+                                    const uint8_t  totalRegister,
+                                    const uint8_t* registerDataList) {
   if (sensor->protocol == I2C) {
-    I2C0_TRY_FUNC(i2c0_wait_bus());
-    // write data with no stop signal
-    i2c0_single_data_write(sensor->address, startAddr, true);
-    i2c0_multiple_data_byte_read(sensor->address, regData, dataLen);
+    uint8_t regDataPair[2];
+    for (int regIndex = 0; regIndex < totalRegister; ++regIndex) {
+      regDataPair[0] = registerList[regIndex];
+      regDataPair[1] = registerDataList[regIndex];
+      i2c0_multiple_data_byte_write(sensor->address, regDataPair, 2);
+    }
+  } else if (sensor->protocol == SPI) {
+    const SpiSettings spiSetting = {.enableDMA       = false,
+                                    .spiBitRateMbits = 0.3,
+                                    .cpuClockMHz     = 16,
+                                    .cpol            = 1,
+                                    .cpha            = 1,
+                                    .operMode        = Freescale,
+                                    .isLoopBack      = false,
+                                    .transferSizeBit = 8,
+                                    .role            = Master,
+                                    .clockSource     = Systemclock};
+    uint8_t           regDataPair[2];
+    for (int regIndex = 0; regIndex < totalRegister; ++regIndex) {
+      regDataPair[0] = registerList[regIndex];
+      regDataPair[1] = registerDataList[regIndex];
+      spi_transfer(spiSetting, regDataPair, 2, NULL, 0);
+    }
   }
   return ERR_NO_ERR;
 }

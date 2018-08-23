@@ -76,12 +76,12 @@ SpiErrCode spi_rx_one_data_unit(const SpiSettings setting,
 }
 
 // TODO: refactor this
-SpiErrCode spi_tx_one_data_unit(const SpiSettings setting,
-                                uint8_t*          totalByteTxed,
-                                const uint8_t*    dataTx) {
+SpiErrCode spi_tx_one_data_unit(const uint8_t  transferSize,
+                                uint8_t*       totalByteTxed,
+                                const uint8_t* dataTx) {
   if (ERR_NO_ERR == spi_check_tx_full()) {
     spi_bus_wait();
-    SSI0_DR_R      = (uint8_t)(dataTx[*totalByteTxed]) << (setting.transferSizeBit - SPI_TRF_SIZE);
+    SSI0_DR_R      = (uint8_t)(dataTx[*totalByteTxed]) << (transferSize - SPI_TRF_SIZE);
     *totalByteTxed = *totalByteTxed + 1;
     return ERR_NO_ERR;
   } else {

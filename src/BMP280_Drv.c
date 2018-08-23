@@ -7,6 +7,7 @@
 #include "include/BMP280_Utils.h"
 #include "include/BMP280_Ware.h"
 #include "include/TivaC_I2C.h"
+#include "include/TivaC_SPI.h"
 
 // offset from BMP280 base register
 typedef enum {
@@ -127,27 +128,15 @@ Bmp280ErrCode bmp280_init(bmp280* sensor, const Bmp280ComProtocol protocol, cons
   return ERR_NO_ERR;
 }
 
+// TODO: Move I2C, SPI specific communication to another file
+
 Bmp280ErrCode bmp280_open(bmp280* sensor) {
   BMP280_TRY_FUNC(bmp280_check_setting(sensor));
-
-  if (I2C == sensor->protocol) {
-    // preparing data byte for writing to bmp280 register
-    uint8_t i2cWriteBytes[4];  // 2 for register addresses and 2 for the
-                               // setting byte
-
-    // handle control byte first
-    i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
-    bmp280_make_ctrl_byte(sensor, &i2cWriteBytes[1]);
-
-    // handle config byte
-    i2cWriteBytes[2] = BMP280_BASEADDR + Config;
-    bmp280_make_cfg_byte(sensor, &i2cWriteBytes[3]);
-
-    i2c0_open();
-  }
-
+  bmp280_open_i2c_spi(sensor);
   return ERR_NO_ERR;
 }
+
+Bmp280ErrCode bmp280_close(bmp280* sensor) { bmp280_close_i2c_spi(sensor); }
 
 Bmp280ErrCode bmp280_get_id(bmp280* sensor, uint8_t* returnID) {
   bmp280_get_one_register(sensor, BMP280_IDARR, returnID);
