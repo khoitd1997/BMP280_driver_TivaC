@@ -12,7 +12,7 @@
 
 SpiErrCode spi_open(const SpiSettings setting) {
   uint8_t errCode;
-  if ((errCode = spi_check_setting(setting)) != ERR_NO_ERR) { return errCode; }
+  if ((errCode = spi_check_setting(setting)) != SPI_ERR_NO_ERR) { return errCode; }
 
   uint8_t preScalc    = 0;
   uint8_t scr         = 0;
@@ -50,7 +50,7 @@ SpiErrCode spi_open(const SpiSettings setting) {
   } else if (setting.cpol == 1) {
     GPIO_PORTA_PUR_R |= 0x4;
   } else {
-    return ERR_SPI_CPA_UNDEFINED;
+    return SPI_ERR_SPI_CPA_UNDEFINED;
   }
 
   // relock the register
@@ -72,7 +72,7 @@ SpiErrCode spi_open(const SpiSettings setting) {
     SSI0_CC_R &= SSI_CC_CS_SYSPLL;
   }
 
-  if ((errCode = spi_calc_clock_prescalc(setting, &preScalc, &scr)) == ERR_NO_ERR) {
+  if ((errCode = spi_calc_clock_prescalc(setting, &preScalc, &scr)) == SPI_ERR_NO_ERR) {
     SSI0_CR0_R &= ~SSI_CR0_SCR_M;
     SSI0_CR0_R += scr << SSI_CR0_SCR_S;
 
@@ -109,7 +109,7 @@ SpiErrCode spi_open(const SpiSettings setting) {
       SSI0_CR0_R |= SSI_CR0_FRF_NMW;
       break;
     default:
-      return ERR_INVAL_PROTOCOL;
+      return SPI_ERR_INVAL_PROTOCOL;
   }
 
   if (setting.enableDMA) {
@@ -125,8 +125,10 @@ SpiErrCode spi_open(const SpiSettings setting) {
   } else {
     SSI0_CR1_R &= ~SSI_CR1_LBM;
   }
-  return ERR_NO_ERR;
+  return SPI_ERR_NO_ERR;
 }
+
+SpiErrCode spi_close(void) { bit_clear(SYSCTL_RCGCSSI_R, SYSCTL_RCGCSSI_R0); }
 
 SpiErrCode spi_transfer(const SpiSettings setting,
                         uint8_t*          dataTx,
@@ -175,8 +177,11 @@ SpiErrCode spi_transfer(const SpiSettings setting,
   spi_bus_wait();
   spi_pull_cs_high();
   spi_disable_spi();
-  return ERR_NO_ERR;
+  return SPI_ERR_NO_ERR;
 }
+
+// TODO: put in check for SPI
+SpiErrCode spi_check_spi_enabled(void) {}
 
 // void main(void) {
 // const SpiSettings spiSetting = {.enableDMA       = false,
@@ -190,7 +195,7 @@ SpiErrCode spi_transfer(const SpiSettings setting,
 //                                 .role            = Master,
 //                                 .clockSource     = Systemclock};
 
-//   if (spi_open(spiSetting) != ERR_NO_ERR) { return; }
+//   if (spi_open(spiSetting) != SPI_ERR_NO_ERR) { return; }
 
 //   uint8_t txData[1] = {0xD0};
 //   uint8_t rxData[1];

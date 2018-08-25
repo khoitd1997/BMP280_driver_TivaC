@@ -29,12 +29,10 @@ Bmp280ErrCode bmp280_port_check(bmp280* sensor);
  true for having errors typically call at beginning of any port operation */
 Bmp280ErrCode bmp280_port_prep(bmp280* sensor);
 
-Bmp280ErrCode bmp280_get_one_register(bmp280* sensor, const uint8_t regAddr, uint8_t* registerData);
-
-Bmp280ErrCode bmp280_get_multiple_register(bmp280*       sensor,
-                                           const uint8_t startAddr,
-                                           uint8_t*      regData,
-                                           const uint8_t totalRegister);
+Bmp280ErrCode bmp280_get_register(bmp280*       sensor,
+                                  const uint8_t startAddr,
+                                  uint8_t*      regData,
+                                  const uint8_t totalRegister);
 
 Bmp280ErrCode bmp280_write_register(bmp280*        sensor,
                                     const uint8_t* registerList,

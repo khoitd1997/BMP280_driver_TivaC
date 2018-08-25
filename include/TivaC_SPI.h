@@ -12,21 +12,21 @@
 #define SPI_TRF_SIZE 8
 
 typedef enum {
-  ERR_NO_ERR,
-  ERR_SPI_CPA_UNDEFINED,
-  ERR_RX_FULL,
-  ERR_TX_FULL,
-  ERR_RX_EMPTY,
-  ERR_INVAL_SYS_CLK_RATE,
-  ERR_NO_VAL_PRESCALC,
-  ERR_INVAL_BIT_RATE,
-  ERR_INVAL_DATA_SIZE,
-  ERR_INVAL_CPOL,
-  ERR_INVAL_CPHA,
-  ERR_INVAL_PROTOCOL,
-  ERR_INVAL_ROLE,
-  ERR_INVAL_OPERMODE,
-  ERR_INVAL_CLOCKSOURCE
+  SPI_ERR_NO_ERR,
+  SPI_ERR_SPI_CPA_UNDEFINED,
+  SPI_ERR_RX_FULL,
+  SPI_ERR_TX_FULL,
+  SPI_ERR_RX_EMPTY,
+  SPI_ERR_INVAL_SYS_CLK_RATE,
+  SPI_ERR_NO_VAL_PRESCALC,
+  SPI_ERR_INVAL_BIT_RATE,
+  SPI_ERR_INVAL_DATA_SIZE,
+  SPI_ERR_INVAL_CPOL,
+  SPI_ERR_INVAL_CPHA,
+  SPI_ERR_INVAL_PROTOCOL,
+  SPI_ERR_INVAL_ROLE,
+  SPI_ERR_INVAL_OPERMODE,
+  SPI_ERR_INVAL_CLOCKSOURCE
 } SpiErrCode;
 
 typedef enum { Freescale, Tissf, Microwire } SpiProtocolMode;
@@ -56,6 +56,7 @@ SpiErrCode spi_open(const SpiSettings setting);  // setup all necessary register
 // calling this will disable clock for spi and change all
 // spi pins to general digital pins
 SpiErrCode spi_close(void);
+SpiErrCode spi_check_spi_enabled(void);
 
 /* Data Transfer */
 // used for both single and multiple bytes

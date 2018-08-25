@@ -128,8 +128,6 @@ Bmp280ErrCode bmp280_init(bmp280* sensor, const Bmp280ComProtocol protocol, cons
   return ERR_NO_ERR;
 }
 
-// TODO: Move I2C, SPI specific communication to another file
-
 Bmp280ErrCode bmp280_open(bmp280* sensor) {
   BMP280_TRY_FUNC(bmp280_check_setting(sensor));
   bmp280_open_i2c_spi(sensor);
@@ -139,7 +137,7 @@ Bmp280ErrCode bmp280_open(bmp280* sensor) {
 Bmp280ErrCode bmp280_close(bmp280* sensor) { bmp280_close_i2c_spi(sensor); }
 
 Bmp280ErrCode bmp280_get_id(bmp280* sensor, uint8_t* returnID) {
-  bmp280_get_one_register(sensor, BMP280_IDARR, returnID);
+  bmp280_get_register(sensor, BMP280_IDARR, returnID, 1);
   sensor->ID = *returnID;
   return ERR_NO_ERR;
 }
@@ -147,48 +145,45 @@ Bmp280ErrCode bmp280_get_id(bmp280* sensor, uint8_t* returnID) {
 Bmp280ErrCode bmp280_reset(bmp280* sensor) {
   BMP280_TRY_FUNC(bmp280_port_prep(sensor));
 
-  uint8_t resSeq[2];
-  resSeq[0] = BMP280_RESADDR;
-  resSeq[1] = 0xB6;  // obtain from page 24 datasheet
+  uint8_t resetRegister[1];
+  uint8_t resetData[1];
+  resetRegister[0] = BMP280_RESADDR;
+  resetData[0]     = 0xB6;  // obtain from page 24 datasheet
 
-  if (sensor->protocol == I2C) { i2c0_multiple_data_byte_write(sensor->address, resSeq, 2); }
-  // TODO: do SPI
-
+  bmp280_write_register(sensor, resetRegister, 1, resetData);
   return ERR_NO_ERR;
 }
 
 Bmp280ErrCode bmp280_update_setting(bmp280* sensor) {
-  if (sensor->protocol == I2C) {
-    // preparing data byte for writing to bmp280 register
-    uint8_t i2cWriteBytes[4];  // 2 for register addresses and 2 for the
-                               // setting byte
+  // preparing data byte for writing to bmp280 register
+  uint8_t i2cRegisterList[2];
+  uint8_t i2cRegisterData[2];
 
-    // handle control byte first
-    i2cWriteBytes[0] = BMP280_BASEADDR + Ctrl_meas;
-    bmp280_make_ctrl_byte(sensor, &i2cWriteBytes[1]);
+  // handle control byte first
+  i2cRegisterList[0] = BMP280_BASEADDR + Ctrl_meas;
+  bmp280_make_ctrl_byte(sensor, &i2cRegisterData[0]);
 
-    // handle config byte
-    i2cWriteBytes[2] = BMP280_BASEADDR + Config;
-    bmp280_make_cfg_byte(sensor, &i2cWriteBytes[3]);
-    i2c0_multiple_data_byte_write(sensor->address, i2cWriteBytes, 4);
-  }
+  // handle config byte
+  i2cRegisterList[1] = BMP280_BASEADDR + Config;
+  bmp280_make_cfg_byte(sensor, &i2cRegisterData[1]);
+  bmp280_write_register(sensor, i2cRegisterList, 2, i2cRegisterData);
 
   return ERR_NO_ERR;
 }
 
 Bmp280ErrCode bmp280_get_ctr_meas(bmp280* sensor, uint8_t* ctrlMeasReturn) {
-  bmp280_get_one_register(sensor, BMP280_BASEADDR + Ctrl_meas, ctrlMeasReturn);
+  bmp280_get_register(sensor, BMP280_BASEADDR + Ctrl_meas, ctrlMeasReturn, 1);
   return ERR_NO_ERR;
 }
 
 Bmp280ErrCode bmp280_get_config(bmp280* sensor, uint8_t* configReturn) {
-  bmp280_get_one_register(sensor, BMP280_BASEADDR + Config, configReturn);
+  bmp280_get_register(sensor, BMP280_BASEADDR + Config, configReturn, 1);
   return ERR_NO_ERR;
 }
 
 Bmp280ErrCode bmp280_get_status(bmp280* sensor) {
   uint8_t statusReturn;
-  bmp280_get_one_register(sensor, BMP280_BASEADDR + Status, &statusReturn);
+  bmp280_get_register(sensor, BMP280_BASEADDR + Status, &statusReturn, 1);
   bit_get(statusReturn, BMP280_MEASURING_MASK) ? (sensor->lastKnowStatus.isMeasuring = true)
                                                : (sensor->lastKnowStatus.isMeasuring = false);
   bit_get(statusReturn, BMP280_UPDATING_MASK) ? (sensor->lastKnowStatus.isUpdating = true)
@@ -202,7 +197,7 @@ Bmp280ErrCode bmp280_get_temp_press(bmp280*          sensor,
                                     Bmp280CalibParam calibParam) {
   BMP280_TRY_FUNC(bmp280_port_prep(sensor));
   uint8_t rawData[RAW_TEM_TOTAL_BIT + RAW_PRESS_TOTAL_BIT + 4];
-  bmp280_get_multiple_register(
+  bmp280_get_register(
       sensor, BMP280_BASEADDR + Press_msb, rawData, RAW_TEM_TOTAL_BIT + RAW_PRESS_TOTAL_BIT + 4);
   int32_t rawPress = (int32_t)((((uint32_t)(rawData[0])) << 12) | (((uint32_t)(rawData[1])) << 4) |
                                ((uint32_t)rawData[2] >> 4));
@@ -219,8 +214,7 @@ Bmp280ErrCode bmp280_get_calibration_data(bmp280* sensor, Bmp280CalibParam* cali
   uint8_t rawCalibData[BMP280_CALIB_DATA_SIZE + 5];
 
   // LSB bits are at lower addr compared to MSB so the first number read will be LSB
-  bmp280_get_multiple_register(
-      sensor, BMP280_CALIB_START_ADDR, rawCalibData, BMP280_CALIB_DATA_SIZE + 5);
+  bmp280_get_register(sensor, BMP280_CALIB_START_ADDR, rawCalibData, BMP280_CALIB_DATA_SIZE + 5);
   bmp280_get_calib_param(rawCalibData, calibParam);
 
   return ERR_NO_ERR;
