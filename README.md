@@ -18,9 +18,13 @@ The project was developed using Segger Embedded Studio but you should be able to
 - /\*\*/ comments indicate a section comments, meaning it apply to all things below it up until the next /**/
 - // indicate a specific comment, it refers to the one thing directly below it or before it in the same line
 
+## Dependencies
+
+The dependency is in the form of the git submodules of other repo, just initialize and pull that sub module and you should be good
+
 ## Naming Convention
 
-- Error code begins with ERR_
+- Error code has ERR_ in their names
 - bmp280 function begins with bmp280_
 - i2c0 function begins with i2c0_
 - spi function begins with spi_
