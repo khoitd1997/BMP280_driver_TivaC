@@ -25,8 +25,8 @@ typedef enum {
 // added with the bmp280_regName to get the correct address
 #define BMP280_BASEADDR 0xF3
 
-#define RAW_TEM_TOTAL_BIT 3
-#define RAW_PRESS_TOTAL_BIT 3
+#define RAW_TEM_TOTAL_BYTE 3
+#define RAW_PRESS_TOTAL_BYTE 3
 #define BMP280_CALIB_START_ADDR 0x88
 
 // the two special addresses
@@ -168,6 +168,7 @@ Bmp280ErrCode bmp280_update_setting(bmp280* sensor) {
   // handle config byte
   i2cRegisterList[1] = BMP280_BASEADDR + Config;
   bmp280_make_cfg_byte(sensor, &i2cRegisterData[1]);
+
   bmp280_write_register(sensor, i2cRegisterList, 2, i2cRegisterData);
 
   return ERR_NO_ERR;
@@ -198,9 +199,9 @@ Bmp280ErrCode bmp280_get_temp_press(bmp280*          sensor,
                                     float*           pressPa,
                                     Bmp280CalibParam calibParam) {
   BMP280_TRY_FUNC(bmp280_port_prep(sensor));
-  uint8_t rawData[RAW_TEM_TOTAL_BIT + RAW_PRESS_TOTAL_BIT + 4];
+  uint8_t rawData[RAW_TEM_TOTAL_BYTE + RAW_PRESS_TOTAL_BYTE + 3];
   bmp280_get_register(
-      sensor, BMP280_BASEADDR + Press_msb, rawData, RAW_TEM_TOTAL_BIT + RAW_PRESS_TOTAL_BIT + 4);
+      sensor, BMP280_BASEADDR + Press_msb, rawData, RAW_TEM_TOTAL_BYTE + RAW_PRESS_TOTAL_BYTE + 3);
   int32_t rawPress = (int32_t)((((uint32_t)(rawData[0])) << 12) | (((uint32_t)(rawData[1])) << 4) |
                                ((uint32_t)rawData[2] >> 4));
 
