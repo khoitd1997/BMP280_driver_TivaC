@@ -12,11 +12,10 @@
 
 SpiErrCode spi_open(const SpiSettings setting) {
   uint8_t errCode;
-  if ((errCode = spi_check_setting(setting)) != SPI_ERR_NO_ERR) { return errCode; }
+  SPI_TRY_FUNC(spi_check_setting(setting));
 
-  uint8_t preScalc    = 0;
-  uint8_t scr         = 0;
-  uint8_t tempErrCode = 0;
+  uint8_t preScalc = 0;
+  uint8_t scr      = 0;
 
   /* Prepping GPIO pin for SPI functionalities */
   SYSCTL_RCGCSSI_R |= SYSCTL_RCGCSSI_R0;    // turn on SPI module
@@ -128,15 +127,26 @@ SpiErrCode spi_open(const SpiSettings setting) {
   return SPI_ERR_NO_ERR;
 }
 
-SpiErrCode spi_close(void) { bit_clear(SYSCTL_RCGCSSI_R, SYSCTL_RCGCSSI_R0); }
+SpiErrCode spi_check_spi_enabled(void) {
+  if (bit_get(SYSCTL_RCGCSSI_R, SYSCTL_RCGCSSI_R0)) {
+    return SPI_ERR_NO_ERR;
+  } else {
+    return SPI_ERR_DISABLED;
+  }
+}
+
+SpiErrCode spi_close(void) {
+  bit_clear(SYSCTL_RCGCSSI_R, SYSCTL_RCGCSSI_R0);
+  return SPI_ERR_NO_ERR;
+}
 
 SpiErrCode spi_transfer(const SpiSettings setting,
                         uint8_t*          dataTx,
                         const uint8_t     dataTxLenByte,
                         uint8_t*          dataRx,
                         const uint8_t     dataRxLenByte) {
-  uint8_t errCode;
-  /* Pre-Transfer Error Checking and Computation Start Here */
+  /* Pre-Transfer Error Checking */
+  SPI_TRY_FUNC(spi_check_spi_enabled());
 
   if ((dataTxLenByte) > 0) { assert(dataTx); }
 
@@ -146,7 +156,6 @@ SpiErrCode spi_transfer(const SpiSettings setting,
   uint8_t totalByteTxed = 0;
   uint8_t totalByteRxed = 0;
   bool    firstRun      = true;
-  bool    secondRun     = true;
 
   spi_enable_spi();
   spi_clear_rx_buffer();
@@ -159,6 +168,8 @@ SpiErrCode spi_transfer(const SpiSettings setting,
 
     spi_data_delay();
     if (true == firstRun) {
+      // the slave won't send any data on the first run so
+      // clear rx buffer on first run since it's just rubbish data
       spi_clear_rx_buffer();
       firstRun = false;
     }
@@ -167,53 +178,15 @@ SpiErrCode spi_transfer(const SpiSettings setting,
       if (dataTxLenByte == totalByteTxed) { spi_send_dummy_byte(); }
       spi_rx_one_data_unit(setting, &totalByteRxed, dataRx);
     }
-    spi_bus_wait();
+    SPI_TRY_FUNC(spi_bus_wait());
     if ((setting.cpol == 0 && setting.cpha == 0) || (setting.cpol == 1 && setting.cpha == 0)) {
       spi_pull_cs_high();  // the spi module requires that cs is pulled high on these settings
                            // btween transfer
     }
   }
 
-  spi_bus_wait();
+  SPI_TRY_FUNC(spi_bus_wait());
   spi_pull_cs_high();
   spi_disable_spi();
   return SPI_ERR_NO_ERR;
 }
-
-// TODO: put in check for SPI
-SpiErrCode spi_check_spi_enabled(void) {}
-
-// void main(void) {
-// const SpiSettings spiSetting = {.enableDMA       = false,
-//                                 .spiBitRateMbits = 0.3,
-//                                 .cpuClockMHz     = 16,
-//                                 .cpol            = 1,
-//                                 .cpha            = 1,
-//                                 .operMode        = Freescale,
-//                                 .isLoopBack      = false,
-//                                 .transferSizeBit = 8,
-//                                 .role            = Master,
-//                                 .clockSource     = Systemclock};
-
-//   if (spi_open(spiSetting) != SPI_ERR_NO_ERR) { return; }
-
-//   uint8_t txData[1] = {0xD0};
-//   uint8_t rxData[1];
-//   greenled_init();
-//   redled_init();
-//   blueled_init();
-//   greenled_off();
-
-//   for (;;) {
-//     spi_transfer(spiSetting, txData, 1, rxData, 1);
-//     printf("\nThe ID is %d", rxData[1]);
-//     if (0x58 == rxData[0]) {
-//       greenled_on();
-//     } else {
-//       greenled_off();
-//       for (;;) {}
-//     }
-//     blueled_off();
-//     delayms(100);
-//   }
-// }

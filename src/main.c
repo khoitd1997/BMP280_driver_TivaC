@@ -36,14 +36,14 @@
 #define I2C_TEST
 
 int main(void) {
-  bmp280           sensor280;
-  Bmp280ErrCode    errCode;
+  bmp280 sensor280;
+  // Bmp280ErrCode    errCode;
   Bmp280CalibParam calibParam;
   float            temperature;
   float            pressure;
   uint8_t          ID;
-  uint8_t          ctrlMeas;
-  uint8_t          configReturn;
+  // uint8_t          ctrlMeas;
+  // uint8_t          configReturn;
 
   bmp280_create_predefined_settings(&sensor280, WeatherStat);
   bmp280_init(&sensor280, SPI, 0x77);

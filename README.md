@@ -6,6 +6,13 @@ The bmp280 board used is from Adafruit: https://www.adafruit.com/product/2651
 
 The project was developed using Segger Embedded Studio but you should be able to use other IDE or build system with it
 
+## Features
+
+- Read and calculate compensated temperature and pressure data
+- Read and write settings
+- Create manufacturer-defined settings or custom settings
+- Available in both I2C and SPI
+
 ## Style Guide
 
 - /\*\*/ comments indicate a section comments, meaning it apply to all things below it up until the next /**/
@@ -24,3 +31,12 @@ The project was developed using Segger Embedded Studio but you should be able to
 - src/: driver .c files in here
 - include/: .h file here
 - external/: Dependencies here, for example git submodules are here
+
+## Code structure
+
+The code is divided into many layers:
+
+- BMP280_Drv files: the front layers, their actions are BMP280 speicifc but doesn't deal directly with SPI or I2C
+- BMP280_Utils: contain utilities functions as well as dealing directly with the I2C and SPI, the glue layer between BMP280_Drv and low layer functions
+- TivaC_SPI related files: Contain SPI functions for SPI0 modules of TivaC, the code is hardocded to use module 0
+- TivaC_I2C related files: Contain TivaC functions to work with I2C0 modules of TivaC, hard coded to use I2C0

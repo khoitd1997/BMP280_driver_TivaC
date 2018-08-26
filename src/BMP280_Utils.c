@@ -15,7 +15,7 @@ Bmp280ErrCode bmp280_check_setting(bmp280* sensor) {
 
   else {
     if (sensor->mode == Uninitialized_mode || sensor->tempSamp == Uninitialized_coeff ||
-        sensor->presSamp == Uninitialized_coeff || sensor->samplSet == Uninitialized_coeff ||
+        sensor->presSamp == Uninitialized_coeff || sensor->samplSet == Uninitialized ||
         sensor->iirFilter == Uninitialized_coeff || sensor->standbyTime == -1) {
       return ERR_SETTING_UNITIALIZED;
 
@@ -26,13 +26,12 @@ Bmp280ErrCode bmp280_check_setting(bmp280* sensor) {
 }
 
 Bmp280ErrCode bmp280_port_check(bmp280* sensor) {
-  if (sensor->protocol == I2C) {
-    if (i2c0_check_master_enabled() != I2C0_NO_ERR) {
-      return ERR_PORT_NOT_OPEN;
-    } else {
-      return ERR_NO_ERR;
-    }
-  }  // TODO: insert SPI error checking
+  if ((I2C == sensor->protocol && (I2C0_NO_ERR != i2c0_check_master_enabled())) ||
+      ((SPI == sensor->protocol) && (SPI_ERR_NO_ERR != spi_check_spi_enabled()))) {
+    return ERR_PORT_NOT_OPEN;
+  }
+
+  return ERR_NO_ERR;
 }
 
 Bmp280ErrCode bmp280_make_ctrl_byte(bmp280* sensor, uint8_t* controlByte) {
@@ -206,6 +205,7 @@ Bmp280ErrCode bmp280_close_i2c_spi(bmp280* sensor) {
   } else if (SPI == sensor->protocol) {
     spi_close();
   }
+  return ERR_NO_ERR;
 }
 
 Bmp280ErrCode bmp280_port_prep(bmp280* sensor) {

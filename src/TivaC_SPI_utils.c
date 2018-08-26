@@ -11,11 +11,15 @@
 #define MAX_TIVAC_CLOCK 80
 #define MAX_SCR 255      // max SSI serial clock rate
 #define MAX_CPSDVSR 254  // max clock pre scaler
+#define SPI_TIMEOUT_COUNTER 500
 
-void spi_bus_wait(void) {
+SpiErrCode spi_bus_wait(void) {
+  uint8_t timeoutCounter = 0;
   while (SSI0_SR_R & SSI_SR_BSY) {
-    // wait until the busy bit is unset
+    ++timeoutCounter;
+    if ((timeoutCounter) > SPI_TIMEOUT_COUNTER) { return SPI_ERR_TIMEOUT; }
   }
+  return SPI_ERR_NO_ERR;
 }
 
 SpiErrCode spi_check_rx_full(void) {
@@ -98,18 +102,18 @@ SpiErrCode spi_tx_one_data_unit(const uint8_t  transferSize,
   spi_bus_wait();
 }
 
-void spi_clear_rx_buffer(void) {
+void __attribute__((optimize("O0"))) spi_clear_rx_buffer(void) {
   // read until all data is gone
-  uint8_t dummy_val;
+
   while (SPI_ERR_NO_ERR == spi_check_rx_not_empty()) {
-    // clear the reg
-    dummy_val = SSI0_DR_R;
+    // clear the reg by reading it
+    SSI0_DR_R + 2;
   }
 }
 
 void spi_enable_spi(void) {
   bit_set(SSI0_CR1_R, SSI_CR1_SSE);
-  while (bit_get(SYSCTL_PRSSI_R, SYSCTL_PRSSI_R0) == 0) {
+  while (0 == bit_get(SYSCTL_PRSSI_R, SYSCTL_PRSSI_R0)) {
     // wait until the SSI is ready to be accessed
   }
 }

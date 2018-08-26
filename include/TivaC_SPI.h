@@ -11,8 +11,16 @@
  */
 #define SPI_TRF_SIZE 8
 
+#define SPI_TRY_FUNC(funcToExecute)                    \
+  do {                                                 \
+    SpiErrCode errCode = funcToExecute;                \
+    if (errCode != SPI_ERR_NO_ERR) { return errCode; } \
+  } while (0)
+
 typedef enum {
   SPI_ERR_NO_ERR,
+  SPI_ERR_DISABLED,
+  SPI_ERR_TIMEOUT,
   SPI_ERR_SPI_CPA_UNDEFINED,
   SPI_ERR_RX_FULL,
   SPI_ERR_TX_FULL,
@@ -45,22 +53,23 @@ typedef struct {
   uint8_t         transferSizeBit;  // how much to tx/rx per SPI transfer
   SpiRole         role;
   ClockSource     clockSource;
-  // TODO: maybe add interrupts support
 } SpiSettings;
 
 /* Communication setup */
-SpiErrCode spi_open(const SpiSettings setting);  // setup all necessary register, but don't
-                                                 // start communication until spi_transfer
-                                                 // is called
+// setup all necessary register, but don't
+// start communication until spi_transfer
+// is called
+SpiErrCode spi_open(const SpiSettings setting);
+
 // clean reg and disable SSI
-// calling this will disable clock for spi and change all
-// spi pins to general digital pins
+// calling this will disable clock for spi
 SpiErrCode spi_close(void);
+
 SpiErrCode spi_check_spi_enabled(void);
 
 /* Data Transfer */
 // used for both single and multiple bytes
-// used for both tx receive
+// used for both tx and rx
 SpiErrCode spi_transfer(const SpiSettings setting,
                         uint8_t*          dataTx,
                         const uint8_t     dataTxLenByte,

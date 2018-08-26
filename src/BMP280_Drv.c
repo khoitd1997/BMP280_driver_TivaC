@@ -121,7 +121,6 @@ Bmp280ErrCode bmp280_init(bmp280* sensor, const Bmp280ComProtocol protocol, cons
   if (NULL == sensor) { return ERR_SENSOR_UNITIALIZED; }
   BMP280_TRY_FUNC(bmp280_check_setting(sensor));
 
-  sensor->portNum  = 0;  // hard coded for 0
   sensor->address  = address;
   sensor->protocol = protocol;  // settings obtained in datasheet pg 19
 
@@ -134,7 +133,10 @@ Bmp280ErrCode bmp280_open(bmp280* sensor) {
   return ERR_NO_ERR;
 }
 
-Bmp280ErrCode bmp280_close(bmp280* sensor) { bmp280_close_i2c_spi(sensor); }
+Bmp280ErrCode bmp280_close(bmp280* sensor) {
+  BMP280_TRY_FUNC(bmp280_close_i2c_spi(sensor));
+  return ERR_NO_ERR;
+}
 
 Bmp280ErrCode bmp280_get_id(bmp280* sensor, uint8_t* returnID) {
   bmp280_get_register(sensor, BMP280_IDARR, returnID, 1);

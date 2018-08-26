@@ -52,7 +52,6 @@ typedef struct bmp280Sensor {
   uint8_t           ID;
   uint8_t           address;
   Bmp280ComProtocol protocol;
-  uint8_t           portNum;
 
   // oversampling settings
   Bmp280Coeff         tempSamp;
