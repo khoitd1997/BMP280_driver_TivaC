@@ -10,6 +10,7 @@ The project was developed using Segger Embedded Studio but you should be able to
 
 - Read and calculate compensated temperature and pressure data
 - Read and write settings
+- Read the status of the sensor
 - Create manufacturer-defined settings or custom settings
 - Available in both I2C and SPI
 
@@ -41,6 +42,7 @@ The dependency is in the form of the git submodules of other repo, just initiali
 The code is divided into many layers:
 
 - BMP280_Drv files: the front layers, their actions are BMP280 speicifc but doesn't deal directly with SPI or I2C
+- BMP280_Ware files: contain API derived from Bosch source code
 - BMP280_Utils: contain utilities functions as well as dealing directly with the I2C and SPI, the glue layer between BMP280_Drv and low layer functions
 - TivaC_SPI related files: Contain SPI functions for SPI0 modules of TivaC, the code is hardocded to use module 0, the CS pin hardcoded to be pin 3 of port A on the TivaC board
 - TivaC_I2C related files: Contain TivaC functions to work with I2C0 modules of TivaC, hard coded to use I2C0

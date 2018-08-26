@@ -17,6 +17,10 @@
     if (errCode != SPI_ERR_NO_ERR) { return errCode; } \
   } while (0)
 
+/**
+ * SPI error code
+ *
+ */
 typedef enum {
   SPI_ERR_NO_ERR,
   SPI_ERR_DISABLED,
@@ -41,7 +45,10 @@ typedef enum { Freescale, Tissf, Microwire } SpiProtocolMode;
 typedef enum { Slave, Master } SpiRole;
 typedef enum { Systemclock, Piosc } ClockSource;
 
-typedef enum { Tx, Rx, Both } SpiTransferMode;
+/**
+ * represent a spi module
+ *
+ */
 typedef struct {
   float           spiBitRateMbits;
   float           cpuClockMHz;

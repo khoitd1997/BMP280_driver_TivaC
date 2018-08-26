@@ -1,3 +1,11 @@
+/**
+ * @brief Contain main I2C functions for TIvaC
+ *
+ * @file TivaC_I2C.c
+ * @author Khoi Trinh
+ * @date 2018-08-25
+ */
+
 #include "include/TivaC_I2C.h"
 
 #include <stdbool.h>
@@ -9,6 +17,13 @@
 
 #define I2C0_TIMEOUT_LIMIT 10000
 
+/**
+ * @brief calculate the timer period for I2C
+ * @param i2cSclClockPeriodNs i2c clock period in nanoseconds
+ * @param cpuClockPeriodNs cpu clock period in nanoseconds
+ * @param tprOut pointer to the return tpr
+ *
+ */
 static I2c0ErrCode i2c0_calculate_tpr(const float i2cSclClockPeriodNs,
                                       const float cpuClockPeriodNs,
                                       uint8_t*    tprOut) {
@@ -16,12 +31,18 @@ static I2c0ErrCode i2c0_calculate_tpr(const float i2cSclClockPeriodNs,
   return I2C0_NO_ERR;
 }
 
+/**
+ * @brief enable clocks, I2C pins and calculate the appropriate clock period
+ * This function should be called first b4 any I2C operations
+ */
 I2c0ErrCode i2c0_open(void) {
   // Enable RCGCI2C for i2c0
   SYSCTL_RCGCI2C_R |= SYSCTL_RCGCI2C_R0;
   // Enable clock for PORTB
   SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R1;
-  // TODO: add checking for clock ready to go
+  while (!(SYSCTL_PRI2C_R & SYSCTL_PRI2C_R0) || !(SYSCTL_PRGPIO_R & SYSCTL_PRGPIO_R1)) {
+    // wait until the peripherals are ready
+  }
 
   // Enable Digital and I2C function and disable
   // the rest
@@ -134,6 +155,10 @@ I2c0ErrCode i2c0_single_data_write(const uint8_t slave_address,
   return I2C0_NO_ERR;
 }
 
+/**
+ * @brief used to generate I2C stop signal
+ *
+ */
 I2c0ErrCode i2c0_stop(void) {
   I2C0_TRY_FUNC(i2c0_wait_bus());
   uint32_t i2c0_mcs_temp = 0;
@@ -146,6 +171,10 @@ I2c0ErrCode i2c0_stop(void) {
   return I2C0_NO_ERR;
 }
 
+/**
+ * @brief used to maintain current I2C state
+ *
+ */
 I2c0ErrCode i2c0_keep_state(void) {
   I2C0_TRY_FUNC(i2c0_wait_bus());
   uint32_t i2c0_mcs_temp = 0;
@@ -157,6 +186,10 @@ I2c0ErrCode i2c0_keep_state(void) {
   return I2C0_NO_ERR;
 }
 
+/**
+ * @brief write byte one by one until done
+ *
+ */
 I2c0ErrCode i2c0_multiple_data_byte_write(const uint8_t  slave_address,
                                           const uint8_t* output_buffer,
                                           const uint8_t  output_buffer_length) {
@@ -202,7 +235,6 @@ I2c0ErrCode i2c0_multiple_data_byte_write(const uint8_t  slave_address,
   return I2C0_NO_ERR;
 }
 
-// TODO: inspect the i2c code to find why the BMP was behaving weirdly
 I2c0ErrCode i2c0_multiple_data_byte_read(const uint8_t slave_address,
                                          uint8_t*      input_buffer,
                                          const uint8_t input_buffer_length) {
@@ -257,6 +289,10 @@ I2c0ErrCode i2c0_multiple_data_byte_read(const uint8_t slave_address,
   return I2C0_NO_ERR;
 }
 
+/**
+ * @brief check i2c error register for any problems
+ *
+ */
 I2c0ErrCode i2c0_error_check(void) {
   if (I2C0_MCS_R & I2C_MCS_ERROR) {
     return I2C0_BUS_ERROR;
@@ -265,11 +301,18 @@ I2c0ErrCode i2c0_error_check(void) {
   }
 }
 
+/**
+ * @brief check i2c config register to see if the master functionality is enabled
+ *
+ */
 I2c0ErrCode i2c0_check_master_enabled(void) {
   return (I2C0_MCR_R & I2C_MCR_MFE) ? I2C0_NO_ERR : I2C0_MASTER_DISABLED;
 }
 
-// will wait until the bus stops being busy or timeout runs out
+/**
+ * @brief used for waiting till the bus stops being busy
+ * @return whether the bus is idle now or timeout happened
+ */
 I2c0ErrCode i2c0_wait_bus(void) {
   uint32_t timeoutCounter = 0;
   while ((I2C0_MCS_R & I2C_MCS_BUSY)) {

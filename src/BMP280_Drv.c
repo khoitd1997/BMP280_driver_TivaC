@@ -1,8 +1,18 @@
+/**
+ * @brief Driver files, contain the top layer of the BMP280 API, contains ideally no I2C or SPI
+ * specific stuffs
+ *
+ * @file BMP280_Drv.c
+ * @author Khoi Trinh
+ * @date 2018-08-25
+ */
+
 #include "include/BMP280_Drv.h"
 
 #include <assert.h>
 #include <stdbool.h>
 
+#include "external/TivaC_Utils/include/TivaC_Other_Utils.h"
 #include "external/TivaC_Utils/include/bit_manipulation.h"
 #include "include/BMP280_Utils.h"
 #include "include/BMP280_Ware.h"
@@ -36,7 +46,10 @@ typedef enum {
 #define BMP280_MEASURING_MASK 0x8
 #define BMP280_UPDATING_MASK 0x1
 
-// initialize the bmp280 with predefined value in the datasheet
+/**
+ * @brief initialize the bmp280 with predefined value in the datasheet
+ * @return no error or user settings violated some rules
+ */
 Bmp280ErrCode bmp280_create_predefined_settings(bmp280*                     sensor,
                                                 const Bmp280MeasureSettings settings) {
   switch (settings) {
@@ -100,6 +113,10 @@ Bmp280ErrCode bmp280_create_predefined_settings(bmp280*                     sens
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief initialize the bmp280 struct with options from user
+ * @return no error or user settings violated some rules
+ */
 Bmp280ErrCode bmp280_create_custom_setting(bmp280*                   sensor,
                                            const Bmp280Coeff         tempSamp,
                                            const Bmp280Coeff         presSamp,
@@ -117,6 +134,10 @@ Bmp280ErrCode bmp280_create_custom_setting(bmp280*                   sensor,
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief check settings, set the bmp280 address and desired communication protocols
+ *
+ */
 Bmp280ErrCode bmp280_init(bmp280* sensor, const Bmp280ComProtocol protocol, const uint8_t address) {
   if (NULL == sensor) { return ERR_SENSOR_UNITIALIZED; }
   BMP280_TRY_FUNC(bmp280_check_setting(sensor));
@@ -127,23 +148,39 @@ Bmp280ErrCode bmp280_init(bmp280* sensor, const Bmp280ComProtocol protocol, cons
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief prepare the i2c/spi port for communications
+ *
+ */
 Bmp280ErrCode bmp280_open(bmp280* sensor) {
   BMP280_TRY_FUNC(bmp280_check_setting(sensor));
   bmp280_open_i2c_spi(sensor);
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief close the ports
+ *
+ */
 Bmp280ErrCode bmp280_close(bmp280* sensor) {
   BMP280_TRY_FUNC(bmp280_close_i2c_spi(sensor));
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief get bmp280 sensor ID, should 0x58 or 88 in decimal
+ *
+ */
 Bmp280ErrCode bmp280_get_id(bmp280* sensor, uint8_t* returnID) {
   bmp280_get_register(sensor, BMP280_IDARR, returnID, 1);
   sensor->ID = *returnID;
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief perform power reset on the bmp280
+ * There is a 5ms seconds delay to allow the bmp280 to properly wake up
+ */
 Bmp280ErrCode bmp280_reset(bmp280* sensor) {
   BMP280_TRY_FUNC(bmp280_port_prep(sensor));
 
@@ -153,9 +190,15 @@ Bmp280ErrCode bmp280_reset(bmp280* sensor) {
   resetData[0]     = 0xB6;  // obtain from page 24 datasheet
 
   bmp280_write_register(sensor, resetRegister, 1, resetData);
+  delayms(5);  // give the board some time to wake up
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief used to write setting sin the bmp280 struct to the control and config register of the
+ * bmp280
+ *
+ */
 Bmp280ErrCode bmp280_update_setting(bmp280* sensor) {
   // preparing data byte for writing to bmp280 register
   uint8_t i2cRegisterList[2];
@@ -174,16 +217,28 @@ Bmp280ErrCode bmp280_update_setting(bmp280* sensor) {
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief read data from control register
+ *
+ */
 Bmp280ErrCode bmp280_get_ctr_meas(bmp280* sensor, uint8_t* ctrlMeasReturn) {
   bmp280_get_register(sensor, BMP280_BASEADDR + Ctrl_meas, ctrlMeasReturn, 1);
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief read data from config register
+ *
+ */
 Bmp280ErrCode bmp280_get_config(bmp280* sensor, uint8_t* configReturn) {
   bmp280_get_register(sensor, BMP280_BASEADDR + Config, configReturn, 1);
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief read bmp280 status and change last known status of the sensor
+ *
+ */
 Bmp280ErrCode bmp280_get_status(bmp280* sensor) {
   uint8_t statusReturn;
   bmp280_get_register(sensor, BMP280_BASEADDR + Status, &statusReturn, 1);
@@ -194,6 +249,12 @@ Bmp280ErrCode bmp280_get_status(bmp280* sensor) {
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief used to read compensated temperature and pressure
+ * @param temperatureC return temperature
+ * @param pressPa return pressure
+ * @param calibParam calibration data obtained beforehand
+ */
 Bmp280ErrCode bmp280_get_temp_press(bmp280*          sensor,
                                     float*           temperatureC,
                                     float*           pressPa,
@@ -212,6 +273,10 @@ Bmp280ErrCode bmp280_get_temp_press(bmp280*          sensor,
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief used to read factory calibration data from the bmp280
+ *
+ */
 Bmp280ErrCode bmp280_get_calibration_data(bmp280* sensor, Bmp280CalibParam* calibParam) {
   BMP280_TRY_FUNC(bmp280_port_prep(sensor));
   uint8_t rawCalibData[BMP280_CALIB_DATA_SIZE + 5];

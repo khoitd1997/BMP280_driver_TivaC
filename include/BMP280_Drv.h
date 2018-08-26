@@ -1,7 +1,3 @@
-/**
- * Main API file for the driver, settings and register names are mostly taken
- * from the BMP280 datasheet
- */
 #ifndef _BMP280_DRV_
 #define _BMP280_DRV_
 
@@ -10,10 +6,15 @@
 
 #include "include/BMP280_Ware.h"
 
-/*enum of all the sensors' settings and error code*/
+/**
+ * enum of all the sensors' settings and error code
+ *
+ */
 typedef enum { SPI, I2C } Bmp280ComProtocol;
 
-// predefined settings given by datasheet
+/**
+ * predefined settings given by datasheet
+ */
 typedef enum {
   HandLow = 0,
   HandDynamic,
@@ -23,45 +24,64 @@ typedef enum {
   IndoorNav,
   Custom
 } Bmp280MeasureSettings;
-// power mode of the bmp280 sensor
+
+/**
+ * power mode of the bmp280 sensor
+ *
+ */
 typedef enum { Uninitialized_mode = -1, Sleep, Forced, Normal } Bmp280OperMode;
 
-// name of predefined oversampling settings
+/**
+ *  name of predefined oversampling settings
+ *
+ */
 typedef enum { Uninitialized = -1, UltraLow, Low, Standard, UltraHigh } Bmp280SamplSettings;
 
-// used for IIR filter, temp and pressure oversampling coefficience
+/**
+ * used for IIR filter, temp and pressure oversampling coefficience
+ *
+ */
 typedef enum { Uninitialized_coeff = -1, x0, x1, x2, x4, x8, x16 } Bmp280Coeff;
 
-// error code for the bmp280
+/**
+ * error code for the bmp280
+ *
+ */
 typedef enum {
-  ERR_NO_ERR,  // report that there is no error
+  ERR_NO_ERR,  //!< report that there is no error
   ERR_PORT_NOT_OPEN,
   ERR_SETTING_UNITIALIZED,
   ERR_SETTING_UNRECOGNIZED,
-  ERR_SENSOR_UNITIALIZED  // indicate that bmp280 struct is not valid
+  ERR_SENSOR_UNITIALIZED  //!< indicate that bmp280 struct is not valid
 } Bmp280ErrCode;
 
+/**
+ * indicate status of the bmp280
+ *
+ */
 typedef struct {
   bool isMeasuring;
   bool isUpdating;
 } Bmp280Status;
 
-/*data structure of a bmp280*/
+/**
+ * data structure of a bmp280
+ *
+ */
 typedef struct bmp280Sensor {
-  // protocol information
+  //!< protocol information
   uint8_t           ID;
   uint8_t           address;
   Bmp280ComProtocol protocol;
 
-  // oversampling settings
+  //!< oversampling settings
   Bmp280Coeff         tempSamp;
   Bmp280Coeff         presSamp;
   Bmp280Coeff         iirFilter;
   Bmp280SamplSettings samplSet;
   Bmp280OperMode      mode;
 
-  float standbyTime;  // unit is ms, check the data sheet for list of allowed
-                      // values
+  float standbyTime;  //!< unit is ms, check the data sheet for list of allowed values
 
   Bmp280Status lastKnowStatus;
 } bmp280;

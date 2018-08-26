@@ -1,14 +1,9 @@
-
-/*
- * Written by Khoi Dinh Trinh on 12/13/2017
- * BMP280 breakout board from Adafruit:
- * https://www.adafruit.com/product/2651
- * Reference:
- * https://github.com/BoschSensortec/BMP280_driver
- * https://github.com/adafruit/Adafruit_BMP280_Library
+/**
+ * @brief used for testing and also serve as an example
  *
- * This file is used for testing the Tiva C with BMP280 BoschSensortec
- * API will be in a separate file
+ * @file main.c
+ * @author Khoi Trinh
+ * @date 2018-08-25
  */
 
 #include <stdbool.h>
@@ -46,8 +41,6 @@ int main(void) {
   bmp280_init(&sensor280, I2C, 0x77);
   bmp280_open(&sensor280);
   bmp280_reset(&sensor280);
-  bmp280_reset(&sensor280);
-  delayms(5);
   bmp280_get_calibration_data(&sensor280, &calibParam);
   bmp280_update_setting(&sensor280);
 
@@ -58,7 +51,7 @@ int main(void) {
 
     bmp280_get_id(&sensor280, &ID);
     printf("\nThe ID is %d", ID);
-    delayms(100);
+    delayms(1000);
   }
 }
 

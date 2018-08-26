@@ -1,3 +1,12 @@
+/**
+ * @brief Utils files contain helper functions for BMP280_Drv.c files as well as the glues to work
+ * with I2C and SPI specific stuffs
+ *
+ * @file BMP280_Utils.c
+ * @author Khoi Trinh
+ * @date 2018-08-25
+ */
+
 #include "include/BMP280_Utils.h"
 
 #include <assert.h>
@@ -8,6 +17,10 @@
 #include "include/TivaC_I2C.h"
 #include "include/TivaC_SPI.h"
 
+/**
+ * @brief check user settings to make sure they are among the supported options
+ *
+ */
 Bmp280ErrCode bmp280_check_setting(bmp280* sensor) {
   if (sensor == NULL) {
     return ERR_SENSOR_UNITIALIZED;
@@ -25,6 +38,10 @@ Bmp280ErrCode bmp280_check_setting(bmp280* sensor) {
   }
 }
 
+/**
+ * @brief port check that are run before data communication
+ *
+ */
 Bmp280ErrCode bmp280_port_check(bmp280* sensor) {
   if ((I2C == sensor->protocol && (I2C0_NO_ERR != i2c0_check_master_enabled())) ||
       ((SPI == sensor->protocol) && (SPI_ERR_NO_ERR != spi_check_spi_enabled()))) {
@@ -34,6 +51,11 @@ Bmp280ErrCode bmp280_port_check(bmp280* sensor) {
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief create a byte corresponding to user option to be sent to the control register on the
+ * BMP280
+ *
+ */
 Bmp280ErrCode bmp280_make_ctrl_byte(bmp280* sensor, uint8_t* controlByte) {
   // start with all 1 and zero out the needed bits
   uint8_t tempByte = 0xFF;
@@ -119,6 +141,11 @@ Bmp280ErrCode bmp280_make_ctrl_byte(bmp280* sensor, uint8_t* controlByte) {
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief create a byte corresponding to user option to be sent to the config register on the
+ * BMP280
+ *
+ */
 uint8_t bmp280_make_cfg_byte(bmp280* sensor, uint8_t* returnByte) {
   // start with all 1 and zero out the needed bits
   uint8_t tempByte = 0xFF;
@@ -179,6 +206,10 @@ uint8_t bmp280_make_cfg_byte(bmp280* sensor, uint8_t* returnByte) {
   *returnByte = tempByte;
 }
 
+/**
+ * @brief open spi or i2c communications
+ *
+ */
 Bmp280ErrCode bmp280_open_i2c_spi(bmp280* sensor) {
   if (I2C == sensor->protocol) {
     i2c0_open();
@@ -198,6 +229,10 @@ Bmp280ErrCode bmp280_open_i2c_spi(bmp280* sensor) {
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief close i2c or spi communications
+ *
+ */
 Bmp280ErrCode bmp280_close_i2c_spi(bmp280* sensor) {
   if (I2C == sensor->protocol) {
     i2c0_close();
@@ -207,15 +242,19 @@ Bmp280ErrCode bmp280_close_i2c_spi(bmp280* sensor) {
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief things to run to prep the i2c/spi port for communication
+ *
+ */
 Bmp280ErrCode bmp280_port_prep(bmp280* sensor) {
-  if (sensor == NULL) {
-    return ERR_SENSOR_UNITIALIZED;
-  } else {
-    BMP280_TRY_FUNC(bmp280_port_check(sensor));
-    return ERR_NO_ERR;
-  }
+  BMP280_TRY_FUNC(bmp280_port_check(sensor));
+  return ERR_NO_ERR;
 }
 
+/**
+ * @brief protocol agnostic function to get data from one or multiple register
+ *
+ */
 Bmp280ErrCode bmp280_get_register(bmp280*       sensor,
                                   const uint8_t startAddr,
                                   uint8_t*      regData,
@@ -254,6 +293,10 @@ Bmp280ErrCode bmp280_get_register(bmp280*       sensor,
   return ERR_NO_ERR;
 }
 
+/**
+ * @brief protocol agnostic function to write data to one or multiple register
+ *
+ */
 Bmp280ErrCode bmp280_write_register(bmp280*        sensor,
                                     const uint8_t* registerList,
                                     const uint8_t  totalRegister,
