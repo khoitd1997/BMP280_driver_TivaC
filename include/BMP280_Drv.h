@@ -15,13 +15,12 @@
 #include "include/BMP280_Ware.h"
 
 /**
- * enum of all the sensors' settings and error code
- *
+ * @brief enum of all the sensors' settings and error code
  */
 typedef enum { SPI, I2C } Bmp280ComProtocol;
 
 /**
- * predefined settings given by datasheet
+ * @brief predefined settings given by datasheet
  */
 typedef enum {
   HandLow = 0,
@@ -34,26 +33,22 @@ typedef enum {
 } Bmp280MeasureSettings;
 
 /**
- * power mode of the bmp280 sensor
- *
+ * @brief power mode of the bmp280 sensor
  */
 typedef enum { Uninitialized_mode = -1, Sleep, Forced, Normal } Bmp280OperMode;
 
 /**
- *  name of predefined oversampling settings
- *
+ * @brief name of predefined oversampling settings
  */
 typedef enum { Uninitialized = -1, UltraLow, Low, Standard, UltraHigh } Bmp280SamplSettings;
 
 /**
- * used for IIR filter, temp and pressure oversampling coefficience
- *
+ * @brief used for IIR filter, temp and pressure oversampling coefficience
  */
 typedef enum { Uninitialized_coeff = -1, x0, x1, x2, x4, x8, x16 } Bmp280Coeff;
 
 /**
- * error code for the bmp280
- *
+ * @brief error code for the bmp280
  */
 typedef enum {
   ERR_NO_ERR,  //!< report that there is no error
@@ -64,8 +59,7 @@ typedef enum {
 } Bmp280ErrCode;
 
 /**
- * indicate status of the bmp280
- *
+ * @brief indicate status of the bmp280
  */
 typedef struct {
   bool isMeasuring;
@@ -73,8 +67,7 @@ typedef struct {
 } Bmp280Status;
 
 /**
- * data structure of a bmp280
- *
+ * @brief data structure of a bmp280
  */
 typedef struct bmp280Sensor {
   //!< protocol information

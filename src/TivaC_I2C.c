@@ -141,6 +141,11 @@ I2c0ErrCode i2c0_single_data_read(const uint8_t slave_address,
   return I2C0_NO_ERR;
 }
 
+/**
+ * @brief write a single byte using I2C
+ * @param no_end_stop whether to generate stop at the end of the write
+ *
+ */
 I2c0ErrCode i2c0_single_data_write(const uint8_t slave_address,
                                    const uint8_t data_byte,
                                    const bool    no_end_stop) {

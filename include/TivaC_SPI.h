@@ -26,7 +26,7 @@
   } while (0)
 
 /**
- * SPI error code
+ * @brief SPI error code
  *
  */
 typedef enum {
@@ -54,8 +54,7 @@ typedef enum { Slave, Master } SpiRole;
 typedef enum { Systemclock, Piosc } ClockSource;
 
 /**
- * represent a spi module
- *
+ * @brief represent a spi module
  */
 typedef struct {
   float           spiBitRateMbits;

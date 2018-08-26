@@ -56,6 +56,9 @@
 #include <stdint.h>
 
 /*! @name Calibration parameters' structure */
+/**
+ * @brief calibration data struct
+ */
 typedef struct {
   uint16_t dig_t1;
   int16_t  dig_t2;
