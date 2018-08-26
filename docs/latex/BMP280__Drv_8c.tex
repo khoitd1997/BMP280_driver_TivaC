@@ -1,0 +1,166 @@
+\hypertarget{BMP280__Drv_8c}{}\section{src/\+B\+M\+P280\+\_\+\+Drv.c File Reference}
+\label{BMP280__Drv_8c}\index{src/\+B\+M\+P280\+\_\+\+Drv.\+c@{src/\+B\+M\+P280\+\_\+\+Drv.\+c}}
+
+
+Driver files, contain the top layer of the B\+M\+P280 A\+PI, contains ideally no I2C or S\+PI specific stuffs.  
+
+
+{\ttfamily \#include \char`\"{}include/\+B\+M\+P280\+\_\+\+Drv.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}external/\+Tiva\+C\+\_\+\+Utils/include/\+Tiva\+C\+\_\+\+Other\+\_\+\+Utils.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}external/\+Tiva\+C\+\_\+\+Utils/include/bit\+\_\+manipulation.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}include/\+B\+M\+P280\+\_\+\+Utils.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}include/\+B\+M\+P280\+\_\+\+Ware.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}include/\+Tiva\+C\+\_\+\+I2\+C.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}include/\+Tiva\+C\+\_\+\+S\+P\+I.\+h\char`\"{}}\newline
+Include dependency graph for B\+M\+P280\+\_\+\+Drv.\+c\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{BMP280__Drv_8c__incl}
+\end{center}
+\end{figure}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_a3323e52608dc9b1bd97b8e71e7c44f62}\label{BMP280__Drv_8c_a3323e52608dc9b1bd97b8e71e7c44f62}} 
+\#define {\bfseries B\+M\+P280\+\_\+\+B\+A\+S\+E\+A\+D\+DR}~0x\+F3
+\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_ac1d9dbd7e41f32c0cb0923c7d4fd8f97}\label{BMP280__Drv_8c_ac1d9dbd7e41f32c0cb0923c7d4fd8f97}} 
+\#define {\bfseries R\+A\+W\+\_\+\+T\+E\+M\+\_\+\+T\+O\+T\+A\+L\+\_\+\+B\+Y\+TE}~3
+\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_abd8baeeaa077ad9bffdd4cf9651be313}\label{BMP280__Drv_8c_abd8baeeaa077ad9bffdd4cf9651be313}} 
+\#define {\bfseries R\+A\+W\+\_\+\+P\+R\+E\+S\+S\+\_\+\+T\+O\+T\+A\+L\+\_\+\+B\+Y\+TE}~3
+\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_ad2356a4e2882a4c8c64cb635327ee892}\label{BMP280__Drv_8c_ad2356a4e2882a4c8c64cb635327ee892}} 
+\#define {\bfseries B\+M\+P280\+\_\+\+C\+A\+L\+I\+B\+\_\+\+S\+T\+A\+R\+T\+\_\+\+A\+D\+DR}~0x88
+\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_adc285c2e63f48773a076aada5b897e06}\label{BMP280__Drv_8c_adc285c2e63f48773a076aada5b897e06}} 
+\#define {\bfseries B\+M\+P280\+\_\+\+R\+E\+S\+A\+D\+DR}~0x\+E0
+\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_a7352d96b04a72365a99aa79ba14e7c49}\label{BMP280__Drv_8c_a7352d96b04a72365a99aa79ba14e7c49}} 
+\#define {\bfseries B\+M\+P280\+\_\+\+I\+D\+A\+RR}~0x\+D0
+\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_a5c988c599f3e498f853ef7f7e8e78ae4}\label{BMP280__Drv_8c_a5c988c599f3e498f853ef7f7e8e78ae4}} 
+\#define {\bfseries B\+M\+P280\+\_\+\+M\+E\+A\+S\+U\+R\+I\+N\+G\+\_\+\+M\+A\+SK}~0x8
+\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_a1f500317eb84c3e350021d319ab982f6}\label{BMP280__Drv_8c_a1f500317eb84c3e350021d319ab982f6}} 
+\#define {\bfseries B\+M\+P280\+\_\+\+U\+P\+D\+A\+T\+I\+N\+G\+\_\+\+M\+A\+SK}~0x1
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_acfc9e3a58bd723695e6ada7e5c8abd80}\label{BMP280__Drv_8c_acfc9e3a58bd723695e6ada7e5c8abd80}} 
+enum {\bfseries bmp280\+\_\+reg\+Name} \{ \newline
+{\bfseries Status} = 0, 
+{\bfseries Ctrl\+\_\+meas}, 
+{\bfseries Config}, 
+{\bfseries Press\+\_\+msb} = 4, 
+\newline
+{\bfseries Press\+\_\+lsb}, 
+{\bfseries Press\+\_\+xlsb}, 
+{\bfseries Temp\+\_\+msb}, 
+{\bfseries Temp\+\_\+lsb}, 
+\newline
+{\bfseries Temp\+\_\+xlsb}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_a688a1cfffa854195e06f133867897012}{bmp280\+\_\+create\+\_\+predefined\+\_\+settings} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor, const \hyperlink{BMP280__Drv_8h_a4a0fcacff61a12b6888fc060fc2baddb}{Bmp280\+Measure\+Settings} settings)
+\begin{DoxyCompactList}\small\item\em initialize the bmp280 with predefined value in the datasheet \end{DoxyCompactList}\item 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_a61a00b8689733032a3148c7a37990be2}{bmp280\+\_\+create\+\_\+custom\+\_\+setting} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor, const \hyperlink{BMP280__Drv_8h_ab15230ba27bac36bf1ba14a32fcd4d04}{Bmp280\+Coeff} temp\+Samp, const \hyperlink{BMP280__Drv_8h_ab15230ba27bac36bf1ba14a32fcd4d04}{Bmp280\+Coeff} pres\+Samp, const \hyperlink{BMP280__Drv_8h_ab15230ba27bac36bf1ba14a32fcd4d04}{Bmp280\+Coeff} iir\+Filter, const \hyperlink{BMP280__Drv_8h_ad55d98fff432892b33bf3f478e1bfbb2}{Bmp280\+Sampl\+Settings} sampl\+Set, const \hyperlink{BMP280__Drv_8h_abd075292d5e9d310574c56eb88e4e05d}{Bmp280\+Oper\+Mode} mode, const float standby\+Time)
+\begin{DoxyCompactList}\small\item\em initialize the bmp280 struct with options from user \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_a96a0359c3e21d58fdda67c171c864f5c}\label{BMP280__Drv_8c_a96a0359c3e21d58fdda67c171c864f5c}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_a96a0359c3e21d58fdda67c171c864f5c}{bmp280\+\_\+init} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor, const \hyperlink{BMP280__Drv_8h_ab4295e33e8c981aef15803030d176782}{Bmp280\+Com\+Protocol} protocol, const uint8\+\_\+t address)
+\begin{DoxyCompactList}\small\item\em check settings, set the bmp280 address and desired communication protocols \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_a11548c71a21d35f741ec3a93911b8dd3}\label{BMP280__Drv_8c_a11548c71a21d35f741ec3a93911b8dd3}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_a11548c71a21d35f741ec3a93911b8dd3}{bmp280\+\_\+open} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor)
+\begin{DoxyCompactList}\small\item\em prepare the i2c/spi port for communications \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_ab82a00168f6bf168223cda858f8d7357}\label{BMP280__Drv_8c_ab82a00168f6bf168223cda858f8d7357}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_ab82a00168f6bf168223cda858f8d7357}{bmp280\+\_\+close} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor)
+\begin{DoxyCompactList}\small\item\em close the ports \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_aee7c5d08f31959ebc26d8776237f9f0f}\label{BMP280__Drv_8c_aee7c5d08f31959ebc26d8776237f9f0f}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_aee7c5d08f31959ebc26d8776237f9f0f}{bmp280\+\_\+get\+\_\+id} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor, uint8\+\_\+t $\ast$return\+ID)
+\begin{DoxyCompactList}\small\item\em get bmp280 sensor ID, should 0x58 or 88 in decimal \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_a6e3c8eaf93ed264d21487663bb5badd4}\label{BMP280__Drv_8c_a6e3c8eaf93ed264d21487663bb5badd4}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_a6e3c8eaf93ed264d21487663bb5badd4}{bmp280\+\_\+reset} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor)
+\begin{DoxyCompactList}\small\item\em perform power reset on the bmp280 There is a 5ms seconds delay to allow the bmp280 to properly wake up \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_aacbc533b2f3eebfd424f5ac45d5352d4}\label{BMP280__Drv_8c_aacbc533b2f3eebfd424f5ac45d5352d4}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_aacbc533b2f3eebfd424f5ac45d5352d4}{bmp280\+\_\+update\+\_\+setting} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor)
+\begin{DoxyCompactList}\small\item\em used to write setting sin the bmp280 struct to the control and config register of the bmp280 \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_a34f09afdd44b71345efa80da744dede8}\label{BMP280__Drv_8c_a34f09afdd44b71345efa80da744dede8}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_a34f09afdd44b71345efa80da744dede8}{bmp280\+\_\+get\+\_\+ctr\+\_\+meas} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor, uint8\+\_\+t $\ast$ctrl\+Meas\+Return)
+\begin{DoxyCompactList}\small\item\em read data from control register \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_ab2f0b73d65e47addcb3c3e40998de5be}\label{BMP280__Drv_8c_ab2f0b73d65e47addcb3c3e40998de5be}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_ab2f0b73d65e47addcb3c3e40998de5be}{bmp280\+\_\+get\+\_\+config} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor, uint8\+\_\+t $\ast$config\+Return)
+\begin{DoxyCompactList}\small\item\em read data from config register \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_aae4895c0b12a1ced41bbfa71ee5b074c}\label{BMP280__Drv_8c_aae4895c0b12a1ced41bbfa71ee5b074c}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_aae4895c0b12a1ced41bbfa71ee5b074c}{bmp280\+\_\+get\+\_\+status} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor)
+\begin{DoxyCompactList}\small\item\em read bmp280 status and change last known status of the sensor \end{DoxyCompactList}\item 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_aa851f088396c0bc027255aaff4303e5b}{bmp280\+\_\+get\+\_\+temp\+\_\+press} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor, float $\ast$temperatureC, float $\ast$press\+Pa, \hyperlink{structBmp280CalibParam}{Bmp280\+Calib\+Param} calib\+Param)
+\begin{DoxyCompactList}\small\item\em used to read compensated temperature and pressure \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Drv_8c_aa6a7975dfb6b2f86ad4a63ce5c32be3e}\label{BMP280__Drv_8c_aa6a7975dfb6b2f86ad4a63ce5c32be3e}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Drv_8c_aa6a7975dfb6b2f86ad4a63ce5c32be3e}{bmp280\+\_\+get\+\_\+calibration\+\_\+data} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor, \hyperlink{structBmp280CalibParam}{Bmp280\+Calib\+Param} $\ast$calib\+Param)
+\begin{DoxyCompactList}\small\item\em used to read factory calibration data from the bmp280 \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Driver files, contain the top layer of the B\+M\+P280 A\+PI, contains ideally no I2C or S\+PI specific stuffs. 
+
+\begin{DoxyAuthor}{Author}
+Khoi Trinh 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2018-\/08-\/25 
+\end{DoxyDate}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{BMP280__Drv_8c_a61a00b8689733032a3148c7a37990be2}\label{BMP280__Drv_8c_a61a00b8689733032a3148c7a37990be2}} 
+\index{B\+M\+P280\+\_\+\+Drv.\+c@{B\+M\+P280\+\_\+\+Drv.\+c}!bmp280\+\_\+create\+\_\+custom\+\_\+setting@{bmp280\+\_\+create\+\_\+custom\+\_\+setting}}
+\index{bmp280\+\_\+create\+\_\+custom\+\_\+setting@{bmp280\+\_\+create\+\_\+custom\+\_\+setting}!B\+M\+P280\+\_\+\+Drv.\+c@{B\+M\+P280\+\_\+\+Drv.\+c}}
+\subsubsection{\texorpdfstring{bmp280\+\_\+create\+\_\+custom\+\_\+setting()}{bmp280\_create\_custom\_setting()}}
+{\footnotesize\ttfamily \hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} bmp280\+\_\+create\+\_\+custom\+\_\+setting (\begin{DoxyParamCaption}\item[{\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$}]{sensor,  }\item[{const \hyperlink{BMP280__Drv_8h_ab15230ba27bac36bf1ba14a32fcd4d04}{Bmp280\+Coeff}}]{temp\+Samp,  }\item[{const \hyperlink{BMP280__Drv_8h_ab15230ba27bac36bf1ba14a32fcd4d04}{Bmp280\+Coeff}}]{pres\+Samp,  }\item[{const \hyperlink{BMP280__Drv_8h_ab15230ba27bac36bf1ba14a32fcd4d04}{Bmp280\+Coeff}}]{iir\+Filter,  }\item[{const \hyperlink{BMP280__Drv_8h_ad55d98fff432892b33bf3f478e1bfbb2}{Bmp280\+Sampl\+Settings}}]{sampl\+Set,  }\item[{const \hyperlink{BMP280__Drv_8h_abd075292d5e9d310574c56eb88e4e05d}{Bmp280\+Oper\+Mode}}]{mode,  }\item[{const float}]{standby\+Time }\end{DoxyParamCaption})}
+
+
+
+initialize the bmp280 struct with options from user 
+
+\begin{DoxyReturn}{Returns}
+no error or user settings violated some rules 
+\end{DoxyReturn}
+\mbox{\Hypertarget{BMP280__Drv_8c_a688a1cfffa854195e06f133867897012}\label{BMP280__Drv_8c_a688a1cfffa854195e06f133867897012}} 
+\index{B\+M\+P280\+\_\+\+Drv.\+c@{B\+M\+P280\+\_\+\+Drv.\+c}!bmp280\+\_\+create\+\_\+predefined\+\_\+settings@{bmp280\+\_\+create\+\_\+predefined\+\_\+settings}}
+\index{bmp280\+\_\+create\+\_\+predefined\+\_\+settings@{bmp280\+\_\+create\+\_\+predefined\+\_\+settings}!B\+M\+P280\+\_\+\+Drv.\+c@{B\+M\+P280\+\_\+\+Drv.\+c}}
+\subsubsection{\texorpdfstring{bmp280\+\_\+create\+\_\+predefined\+\_\+settings()}{bmp280\_create\_predefined\_settings()}}
+{\footnotesize\ttfamily \hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} bmp280\+\_\+create\+\_\+predefined\+\_\+settings (\begin{DoxyParamCaption}\item[{\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$}]{sensor,  }\item[{const \hyperlink{BMP280__Drv_8h_a4a0fcacff61a12b6888fc060fc2baddb}{Bmp280\+Measure\+Settings}}]{settings }\end{DoxyParamCaption})}
+
+
+
+initialize the bmp280 with predefined value in the datasheet 
+
+\begin{DoxyReturn}{Returns}
+no error or user settings violated some rules 
+\end{DoxyReturn}
+\mbox{\Hypertarget{BMP280__Drv_8c_aa851f088396c0bc027255aaff4303e5b}\label{BMP280__Drv_8c_aa851f088396c0bc027255aaff4303e5b}} 
+\index{B\+M\+P280\+\_\+\+Drv.\+c@{B\+M\+P280\+\_\+\+Drv.\+c}!bmp280\+\_\+get\+\_\+temp\+\_\+press@{bmp280\+\_\+get\+\_\+temp\+\_\+press}}
+\index{bmp280\+\_\+get\+\_\+temp\+\_\+press@{bmp280\+\_\+get\+\_\+temp\+\_\+press}!B\+M\+P280\+\_\+\+Drv.\+c@{B\+M\+P280\+\_\+\+Drv.\+c}}
+\subsubsection{\texorpdfstring{bmp280\+\_\+get\+\_\+temp\+\_\+press()}{bmp280\_get\_temp\_press()}}
+{\footnotesize\ttfamily \hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} bmp280\+\_\+get\+\_\+temp\+\_\+press (\begin{DoxyParamCaption}\item[{\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$}]{sensor,  }\item[{float $\ast$}]{temperatureC,  }\item[{float $\ast$}]{press\+Pa,  }\item[{\hyperlink{structBmp280CalibParam}{Bmp280\+Calib\+Param}}]{calib\+Param }\end{DoxyParamCaption})}
+
+
+
+used to read compensated temperature and pressure 
+
+
+\begin{DoxyParams}{Parameters}
+{\em temperatureC} & return temperature \\
+\hline
+{\em press\+Pa} & return pressure \\
+\hline
+{\em calib\+Param} & calibration data obtained beforehand \\
+\hline
+\end{DoxyParams}

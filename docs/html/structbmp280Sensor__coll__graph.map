@@ -1,0 +1,3 @@
+<map id="bmp280Sensor" name="bmp280Sensor">
+<area shape="rect" id="node2" href="$structBmp280Status.html" title="indicate status of the bmp280 " alt="" coords="6,5,114,32"/>
+</map>

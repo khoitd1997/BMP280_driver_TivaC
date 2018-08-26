@@ -1,0 +1,86 @@
+\hypertarget{BMP280__Utils_8h}{}\section{include/\+B\+M\+P280\+\_\+\+Utils.h File Reference}
+\label{BMP280__Utils_8h}\index{include/\+B\+M\+P280\+\_\+\+Utils.\+h@{include/\+B\+M\+P280\+\_\+\+Utils.\+h}}
+
+
+headers to B\+M\+P280 utils functions  
+
+
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}include/\+B\+M\+P280\+\_\+\+Drv.\+h\char`\"{}}\newline
+Include dependency graph for B\+M\+P280\+\_\+\+Utils.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{BMP280__Utils_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=302pt]{BMP280__Utils_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries B\+M\+P280\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC}(func\+To\+Execute)
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{BMP280__Utils_8h_a651c00a3684abdf07d2573d92fe45b63}\label{BMP280__Utils_8h_a651c00a3684abdf07d2573d92fe45b63}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Utils_8h_a651c00a3684abdf07d2573d92fe45b63}{bmp280\+\_\+make\+\_\+ctrl\+\_\+byte} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor, uint8\+\_\+t $\ast$control\+Byte)
+\begin{DoxyCompactList}\small\item\em create a byte corresponding to user option to be sent to the control register on the B\+M\+P280 \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Utils_8h_a4045241afbda61ce8354f7cbb25539bc}\label{BMP280__Utils_8h_a4045241afbda61ce8354f7cbb25539bc}} 
+uint8\+\_\+t \hyperlink{BMP280__Utils_8h_a4045241afbda61ce8354f7cbb25539bc}{bmp280\+\_\+make\+\_\+cfg\+\_\+byte} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor, uint8\+\_\+t $\ast$return\+Byte)
+\begin{DoxyCompactList}\small\item\em create a byte corresponding to user option to be sent to the config register on the B\+M\+P280 \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Utils_8h_a36f6ebcb6c407ee4e48a741bc77b580e}\label{BMP280__Utils_8h_a36f6ebcb6c407ee4e48a741bc77b580e}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Utils_8h_a36f6ebcb6c407ee4e48a741bc77b580e}{bmp280\+\_\+check\+\_\+setting} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor)
+\begin{DoxyCompactList}\small\item\em check user settings to make sure they are among the supported options \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Utils_8h_a17288e03b956c789447940fb2ea10c88}\label{BMP280__Utils_8h_a17288e03b956c789447940fb2ea10c88}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Utils_8h_a17288e03b956c789447940fb2ea10c88}{bmp280\+\_\+port\+\_\+check} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor)
+\begin{DoxyCompactList}\small\item\em port check that are run before data communication \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Utils_8h_a98f791b4ff6fcabbe466bbfabf0cb8f5}\label{BMP280__Utils_8h_a98f791b4ff6fcabbe466bbfabf0cb8f5}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Utils_8h_a98f791b4ff6fcabbe466bbfabf0cb8f5}{bmp280\+\_\+port\+\_\+prep} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor)
+\begin{DoxyCompactList}\small\item\em things to run to prep the i2c/spi port for communication \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Utils_8h_a0b70b2b744d683d210f703a83cac2e6c}\label{BMP280__Utils_8h_a0b70b2b744d683d210f703a83cac2e6c}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Utils_8h_a0b70b2b744d683d210f703a83cac2e6c}{bmp280\+\_\+get\+\_\+register} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor, const uint8\+\_\+t start\+Addr, uint8\+\_\+t $\ast$reg\+Data, const uint8\+\_\+t total\+Register)
+\begin{DoxyCompactList}\small\item\em protocol agnostic function to get data from one or multiple register \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Utils_8h_a32b99e7c569d0b4e0aa6829994041171}\label{BMP280__Utils_8h_a32b99e7c569d0b4e0aa6829994041171}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Utils_8h_a32b99e7c569d0b4e0aa6829994041171}{bmp280\+\_\+write\+\_\+register} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor, const uint8\+\_\+t $\ast$register\+List, const uint8\+\_\+t total\+Register, const uint8\+\_\+t $\ast$register\+Data\+List)
+\begin{DoxyCompactList}\small\item\em protocol agnostic function to write data to one or multiple register \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Utils_8h_a063d98e3e3b84c4c2816ff82e4c2aacd}\label{BMP280__Utils_8h_a063d98e3e3b84c4c2816ff82e4c2aacd}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Utils_8h_a063d98e3e3b84c4c2816ff82e4c2aacd}{bmp280\+\_\+open\+\_\+i2c\+\_\+spi} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor)
+\begin{DoxyCompactList}\small\item\em open spi or i2c communications \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{BMP280__Utils_8h_a3475b11b628b6248e6848694d4450450}\label{BMP280__Utils_8h_a3475b11b628b6248e6848694d4450450}} 
+\hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7c}{Bmp280\+Err\+Code} \hyperlink{BMP280__Utils_8h_a3475b11b628b6248e6848694d4450450}{bmp280\+\_\+close\+\_\+i2c\+\_\+spi} (\hyperlink{BMP280__Drv_8h_ab9e22f3267ce8af4053eb1189db84627}{bmp280} $\ast$sensor)
+\begin{DoxyCompactList}\small\item\em close i2c or spi communications \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+headers to B\+M\+P280 utils functions 
+
+\begin{DoxyAuthor}{Author}
+Khoi Trinh 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2018-\/08-\/25 
+\end{DoxyDate}
+
+
+\subsection{Macro Definition Documentation}
+\mbox{\Hypertarget{BMP280__Utils_8h_a7b2fb7f0fc42f84778d7a4fb1ed0cc37}\label{BMP280__Utils_8h_a7b2fb7f0fc42f84778d7a4fb1ed0cc37}} 
+\index{B\+M\+P280\+\_\+\+Utils.\+h@{B\+M\+P280\+\_\+\+Utils.\+h}!B\+M\+P280\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC@{B\+M\+P280\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC}}
+\index{B\+M\+P280\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC@{B\+M\+P280\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC}!B\+M\+P280\+\_\+\+Utils.\+h@{B\+M\+P280\+\_\+\+Utils.\+h}}
+\subsubsection{\texorpdfstring{B\+M\+P280\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC}{BMP280\_TRY\_FUNC}}
+{\footnotesize\ttfamily \#define B\+M\+P280\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC(\begin{DoxyParamCaption}\item[{}]{func\+To\+Execute }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}
+\textcolor{keywordflow}{do} \{                                             \(\backslash\)
+    Bmp280ErrCode errCode;                         \(\backslash\)
+    errCode = funcToExecute;                       \(\backslash\)
+    if (errCode != \hyperlink{BMP280__Drv_8h_a726300a3932e443ece00fcc5c4f3ca7cab8516ccf594649942dde7e22723cdfa9}{ERR\_NO\_ERR}) \{ \textcolor{keywordflow}{return} errCode; \} \(\backslash\)
+  \} \textcolor{keywordflow}{while} (0)
+\end{DoxyCode}

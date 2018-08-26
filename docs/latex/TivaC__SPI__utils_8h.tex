@@ -1,0 +1,98 @@
+\hypertarget{TivaC__SPI__utils_8h}{}\section{include/\+Tiva\+C\+\_\+\+S\+P\+I\+\_\+utils.h File Reference}
+\label{TivaC__SPI__utils_8h}\index{include/\+Tiva\+C\+\_\+\+S\+P\+I\+\_\+utils.\+h@{include/\+Tiva\+C\+\_\+\+S\+P\+I\+\_\+utils.\+h}}
+
+
+header file for S\+PI utilities functions  
+
+
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}include/\+Tiva\+C\+\_\+\+S\+P\+I.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}include/tm4c123gh6pm.\+h\char`\"{}}\newline
+Include dependency graph for Tiva\+C\+\_\+\+S\+P\+I\+\_\+utils.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{TivaC__SPI__utils_8h__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_a75e2e39f095c5aed9f1404209f41ea2f}\label{TivaC__SPI__utils_8h_a75e2e39f095c5aed9f1404209f41ea2f}} 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} \hyperlink{TivaC__SPI__utils_8h_a75e2e39f095c5aed9f1404209f41ea2f}{spi\+\_\+check\+\_\+setting} (const \hyperlink{structSpiSettings}{Spi\+Settings} setting)
+\begin{DoxyCompactList}\small\item\em check user settings to see if they are logical \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_ad13f4a862a1214c17eba3e1a30e606b8}\label{TivaC__SPI__utils_8h_ad13f4a862a1214c17eba3e1a30e606b8}} 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} {\bfseries spi\+\_\+check\+\_\+rx\+\_\+full} (void)
+\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_a4dd6f46726dae4cd86785f36bc28a064}\label{TivaC__SPI__utils_8h_a4dd6f46726dae4cd86785f36bc28a064}} 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} {\bfseries spi\+\_\+check\+\_\+tx\+\_\+full} (void)
+\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_ac33fc00ccd26b1cb75a6fabc7efc4839}\label{TivaC__SPI__utils_8h_ac33fc00ccd26b1cb75a6fabc7efc4839}} 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} {\bfseries spi\+\_\+check\+\_\+rx\+\_\+not\+\_\+empty} (void)
+\item 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} \hyperlink{TivaC__SPI__utils_8h_a1aa8e59f77487dd762878eeeb136bea3}{spi\+\_\+calc\+\_\+clock\+\_\+prescalc} (const \hyperlink{structSpiSettings}{Spi\+Settings} setting, uint8\+\_\+t $\ast$pre\+Scalc, uint8\+\_\+t $\ast$scr)
+\begin{DoxyCompactList}\small\item\em calculate spi clock prescaler number \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_a5b03049a2c7efe2fec01007cef275e40}\label{TivaC__SPI__utils_8h_a5b03049a2c7efe2fec01007cef275e40}} 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} \hyperlink{TivaC__SPI__utils_8h_a5b03049a2c7efe2fec01007cef275e40}{spi\+\_\+bus\+\_\+wait} (void)
+\begin{DoxyCompactList}\small\item\em wait until the spi bus is not busy anymore \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_a917d6dec06c1a5f4204a94121f1566d3}\label{TivaC__SPI__utils_8h_a917d6dec06c1a5f4204a94121f1566d3}} 
+void \hyperlink{TivaC__SPI__utils_8h_a917d6dec06c1a5f4204a94121f1566d3}{spi\+\_\+enable\+\_\+spi} (void)
+\begin{DoxyCompactList}\small\item\em enable spi modules, note that this is different from turning on the clock, this assumes that the clock is turn on and all pins are S\+P\+I-\/ready \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_a126ecd9fffb497ae45b83ef92b925075}\label{TivaC__SPI__utils_8h_a126ecd9fffb497ae45b83ef92b925075}} 
+void \hyperlink{TivaC__SPI__utils_8h_a126ecd9fffb497ae45b83ef92b925075}{spi\+\_\+disable\+\_\+spi} (void)
+\begin{DoxyCompactList}\small\item\em disable spi modules, but leave the S\+PI clocks and pins still S\+P\+I-\/ready \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_ad2e3a01d42741e9a944843dfd2403777}\label{TivaC__SPI__utils_8h_ad2e3a01d42741e9a944843dfd2403777}} 
+void \hyperlink{TivaC__SPI__utils_8h_ad2e3a01d42741e9a944843dfd2403777}{spi\+\_\+pull\+\_\+cs\+\_\+low} (void)
+\begin{DoxyCompactList}\small\item\em pull chip select pin low to activate S\+PI, hardcoded to be pin 3 of port A \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_aebcad4e2f1d2721b28041e33984ca143}\label{TivaC__SPI__utils_8h_aebcad4e2f1d2721b28041e33984ca143}} 
+void {\bfseries spi\+\_\+pull\+\_\+cs\+\_\+high} (void)
+\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_a25f68c7ccbe2aa563848fef9ae783997}\label{TivaC__SPI__utils_8h_a25f68c7ccbe2aa563848fef9ae783997}} 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} \hyperlink{TivaC__SPI__utils_8h_a25f68c7ccbe2aa563848fef9ae783997}{spi\+\_\+send\+\_\+dummy\+\_\+byte} (void)
+\begin{DoxyCompactList}\small\item\em used for sending byte 0 to extend the S\+PI communication, usually to finish reading all the bytes that users want \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_ab640efbed4dd7ffb7c30a3d883a4038e}\label{TivaC__SPI__utils_8h_ab640efbed4dd7ffb7c30a3d883a4038e}} 
+void {\bfseries spi\+\_\+data\+\_\+delay} (void)
+\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_acd2cbe40a14e1694b6dc217fabf96d66}\label{TivaC__SPI__utils_8h_acd2cbe40a14e1694b6dc217fabf96d66}} 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} \hyperlink{TivaC__SPI__utils_8h_acd2cbe40a14e1694b6dc217fabf96d66}{spi\+\_\+rx\+\_\+one\+\_\+data\+\_\+unit} (const \hyperlink{structSpiSettings}{Spi\+Settings} setting, uint8\+\_\+t $\ast$total\+Byte\+Rxed, uint8\+\_\+t $\ast$data\+Rx)
+\begin{DoxyCompactList}\small\item\em receive one data unit from the S\+PI buffer \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_ac60b29ad366c6edd9a876ab6d801cf02}\label{TivaC__SPI__utils_8h_ac60b29ad366c6edd9a876ab6d801cf02}} 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} \hyperlink{TivaC__SPI__utils_8h_ac60b29ad366c6edd9a876ab6d801cf02}{spi\+\_\+tx\+\_\+one\+\_\+data\+\_\+unit} (const uint8\+\_\+t transfer\+Size, uint8\+\_\+t $\ast$total\+Byte\+Txed, const uint8\+\_\+t $\ast$data\+Tx)
+\begin{DoxyCompactList}\small\item\em send 8 bits of data on the S\+PI interface \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_a6745a65c6abffa7de06e25252dfa5689}\label{TivaC__SPI__utils_8h_a6745a65c6abffa7de06e25252dfa5689}} 
+void {\bfseries spi\+\_\+clear\+\_\+rx\+\_\+buffer} (void)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+header file for S\+PI utilities functions 
+
+\begin{DoxyAuthor}{Author}
+Khoi Trinh 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2018-\/08-\/25 
+\end{DoxyDate}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{TivaC__SPI__utils_8h_a1aa8e59f77487dd762878eeeb136bea3}\label{TivaC__SPI__utils_8h_a1aa8e59f77487dd762878eeeb136bea3}} 
+\index{Tiva\+C\+\_\+\+S\+P\+I\+\_\+utils.\+h@{Tiva\+C\+\_\+\+S\+P\+I\+\_\+utils.\+h}!spi\+\_\+calc\+\_\+clock\+\_\+prescalc@{spi\+\_\+calc\+\_\+clock\+\_\+prescalc}}
+\index{spi\+\_\+calc\+\_\+clock\+\_\+prescalc@{spi\+\_\+calc\+\_\+clock\+\_\+prescalc}!Tiva\+C\+\_\+\+S\+P\+I\+\_\+utils.\+h@{Tiva\+C\+\_\+\+S\+P\+I\+\_\+utils.\+h}}
+\subsubsection{\texorpdfstring{spi\+\_\+calc\+\_\+clock\+\_\+prescalc()}{spi\_calc\_clock\_prescalc()}}
+{\footnotesize\ttfamily \hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} spi\+\_\+calc\+\_\+clock\+\_\+prescalc (\begin{DoxyParamCaption}\item[{const \hyperlink{structSpiSettings}{Spi\+Settings}}]{setting,  }\item[{uint8\+\_\+t $\ast$}]{pre\+Scalc,  }\item[{uint8\+\_\+t $\ast$}]{scr }\end{DoxyParamCaption})}
+
+
+
+calculate spi clock prescaler number 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pre\+Scalc} & the calculated prescaler value \\
+\hline
+{\em scr} & the desired serial clock rate \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+whether it\textquotesingle{}s possible to find a prescaler value for the specific scr 
+\end{DoxyReturn}

@@ -1,0 +1,123 @@
+\hypertarget{TivaC__I2C_8c}{}\section{src/\+Tiva\+C\+\_\+\+I2C.c File Reference}
+\label{TivaC__I2C_8c}\index{src/\+Tiva\+C\+\_\+\+I2\+C.\+c@{src/\+Tiva\+C\+\_\+\+I2\+C.\+c}}
+
+
+Contain main I2C functions for T\+IvaC.  
+
+
+{\ttfamily \#include \char`\"{}include/\+Tiva\+C\+\_\+\+I2\+C.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}external/\+Tiva\+C\+\_\+\+Utils/include/tm4c123gh6pm.\+h\char`\"{}}\newline
+Include dependency graph for Tiva\+C\+\_\+\+I2\+C.\+c\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{TivaC__I2C_8c__incl}
+\end{center}
+\end{figure}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{TivaC__I2C_8c_a4ccb093ce990b3d0dd67ba286b5b40cf}\label{TivaC__I2C_8c_a4ccb093ce990b3d0dd67ba286b5b40cf}} 
+\#define {\bfseries S\+C\+L\+\_\+\+LP}~6
+\item 
+\mbox{\Hypertarget{TivaC__I2C_8c_ad36d068c694b11d45af851c811e46394}\label{TivaC__I2C_8c_ad36d068c694b11d45af851c811e46394}} 
+\#define {\bfseries S\+C\+L\+\_\+\+HP}~4
+\item 
+\mbox{\Hypertarget{TivaC__I2C_8c_a1ef39cf839b4b9aa3f018ebac932a6dd}\label{TivaC__I2C_8c_a1ef39cf839b4b9aa3f018ebac932a6dd}} 
+\#define {\bfseries I2\+C0\+\_\+\+T\+I\+M\+E\+O\+U\+T\+\_\+\+L\+I\+M\+IT}~10000
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{TivaC__I2C_8c_ab67308783773adc604bd5a0d87a511af}\label{TivaC__I2C_8c_ab67308783773adc604bd5a0d87a511af}} 
+I2c0\+Err\+Code \hyperlink{TivaC__I2C_8c_ab67308783773adc604bd5a0d87a511af}{i2c0\+\_\+open} (void)
+\begin{DoxyCompactList}\small\item\em enable clocks, I2C pins and calculate the appropriate clock period This function should be called first b4 any I2C operations \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__I2C_8c_ad78ce9ab48b822965a2e58c0389edbd1}\label{TivaC__I2C_8c_ad78ce9ab48b822965a2e58c0389edbd1}} 
+I2c0\+Err\+Code \hyperlink{TivaC__I2C_8c_ad78ce9ab48b822965a2e58c0389edbd1}{i2c0\+\_\+close} (void)
+\begin{DoxyCompactList}\small\item\em Disable clock as well as the I2C pins. \end{DoxyCompactList}\item 
+I2c0\+Err\+Code \hyperlink{TivaC__I2C_8c_ae51adb7272b1571ff425a124f0f5a7a5}{i2c0\+\_\+single\+\_\+data\+\_\+read} (const uint8\+\_\+t slave\+\_\+address, uint8\+\_\+t $\ast$return\+Data, const bool no\+\_\+ack, const bool no\+\_\+stop, const bool no\+\_\+start)
+\begin{DoxyCompactList}\small\item\em read one byte of data \end{DoxyCompactList}\item 
+I2c0\+Err\+Code \hyperlink{TivaC__I2C_8c_ab8c85ee87b4d758a3ff1bfbdbec6bf26}{i2c0\+\_\+single\+\_\+data\+\_\+write} (const uint8\+\_\+t slave\+\_\+address, const uint8\+\_\+t data\+\_\+byte, const bool no\+\_\+end\+\_\+stop)
+\begin{DoxyCompactList}\small\item\em write a single byte using I2C \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__I2C_8c_ab9a581a005285f7e94a5c79d956f207b}\label{TivaC__I2C_8c_ab9a581a005285f7e94a5c79d956f207b}} 
+I2c0\+Err\+Code \hyperlink{TivaC__I2C_8c_ab9a581a005285f7e94a5c79d956f207b}{i2c0\+\_\+stop} (void)
+\begin{DoxyCompactList}\small\item\em used to generate I2C stop signal \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__I2C_8c_ad6ba2e0d794a585e8f69ea37033971fa}\label{TivaC__I2C_8c_ad6ba2e0d794a585e8f69ea37033971fa}} 
+I2c0\+Err\+Code \hyperlink{TivaC__I2C_8c_ad6ba2e0d794a585e8f69ea37033971fa}{i2c0\+\_\+keep\+\_\+state} (void)
+\begin{DoxyCompactList}\small\item\em used to maintain current I2C state \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__I2C_8c_af0bd7f3c3b91870a3b7616dd5d848365}\label{TivaC__I2C_8c_af0bd7f3c3b91870a3b7616dd5d848365}} 
+I2c0\+Err\+Code \hyperlink{TivaC__I2C_8c_af0bd7f3c3b91870a3b7616dd5d848365}{i2c0\+\_\+multiple\+\_\+data\+\_\+byte\+\_\+write} (const uint8\+\_\+t slave\+\_\+address, const uint8\+\_\+t $\ast$output\+\_\+buffer, const uint8\+\_\+t output\+\_\+buffer\+\_\+length)
+\begin{DoxyCompactList}\small\item\em write byte one by one until done \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__I2C_8c_a8e258129956544f01ec903e3dd153454}\label{TivaC__I2C_8c_a8e258129956544f01ec903e3dd153454}} 
+I2c0\+Err\+Code {\bfseries i2c0\+\_\+multiple\+\_\+data\+\_\+byte\+\_\+read} (const uint8\+\_\+t slave\+\_\+address, uint8\+\_\+t $\ast$input\+\_\+buffer, const uint8\+\_\+t input\+\_\+buffer\+\_\+length)
+\item 
+\mbox{\Hypertarget{TivaC__I2C_8c_ab0f051ca77472369ee6bbb68b020f657}\label{TivaC__I2C_8c_ab0f051ca77472369ee6bbb68b020f657}} 
+I2c0\+Err\+Code \hyperlink{TivaC__I2C_8c_ab0f051ca77472369ee6bbb68b020f657}{i2c0\+\_\+error\+\_\+check} (void)
+\begin{DoxyCompactList}\small\item\em check i2c error register for any problems \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__I2C_8c_a8cb69d8095fdbe6d8447f3413c280e03}\label{TivaC__I2C_8c_a8cb69d8095fdbe6d8447f3413c280e03}} 
+I2c0\+Err\+Code \hyperlink{TivaC__I2C_8c_a8cb69d8095fdbe6d8447f3413c280e03}{i2c0\+\_\+check\+\_\+master\+\_\+enabled} (void)
+\begin{DoxyCompactList}\small\item\em check i2c config register to see if the master functionality is enabled \end{DoxyCompactList}\item 
+I2c0\+Err\+Code \hyperlink{TivaC__I2C_8c_ade2063cad2d3a4744d325dbbb3eda2c4}{i2c0\+\_\+wait\+\_\+bus} (void)
+\begin{DoxyCompactList}\small\item\em used for waiting till the bus stops being busy \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Contain main I2C functions for T\+IvaC. 
+
+\begin{DoxyAuthor}{Author}
+Khoi Trinh 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2018-\/08-\/25 
+\end{DoxyDate}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{TivaC__I2C_8c_ae51adb7272b1571ff425a124f0f5a7a5}\label{TivaC__I2C_8c_ae51adb7272b1571ff425a124f0f5a7a5}} 
+\index{Tiva\+C\+\_\+\+I2\+C.\+c@{Tiva\+C\+\_\+\+I2\+C.\+c}!i2c0\+\_\+single\+\_\+data\+\_\+read@{i2c0\+\_\+single\+\_\+data\+\_\+read}}
+\index{i2c0\+\_\+single\+\_\+data\+\_\+read@{i2c0\+\_\+single\+\_\+data\+\_\+read}!Tiva\+C\+\_\+\+I2\+C.\+c@{Tiva\+C\+\_\+\+I2\+C.\+c}}
+\subsubsection{\texorpdfstring{i2c0\+\_\+single\+\_\+data\+\_\+read()}{i2c0\_single\_data\_read()}}
+{\footnotesize\ttfamily I2c0\+Err\+Code i2c0\+\_\+single\+\_\+data\+\_\+read (\begin{DoxyParamCaption}\item[{const uint8\+\_\+t}]{slave\+\_\+address,  }\item[{uint8\+\_\+t $\ast$}]{return\+Data,  }\item[{const bool}]{no\+\_\+ack,  }\item[{const bool}]{no\+\_\+stop,  }\item[{const bool}]{no\+\_\+start }\end{DoxyParamCaption})}
+
+
+
+read one byte of data 
+
+
+\begin{DoxyParams}{Parameters}
+{\em no\+\_\+ack} & whether to generate ack signal \\
+\hline
+{\em no\+\_\+stop} & whether to generate stop signal \\
+\hline
+{\em no\+\_\+start} & whether to generate start(or repeated start) signal \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{TivaC__I2C_8c_ab8c85ee87b4d758a3ff1bfbdbec6bf26}\label{TivaC__I2C_8c_ab8c85ee87b4d758a3ff1bfbdbec6bf26}} 
+\index{Tiva\+C\+\_\+\+I2\+C.\+c@{Tiva\+C\+\_\+\+I2\+C.\+c}!i2c0\+\_\+single\+\_\+data\+\_\+write@{i2c0\+\_\+single\+\_\+data\+\_\+write}}
+\index{i2c0\+\_\+single\+\_\+data\+\_\+write@{i2c0\+\_\+single\+\_\+data\+\_\+write}!Tiva\+C\+\_\+\+I2\+C.\+c@{Tiva\+C\+\_\+\+I2\+C.\+c}}
+\subsubsection{\texorpdfstring{i2c0\+\_\+single\+\_\+data\+\_\+write()}{i2c0\_single\_data\_write()}}
+{\footnotesize\ttfamily I2c0\+Err\+Code i2c0\+\_\+single\+\_\+data\+\_\+write (\begin{DoxyParamCaption}\item[{const uint8\+\_\+t}]{slave\+\_\+address,  }\item[{const uint8\+\_\+t}]{data\+\_\+byte,  }\item[{const bool}]{no\+\_\+end\+\_\+stop }\end{DoxyParamCaption})}
+
+
+
+write a single byte using I2C 
+
+
+\begin{DoxyParams}{Parameters}
+{\em no\+\_\+end\+\_\+stop} & whether to generate stop at the end of the write \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{TivaC__I2C_8c_ade2063cad2d3a4744d325dbbb3eda2c4}\label{TivaC__I2C_8c_ade2063cad2d3a4744d325dbbb3eda2c4}} 
+\index{Tiva\+C\+\_\+\+I2\+C.\+c@{Tiva\+C\+\_\+\+I2\+C.\+c}!i2c0\+\_\+wait\+\_\+bus@{i2c0\+\_\+wait\+\_\+bus}}
+\index{i2c0\+\_\+wait\+\_\+bus@{i2c0\+\_\+wait\+\_\+bus}!Tiva\+C\+\_\+\+I2\+C.\+c@{Tiva\+C\+\_\+\+I2\+C.\+c}}
+\subsubsection{\texorpdfstring{i2c0\+\_\+wait\+\_\+bus()}{i2c0\_wait\_bus()}}
+{\footnotesize\ttfamily I2c0\+Err\+Code i2c0\+\_\+wait\+\_\+bus (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+used for waiting till the bus stops being busy 
+
+\begin{DoxyReturn}{Returns}
+whether the bus is idle now or timeout happened 
+\end{DoxyReturn}

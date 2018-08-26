@@ -1,0 +1,153 @@
+\hypertarget{TivaC__SPI_8h}{}\section{include/\+Tiva\+C\+\_\+\+S\+PI.h File Reference}
+\label{TivaC__SPI_8h}\index{include/\+Tiva\+C\+\_\+\+S\+P\+I.\+h@{include/\+Tiva\+C\+\_\+\+S\+P\+I.\+h}}
+
+
+contain data structure for S\+PI settings, errors as well as enum for various settings  
+
+
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+Include dependency graph for Tiva\+C\+\_\+\+S\+P\+I.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=204pt]{TivaC__SPI_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{TivaC__SPI_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structSpiSettings}{Spi\+Settings}
+\begin{DoxyCompactList}\small\item\em represent a spi module \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{TivaC__SPI_8h_ac4a8cec2cfd0d3fd322fb27149af0fd5}\label{TivaC__SPI_8h_ac4a8cec2cfd0d3fd322fb27149af0fd5}} 
+\#define \hyperlink{TivaC__SPI_8h_ac4a8cec2cfd0d3fd322fb27149af0fd5}{S\+P\+I\+\_\+\+T\+R\+F\+\_\+\+S\+I\+ZE}~8
+\begin{DoxyCompactList}\small\item\em the smallest transfer size of the spi, note that this is different from the transfer size in the spi structure, a complete transfer is made up of small 8 bit transfers \end{DoxyCompactList}\item 
+\#define {\bfseries S\+P\+I\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC}(func\+To\+Execute)
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}\label{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}} 
+enum \hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} \{ \newline
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+N\+O\+\_\+\+E\+RR}, 
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+D\+I\+S\+A\+B\+L\+ED}, 
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+T\+I\+M\+E\+O\+UT}, 
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+S\+P\+I\+\_\+\+C\+P\+A\+\_\+\+U\+N\+D\+E\+F\+I\+N\+ED}, 
+\newline
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+R\+X\+\_\+\+F\+U\+LL}, 
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+T\+X\+\_\+\+F\+U\+LL}, 
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+R\+X\+\_\+\+E\+M\+P\+TY}, 
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+I\+N\+V\+A\+L\+\_\+\+S\+Y\+S\+\_\+\+C\+L\+K\+\_\+\+R\+A\+TE}, 
+\newline
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+N\+O\+\_\+\+V\+A\+L\+\_\+\+P\+R\+E\+S\+C\+A\+LC}, 
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+I\+N\+V\+A\+L\+\_\+\+B\+I\+T\+\_\+\+R\+A\+TE}, 
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+I\+N\+V\+A\+L\+\_\+\+D\+A\+T\+A\+\_\+\+S\+I\+ZE}, 
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+I\+N\+V\+A\+L\+\_\+\+C\+P\+OL}, 
+\newline
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+I\+N\+V\+A\+L\+\_\+\+C\+P\+HA}, 
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+I\+N\+V\+A\+L\+\_\+\+P\+R\+O\+T\+O\+C\+OL}, 
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+I\+N\+V\+A\+L\+\_\+\+R\+O\+LE}, 
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+I\+N\+V\+A\+L\+\_\+\+O\+P\+E\+R\+M\+O\+DE}, 
+\newline
+{\bfseries S\+P\+I\+\_\+\+E\+R\+R\+\_\+\+I\+N\+V\+A\+L\+\_\+\+C\+L\+O\+C\+K\+S\+O\+U\+R\+CE}
+ \}\begin{DoxyCompactList}\small\item\em S\+PI error code. \end{DoxyCompactList}
+\item 
+\mbox{\Hypertarget{TivaC__SPI_8h_aa453f368264f8e25288c765016fe682e}\label{TivaC__SPI_8h_aa453f368264f8e25288c765016fe682e}} 
+enum {\bfseries Spi\+Protocol\+Mode} \{ {\bfseries Freescale}, 
+{\bfseries Tissf}, 
+{\bfseries Microwire}
+ \}
+\item 
+\mbox{\Hypertarget{TivaC__SPI_8h_a7fa0276fb58c61168e098931d9471bb7}\label{TivaC__SPI_8h_a7fa0276fb58c61168e098931d9471bb7}} 
+enum {\bfseries Spi\+Role} \{ {\bfseries Slave}, 
+{\bfseries Master}
+ \}
+\item 
+\mbox{\Hypertarget{TivaC__SPI_8h_acf1a803586170334621a9a55e90a2ffb}\label{TivaC__SPI_8h_acf1a803586170334621a9a55e90a2ffb}} 
+enum {\bfseries Clock\+Source} \{ {\bfseries Systemclock}, 
+{\bfseries Piosc}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} \hyperlink{TivaC__SPI_8h_a12b73afd32ec56549a49243d61154740}{spi\+\_\+open} (const \hyperlink{structSpiSettings}{Spi\+Settings} setting)
+\begin{DoxyCompactList}\small\item\em set up spi bus, should be called first \end{DoxyCompactList}\item 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} \hyperlink{TivaC__SPI_8h_a8203f5d7ead72b1a5f4f6336a7e67bcc}{spi\+\_\+close} (void)
+\begin{DoxyCompactList}\small\item\em turn off clock for the S\+PI module \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{TivaC__SPI_8h_a782c68fc08576e31fa6a03218bed8396}\label{TivaC__SPI_8h_a782c68fc08576e31fa6a03218bed8396}} 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} \hyperlink{TivaC__SPI_8h_a782c68fc08576e31fa6a03218bed8396}{spi\+\_\+check\+\_\+spi\+\_\+enabled} (void)
+\begin{DoxyCompactList}\small\item\em check if the clock for S\+PI is turned on \end{DoxyCompactList}\item 
+\hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} \hyperlink{TivaC__SPI_8h_a11a9f3594b3e76f05cdcdb2146d1f99c}{spi\+\_\+transfer} (const \hyperlink{structSpiSettings}{Spi\+Settings} setting, uint8\+\_\+t $\ast$data\+Tx, const uint8\+\_\+t data\+Tx\+Len\+Byte, uint8\+\_\+t $\ast$data\+Rx, const uint8\+\_\+t data\+Rx\+Len\+Byte)
+\begin{DoxyCompactList}\small\item\em used for both rx and tx \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+contain data structure for S\+PI settings, errors as well as enum for various settings 
+
+\begin{DoxyAuthor}{Author}
+Khoi Trinh 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2018-\/08-\/25 
+\end{DoxyDate}
+
+
+\subsection{Macro Definition Documentation}
+\mbox{\Hypertarget{TivaC__SPI_8h_afc7a246bd787cd6acfd93b7649137c34}\label{TivaC__SPI_8h_afc7a246bd787cd6acfd93b7649137c34}} 
+\index{Tiva\+C\+\_\+\+S\+P\+I.\+h@{Tiva\+C\+\_\+\+S\+P\+I.\+h}!S\+P\+I\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC@{S\+P\+I\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC}}
+\index{S\+P\+I\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC@{S\+P\+I\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC}!Tiva\+C\+\_\+\+S\+P\+I.\+h@{Tiva\+C\+\_\+\+S\+P\+I.\+h}}
+\subsubsection{\texorpdfstring{S\+P\+I\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC}{SPI\_TRY\_FUNC}}
+{\footnotesize\ttfamily \#define S\+P\+I\+\_\+\+T\+R\+Y\+\_\+\+F\+U\+NC(\begin{DoxyParamCaption}\item[{}]{func\+To\+Execute }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}
+\textcolor{keywordflow}{do} \{                                                 \(\backslash\)
+    SpiErrCode errCode = funcToExecute;                \(\backslash\)
+    if (errCode != SPI\_ERR\_NO\_ERR) \{ \textcolor{keywordflow}{return} errCode; \} \(\backslash\)
+  \} \textcolor{keywordflow}{while} (0)
+\end{DoxyCode}
+
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{TivaC__SPI_8h_a8203f5d7ead72b1a5f4f6336a7e67bcc}\label{TivaC__SPI_8h_a8203f5d7ead72b1a5f4f6336a7e67bcc}} 
+\index{Tiva\+C\+\_\+\+S\+P\+I.\+h@{Tiva\+C\+\_\+\+S\+P\+I.\+h}!spi\+\_\+close@{spi\+\_\+close}}
+\index{spi\+\_\+close@{spi\+\_\+close}!Tiva\+C\+\_\+\+S\+P\+I.\+h@{Tiva\+C\+\_\+\+S\+P\+I.\+h}}
+\subsubsection{\texorpdfstring{spi\+\_\+close()}{spi\_close()}}
+{\footnotesize\ttfamily \hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} spi\+\_\+close (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+turn off clock for the S\+PI module 
+
+Will wait to make sure that all S\+PI traffic is done before turning off the clock \mbox{\Hypertarget{TivaC__SPI_8h_a12b73afd32ec56549a49243d61154740}\label{TivaC__SPI_8h_a12b73afd32ec56549a49243d61154740}} 
+\index{Tiva\+C\+\_\+\+S\+P\+I.\+h@{Tiva\+C\+\_\+\+S\+P\+I.\+h}!spi\+\_\+open@{spi\+\_\+open}}
+\index{spi\+\_\+open@{spi\+\_\+open}!Tiva\+C\+\_\+\+S\+P\+I.\+h@{Tiva\+C\+\_\+\+S\+P\+I.\+h}}
+\subsubsection{\texorpdfstring{spi\+\_\+open()}{spi\_open()}}
+{\footnotesize\ttfamily \hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} spi\+\_\+open (\begin{DoxyParamCaption}\item[{const \hyperlink{structSpiSettings}{Spi\+Settings}}]{setting }\end{DoxyParamCaption})}
+
+
+
+set up spi bus, should be called first 
+
+used to turn on the clock, adjust the S\+PI pins and apply all the users settings to the S\+PI modules, note that the S\+PI module would still be off after this function but it only needs to be enabled to function \mbox{\Hypertarget{TivaC__SPI_8h_a11a9f3594b3e76f05cdcdb2146d1f99c}\label{TivaC__SPI_8h_a11a9f3594b3e76f05cdcdb2146d1f99c}} 
+\index{Tiva\+C\+\_\+\+S\+P\+I.\+h@{Tiva\+C\+\_\+\+S\+P\+I.\+h}!spi\+\_\+transfer@{spi\+\_\+transfer}}
+\index{spi\+\_\+transfer@{spi\+\_\+transfer}!Tiva\+C\+\_\+\+S\+P\+I.\+h@{Tiva\+C\+\_\+\+S\+P\+I.\+h}}
+\subsubsection{\texorpdfstring{spi\+\_\+transfer()}{spi\_transfer()}}
+{\footnotesize\ttfamily \hyperlink{TivaC__SPI_8h_a3a4379fe5892fb16c076de874ac889db}{Spi\+Err\+Code} spi\+\_\+transfer (\begin{DoxyParamCaption}\item[{const \hyperlink{structSpiSettings}{Spi\+Settings}}]{setting,  }\item[{uint8\+\_\+t $\ast$}]{data\+Tx,  }\item[{const uint8\+\_\+t}]{data\+Tx\+Len\+Byte,  }\item[{uint8\+\_\+t $\ast$}]{data\+Rx,  }\item[{const uint8\+\_\+t}]{data\+Rx\+Len\+Byte }\end{DoxyParamCaption})}
+
+
+
+used for both rx and tx 
+
+enable S\+PI, and then send/receive based on the user inputs, after a transfer the S\+PI module would be disabled to make sure no transfer erroneously happens, this is a soft disable with all the clocks and pins still S\+P\+I-\/ready 
