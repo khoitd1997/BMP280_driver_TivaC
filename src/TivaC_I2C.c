@@ -70,6 +70,10 @@ I2c0ErrCode i2c0_open(void) {
   return I2C0_NO_ERR;
 }
 
+/**
+ * @brief Disable clock as well as the I2C pins
+ *
+ */
 I2c0ErrCode i2c0_close(void) {
   I2C0_TRY_FUNC(i2c0_wait_bus());
 
@@ -85,7 +89,15 @@ I2c0ErrCode i2c0_close(void) {
   return I2C0_NO_ERR;
 }
 
+/**
+ * @brief read one byte of data
+ * @param no_ack whether to generate ack signal
+ * @param no_stop whether to generate stop signal
+ * @param no_start whether to generate start(or repeated start) signal
+ *
+ */
 I2c0ErrCode i2c0_single_data_read(const uint8_t slave_address,
+                                  uint8_t*      returnData,
                                   const bool    no_ack,
                                   const bool    no_stop,
                                   const bool    no_start) {
@@ -123,8 +135,10 @@ I2c0ErrCode i2c0_single_data_read(const uint8_t slave_address,
   I2C0_MCS_R = i2c0_mcs_temp;
 
   I2C0_TRY_FUNC(i2c0_wait_bus());
+  I2C0_TRY_FUNC(i2c0_error_check());
 
-  return i2c0_error_check() ? 1 : ((I2C0_MDR_R) & (I2C_MDR_DATA_M)) >> I2C_MDR_DATA_S;
+  *returnData = ((I2C0_MDR_R) & (I2C_MDR_DATA_M)) >> I2C_MDR_DATA_S;
+  return I2C0_NO_ERR;
 }
 
 I2c0ErrCode i2c0_single_data_write(const uint8_t slave_address,

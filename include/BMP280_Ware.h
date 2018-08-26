@@ -1,4 +1,12 @@
 /**
+ * @brief Utils header that contain Bosch data structure for calibration data as well as bit
+ * positions of data
+ *
+ * @file BMP280_Ware.h
+ * @date 2018-08-25
+ */
+
+/**
  * Copyright (C) 2017 - 2018 Bosch Sensortec GmbH
  *
  * Redistribution and use in source and binary forms, with or without

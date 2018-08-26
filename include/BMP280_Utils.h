@@ -1,6 +1,11 @@
 /**
- * Files provided auxilarry functions not called by the user
+ * @brief headers to BMP280 utils functions
+ *
+ * @file BMP280_Utils.h
+ * @author Khoi Trinh
+ * @date 2018-08-25
  */
+
 #ifndef _BMP280_UTILS_H
 #define _BMP280_UTILS_H
 #include <stdint.h>

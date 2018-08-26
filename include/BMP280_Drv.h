@@ -1,3 +1,11 @@
+/**
+ * @brief contain data structures for BMP280
+ *
+ * @file BMP280_Drv.h
+ * @author Khoi Trinh
+ * @date 2018-08-25
+ */
+
 #ifndef _BMP280_DRV_
 #define _BMP280_DRV_
 

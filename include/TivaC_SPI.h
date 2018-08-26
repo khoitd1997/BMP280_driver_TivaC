@@ -1,3 +1,11 @@
+/**
+ * @brief contain data structure for SPI settings, errors as well as enum for various settings
+ *
+ * @file TivaC_SPI.h
+ * @author Khoi Trinh
+ * @date 2018-08-25
+ */
+
 #ifndef _TIVA_C_SPI_H
 #define _TIVA_C_SPI_H
 

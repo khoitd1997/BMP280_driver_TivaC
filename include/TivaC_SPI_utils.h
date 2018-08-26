@@ -1,3 +1,11 @@
+/**
+ * @brief header file for SPI utilities functions
+ *
+ * @file TivaC_SPI_utils.h
+ * @author Khoi Trinh
+ * @date 2018-08-25
+ */
+
 #ifndef _TIVAC_SPI_UTILS_H
 #define _TIVAC_SPI_UTILS_H
 

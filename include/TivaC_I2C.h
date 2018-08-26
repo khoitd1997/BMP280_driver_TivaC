@@ -1,3 +1,11 @@
+/**
+ * @brief contain i2c error enum and function prototypes
+ *
+ * @file TivaC_I2C.h
+ * @author Khoi Trinh
+ * @date 2018-08-25
+ */
+
 #ifndef _TIVAC_I2C_H
 #define _TIVAC_I2C_H
 #include <stdbool.h>
@@ -37,6 +45,7 @@ I2c0ErrCode i2c0_multiple_data_byte_read(const uint8_t slave_address,
                                          const uint8_t input_buffer_length);
 
 I2c0ErrCode i2c0_single_data_read(const uint8_t slave_address,
+                                  uint8_t*      returnData,
                                   const bool    no_ack,
                                   const bool    no_stop,
                                   const bool    no_start);
