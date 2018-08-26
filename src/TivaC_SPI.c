@@ -10,6 +10,13 @@
 #include "external/TivaC_Utils/include/tm4c123gh6pm.h"
 #include "include/TivaC_SPI_utils.h"
 
+/**
+ * @brief set up spi bus, should be called first
+ *
+ * used to turn on the clock, adjust the SPI pins and apply all the users settings to the SPI
+ * modules, note that the SPI module would still be off after this function but it only needs to be
+ * enabled to function
+ */
 SpiErrCode spi_open(const SpiSettings setting) {
   uint8_t errCode;
   SPI_TRY_FUNC(spi_check_setting(setting));
@@ -111,14 +118,6 @@ SpiErrCode spi_open(const SpiSettings setting) {
       return SPI_ERR_INVAL_PROTOCOL;
   }
 
-  if (setting.enableDMA) {
-    SSI0_DMACTL_R |= SSI_DMACTL_TXDMAE;
-    SSI0_DMACTL_R |= SSI_DMACTL_RXDMAE;
-  } else {
-    SSI0_DMACTL_R &= ~SSI_DMACTL_TXDMAE;
-    SSI0_DMACTL_R &= ~SSI_DMACTL_RXDMAE;
-  }
-
   if (setting.isLoopBack) {
     SSI0_CR1_R |= SSI_CR1_LBM;
   } else {
@@ -127,6 +126,10 @@ SpiErrCode spi_open(const SpiSettings setting) {
   return SPI_ERR_NO_ERR;
 }
 
+/**
+ * @brief check if the clock for SPI is turned on
+ *
+ */
 SpiErrCode spi_check_spi_enabled(void) {
   if (bit_get(SYSCTL_RCGCSSI_R, SYSCTL_RCGCSSI_R0)) {
     return SPI_ERR_NO_ERR;
@@ -135,11 +138,24 @@ SpiErrCode spi_check_spi_enabled(void) {
   }
 }
 
+/**
+ * @brief turn off clock for the SPI module
+ *
+ * Will wait to make sure that all SPI traffic is done before turning off the clock
+ */
 SpiErrCode spi_close(void) {
+  SPI_TRY_FUNC(spi_bus_wait());
   bit_clear(SYSCTL_RCGCSSI_R, SYSCTL_RCGCSSI_R0);
   return SPI_ERR_NO_ERR;
 }
 
+/**
+ * @brief used for both rx and tx
+ *
+ * enable SPI, and then send/receive based on the user inputs, after a transfer the SPI module would
+ * be disabled to make sure no transfer erroneously happens, this is a soft disable with all the
+ * clocks and pins still SPI-ready
+ */
 SpiErrCode spi_transfer(const SpiSettings setting,
                         uint8_t*          dataTx,
                         const uint8_t     dataTxLenByte,

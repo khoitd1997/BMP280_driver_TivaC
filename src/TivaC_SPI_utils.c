@@ -13,6 +13,10 @@
 #define MAX_CPSDVSR 254  // max clock pre scaler
 #define SPI_TIMEOUT_COUNTER 500
 
+/**
+ * @brief wait until the spi bus is not busy anymore
+ *
+ */
 SpiErrCode spi_bus_wait(void) {
   uint8_t timeoutCounter = 0;
   while (SSI0_SR_R & SSI_SR_BSY) {
@@ -30,6 +34,12 @@ SpiErrCode spi_check_tx_full(void) {
   return (SSI0_SR_R & SSI_SR_TNF) ? SPI_ERR_NO_ERR : SPI_ERR_TX_FULL;
 }
 
+/**
+ * @brief calculate spi clock prescaler number
+ * @param preScalc the calculated prescaler value
+ * @param scr the desired serial clock rate
+ * @return whether it's possible to find a prescaler value for the specific scr
+ */
 SpiErrCode spi_calc_clock_prescalc(const SpiSettings setting, uint8_t* preScalc, uint8_t* scr) {
   uint8_t errCode;
   if ((errCode = spi_check_setting(setting)) != SPI_ERR_NO_ERR) { return errCode; }
@@ -50,6 +60,10 @@ SpiErrCode spi_calc_clock_prescalc(const SpiSettings setting, uint8_t* preScalc,
   return SPI_ERR_NO_VAL_PRESCALC;
 }
 
+/**
+ * @brief check user settings to see if they are logical
+ *
+ */
 SpiErrCode spi_check_setting(const SpiSettings setting) {
   if (setting.cpuClockMHz <= 0 || setting.cpuClockMHz > MAX_TIVAC_CLOCK) {
     return SPI_ERR_INVAL_SYS_CLK_RATE;
@@ -76,10 +90,14 @@ SpiErrCode spi_check_rx_not_empty(void) {
   return ((SSI0_SR_R & SSI_SR_RNE) ? SPI_ERR_NO_ERR : SPI_ERR_RX_EMPTY);
 }
 
+/**
+ * @brief receive one data unit from the SPI buffer
+ *
+ */
 SpiErrCode spi_rx_one_data_unit(const SpiSettings setting,
                                 uint8_t*          totalByteRxed,
                                 uint8_t*          dataRx) {
-  spi_bus_wait();
+  SPI_TRY_FUNC(spi_bus_wait());
   if (SPI_ERR_NO_ERR == spi_check_rx_not_empty()) {
     dataRx[*totalByteRxed] = ((SSI0_DR_R)&SSI_DR_DATA_M) >> (SSI_DR_DATA_S);
     *totalByteRxed         = *totalByteRxed + 1;
@@ -87,21 +105,28 @@ SpiErrCode spi_rx_one_data_unit(const SpiSettings setting,
   return SPI_ERR_NO_ERR;
 }
 
-// TODO: refactor this
+/**
+ * @brief send 8 bits of data on the SPI interface
+ *
+ */
 SpiErrCode spi_tx_one_data_unit(const uint8_t  transferSize,
                                 uint8_t*       totalByteTxed,
                                 const uint8_t* dataTx) {
   if (SPI_ERR_NO_ERR == spi_check_tx_full()) {
-    spi_bus_wait();
+    SPI_TRY_FUNC(spi_bus_wait());
     SSI0_DR_R      = (uint8_t)(dataTx[*totalByteTxed]) << (transferSize - SPI_TRF_SIZE);
     *totalByteTxed = *totalByteTxed + 1;
     return SPI_ERR_NO_ERR;
   } else {
     return SPI_ERR_TX_FULL;
   }
-  spi_bus_wait();
+  SPI_TRY_FUNC(spi_bus_wait());
 }
 
+/**
+ * @brief clear the SPI receive buffer by all of the available data
+ *
+ */
 void __attribute__((optimize("O0"))) spi_clear_rx_buffer(void) {
   // read until all data is gone
 
@@ -111,6 +136,11 @@ void __attribute__((optimize("O0"))) spi_clear_rx_buffer(void) {
   }
 }
 
+/**
+ * @brief enable spi modules, note that this is different from turning on the clock, this assumes
+ * that the clock is turn on and all pins are SPI-ready
+ *
+ */
 void spi_enable_spi(void) {
   bit_set(SSI0_CR1_R, SSI_CR1_SSE);
   while (0 == bit_get(SYSCTL_PRSSI_R, SYSCTL_PRSSI_R0)) {
@@ -118,18 +148,40 @@ void spi_enable_spi(void) {
   }
 }
 
-void spi_send_dummy_byte(void) {
-  spi_bus_wait();
+/**
+ * @brief used for sending byte 0 to extend the SPI communication, usually to finish reading all the
+ * bytes that users want
+ *
+ */
+SpiErrCode spi_send_dummy_byte(void) {
+  SPI_TRY_FUNC(spi_bus_wait());
   SSI0_DR_R = 0;  // used to stretch the transfer until all the data is received
-  spi_bus_wait();
+  SPI_TRY_FUNC(spi_bus_wait());
+  return SPI_ERR_NO_ERR;
 }
 
+/**
+ * @brief disable spi modules, but leave the SPI clocks and pins still SPI-ready
+ *
+ */
 void spi_disable_spi(void) { bit_clear(SSI0_CR1_R, SSI_CR1_SSE); }
+
+/**
+ * @brief pull chip select pin low to activate SPI, hardcoded to be pin 3 of port A
+ *
+ */
 void spi_pull_cs_low(void) { bit_clear(GPIO_PORTA_DATA_R, 0x8); }
+
 void spi_pull_cs_high(void) { bit_set(GPIO_PORTA_DATA_R, 0x8); }
 
-// from the time when the SPi module receives data till it puts the data available for read, there
-// is really short delay
+/**
+ * @brief used to create a really short delay that makes sure that the data received is available
+ * for reading
+ *
+ * There seems to be a short delay between the SPI module receives the data and when that data is
+ * available in the FIFO so a delay is necessary
+ *
+ */
 void __attribute__((optimize("O0"))) spi_data_delay(void) {
   for (int waitIndex = 0; waitIndex < 50; ++waitIndex) {
     // wait loop

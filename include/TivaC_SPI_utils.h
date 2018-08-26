@@ -21,7 +21,7 @@ void       spi_enable_spi(void);
 void       spi_disable_spi(void);
 void       spi_pull_cs_low(void);
 void       spi_pull_cs_high(void);
-void       spi_send_dummy_byte(void);  // used to stretching communication
+SpiErrCode spi_send_dummy_byte(void);  // used to stretching communication
 void       spi_data_delay(void);       // delay between receiving and reading the data
 
 /* Protocol Handling */

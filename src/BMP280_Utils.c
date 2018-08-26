@@ -183,8 +183,7 @@ Bmp280ErrCode bmp280_open_i2c_spi(bmp280* sensor) {
   if (I2C == sensor->protocol) {
     i2c0_open();
   } else if (SPI == sensor->protocol) {
-    const SpiSettings spiSetting = {.enableDMA       = false,
-                                    .spiBitRateMbits = 0.3,
+    const SpiSettings spiSetting = {.spiBitRateMbits = 0.3,
                                     .cpuClockMHz     = 16,
                                     .cpol            = 1,
                                     .cpha            = 1,
@@ -238,8 +237,7 @@ Bmp280ErrCode bmp280_get_register(bmp280*       sensor,
       *regData = inputBuffer[0];
     }
   } else if (SPI == sensor->protocol) {
-    const SpiSettings spiSetting = {.enableDMA       = false,
-                                    .spiBitRateMbits = 0.3,
+    const SpiSettings spiSetting = {.spiBitRateMbits = 0.3,
                                     .cpuClockMHz     = 16,
                                     .cpol            = 1,
                                     .cpha            = 1,
@@ -268,8 +266,7 @@ Bmp280ErrCode bmp280_write_register(bmp280*        sensor,
       i2c0_multiple_data_byte_write(sensor->address, regDataPair, 2);
     }
   } else if (SPI == sensor->protocol) {
-    const SpiSettings spiSetting = {.enableDMA       = false,
-                                    .spiBitRateMbits = 0.3,
+    const SpiSettings spiSetting = {.spiBitRateMbits = 0.3,
                                     .cpuClockMHz     = 16,
                                     .cpol            = 1,
                                     .cpha            = 1,
