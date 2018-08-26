@@ -8,6 +8,12 @@ Some API for compensating and collecting raw data was borrowed from Bosch: https
 
 The project was developed using Segger Embedded Studio but you should be able to use other IDE or build system with it
 
+## Documentation
+
+Please go to this link: https://rawgit.com/khoitd1997/BMP280_driver_TivaC/master/docs/html/index.html
+
+Or read inside the docs/ folder
+
 ## Features
 
 - Read and calculate compensated temperature and pressure data
