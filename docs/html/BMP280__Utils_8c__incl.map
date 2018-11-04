@@ -1,7 +1,0 @@
-<map id="src/BMP280_Utils.c" name="src/BMP280_Utils.c">
-<area shape="rect" id="node2" href="$BMP280__Utils_8h.html" title="headers to BMP280 utils functions " alt="" coords="17,80,179,107"/>
-<area shape="rect" id="node4" href="$BMP280__Drv_8h.html" title="contain data structures for BMP280 " alt="" coords="20,155,176,181"/>
-<area shape="rect" id="node9" href="$TivaC__I2C_8h.html" title="contain i2c error enum and function prototypes " alt="" coords="433,80,574,107"/>
-<area shape="rect" id="node11" href="$TivaC__SPI_8h.html" title="contain data structure for SPI settings, errors as well as enum for various settings ..." alt="" coords="200,155,343,181"/>
-<area shape="rect" id="node6" href="$BMP280__Ware_8h.html" title="Utils header that contain Bosch data structure for calibration data as well as bit positions of data..." alt="" coords="71,229,237,256"/>
-</map>
