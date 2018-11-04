@@ -1,3 +1,5 @@
+[![Documentation Status](https://readthedocs.org/projects/bmp280-driver-tivac/badge/?version=latest)](https://bmp280-driver-tivac.readthedocs.io/en/latest/?badge=latest)
+
 # BMP280 Driver using TivaC
 
 Library used for interacting the bmp280 with tivaC tm4c123gh6pm processor, the dev board used is the TivaC line of Texas Instrument
@@ -10,7 +12,7 @@ The project was developed using Segger Embedded Studio but you should be able to
 
 ## Documentation
 
-[Doxygen  Docs]()
+[Doxygen  Docs](https://bmp280-driver-tivac.readthedocs.io/en/latest/)
 
 ## Features
 
