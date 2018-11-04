@@ -10,9 +10,7 @@ The project was developed using Segger Embedded Studio but you should be able to
 
 ## Documentation
 
-Please go to this link: https://rawgit.com/khoitd1997/BMP280_driver_TivaC/master/docs/html/index.html
-
-Or read inside the docs/ folder
+[Doxygen  Docs]()
 
 ## Features
 
